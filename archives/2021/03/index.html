@@ -21,7 +21,7 @@
     <meta name="description" content="">
     <meta property="og:type" content="website">
 <meta property="og:title" content="Hexo">
-<meta property="og:url" content="https://graphicyan.github.io/archives/2021/04/index.html">
+<meta property="og:url" content="https://graphicyan.github.io/archives/2021/03/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:locale" content="en_US">
 <meta property="article:author" content="Yan Zhang">
@@ -428,20 +428,19 @@
             
         
         <article class="index-post">
-            <a class="abstract-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">
+            <a class="abstract-title" href="/2021/03/29/Learn-Rendering-Function/">
                 
-                <span class="abstract-title-text">蒙特卡洛路径追踪</span>
+                <span class="abstract-title-text">理解渲染方程</span>
             </a>
             <div class="abstract-content">
-                
-1 蒙特卡洛积分(Monte Carlo Integration)首先让我们先搞懂蒙特卡洛路径追踪的这个“蒙特卡洛”的前缀到底指什么。蒙特卡洛积分的目的：当一个积分很难通过解析的方式得到答案的时候可以通过蒙特卡洛的方式近似得到积分结果，如下图所示：显然对于这样一个函数，很难去用一个数学式子去表示，因此无法用一般解析的方法直接求得积分值，而这时候就可以采用蒙特卡洛的思想了。蒙特卡洛积分的原理及做法：对函数值进行多次采样求均值作为积分值的近似该做法十分容易理解，想象一下如果对上图这个函数值进行均匀采样的话，其实就相当于将整个积分面积切成了许许多多个长方形，然后将这些小长方形的面积全部加起来...
+                渲染方程知识在反射方程的基础之上添加了一个自发光项(Emission term)，从而使得反射方程更加的general：其中为自发光项，反射方程中的用，代替。 (tips：所有光线方向均指向外)接下来从一个点光源和单个物体的场景开始理解渲染方程：(点光源对一个点来说自然只有一个方向有入射光，所以这里没有了积分)多个点光源一个物体的情况：将这些所有的点光源的贡献全部求和即可，那么如果点光源变成了面光源呢？如下图所示：其实面光源就相当于无穷多个点光源的集合，只需要对 面光源所在的立体角范围进行积分，并且能够确定不同立体角方向的面光源的入射光radiance即可。那么更进一步的，再在场景当中加...
             </div>
             <!-- read more -->
             
             <div class="abstract-post-meta">
                 <!-- date -->
                 <div class="abstract-date" title="Last updated: 2022/11/27">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/04/09</span>
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/03/29</span>
                 </div>
                 <!-- tags -->
                 
@@ -456,50 +455,20 @@
             
         
         <article class="index-post">
-            <a class="abstract-title" href="/2021/04/07/Importance-Sampling/">
+            <a class="abstract-title" href="/2021/03/22/Learn-Radiometry/">
                 
-                <span class="abstract-title-text">重要性采样</span>
+                <span class="abstract-title-text">辐射度量学笔记</span>
             </a>
             <div class="abstract-content">
-                
-1 蒙特卡洛路径追踪简要回顾
-1.1 算法主要流程所有的全局光照算法其实都是围绕着如何求解渲染方程：着色点向发出的光线由两部分组成，一部分是本身的自发光(一般只有光源才有，其他物体为0)，另一部分由法线所在半球的各个方向上的光线共同贡献得到。路径追踪的方法也非常的直观，即每次碰撞到物体之后都去采样一条可能的scatter的方向，然后递归这个过程直到光线逃逸出场景，或达到终止条件，又或者击中光源形成一条真正可行的光路。简单图示如下：了解了基本的路径追踪的过程，那么伪代码也就比较好写了：Color color(Point p, Direction w, int depth){ if dep...
+                射度量学其实是对光照的一套测量系统和单位，它能够准确的描述光线的物理性质。具体来说，我们需要明白的是其中的几个关于光线的概念，分别为：辐射能量(Radiant energy)，辐射通量(Radiant flux)，辐射强度(Radiant intensity)，irradiance，radiance，(对后两种概念没有合适的中文，所以就直接用英文了)，接下来就对这些概念进行具体解释。
+2.1 辐射能量(Radiant energy)和辐射通量(Radiant flux)首先看一看Radiant energy的定义：所谓辐射能量其实非常直观，就是辐射出来的电磁能量，单位为焦耳。可以用物理当...
             </div>
             <!-- read more -->
             
             <div class="abstract-post-meta">
                 <!-- date -->
                 <div class="abstract-date" title="Last updated: 2022/11/27">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/04/07</span>
-                </div>
-                <!-- tags -->
-                
-            </div>
-        </article>
-        <div class="index-post-divider"></div>
-    
-        
-        
-        
-        
-            
-        
-        <article class="index-post">
-            <a class="abstract-title" href="/2021/04/02/Cook-Torrance-BRDF/">
-                
-                <span class="abstract-title-text">Cook-Torrance的BRDF</span>
-            </a>
-            <div class="abstract-content">
-                Cook-Torrance BRDF的定义:首先让我们先看看如何计算出。
-3.1 漫反射项推导在很久之前谈光栅化的时候就提及过，漫反射会均匀的向每个方向反射因此，漫反射的BRDF一定是一个常数。假设入射光是均匀且遍布整个半球方向，可以得到如下方程：（根据定义， 积分过程省略） 由于假设入射光是均匀且遍布整个半球方向，所以与方向无关，且等于，最终约去两边，得到结果：但有一点要注意的是，这里并没有考虑能量被吸收，将反射率考虑进来之后，得到最终的漫反射BRDF：这里的可以类比光栅化当中的漫反射系数去理解，本质就是一个3维向量，含有物体表面的颜色信息。
-3.2 镜面反射项推导漫反射项的形式简单且...
-            </div>
-            <!-- read more -->
-            
-            <div class="abstract-post-meta">
-                <!-- date -->
-                <div class="abstract-date" title="Last updated: 2022/11/27">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/04/02</span>
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/03/22</span>
                 </div>
                 <!-- tags -->
                 
