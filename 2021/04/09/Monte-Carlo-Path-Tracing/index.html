@@ -22,7 +22,7 @@
     <meta name="description" content="1 蒙特卡洛积分(Monte Carlo Integration)首先让我们先搞懂蒙特卡洛路径追踪的这个“蒙特卡洛”的前缀到底指什么。蒙特卡洛积分的目的：当一个积分很难通过解析的方式得到答案的时候可以通过蒙特卡洛的方式近似得到积分结果，如下图所示：显然对于这样一个函数，很难去用一个数学式子去表示，因此无法用一般解析的方法直接求得积分值，而这时候就可以采用蒙特卡洛的思想了。蒙特卡洛积分的原理及做法">
 <meta property="og:type" content="article">
 <meta property="og:title" content="蒙特卡洛路径追踪">
-<meta property="og:url" content="https://graphicyan.github.io/2022/11/27/%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E8%B7%AF%E5%BE%84%E8%BF%BD%E8%B8%AA/index.html">
+<meta property="og:url" content="https://graphicyan.github.io/2021/04/09/Monte-Carlo-Path-Tracing/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="1 蒙特卡洛积分(Monte Carlo Integration)首先让我们先搞懂蒙特卡洛路径追踪的这个“蒙特卡洛”的前缀到底指什么。蒙特卡洛积分的目的：当一个积分很难通过解析的方式得到答案的时候可以通过蒙特卡洛的方式近似得到积分结果，如下图所示：显然对于这样一个函数，很难去用一个数学式子去表示，因此无法用一般解析的方法直接求得积分值，而这时候就可以采用蒙特卡洛的思想了。蒙特卡洛积分的原理及做法">
 <meta property="og:locale" content="en_US">
@@ -69,14 +69,14 @@
 <meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/svg/223200/1617958587947-cb8e2aa8-310e-4ef6-8539-7df85f78568a.svg#from=paste&height=18&id=u154f196b&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=20&originalType=url&status=done&style=none&taskId=u1f791c47-e17b-4812-af88-3a4768465ac&width=20">
 <meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/jpeg/223200/1617958587998-00286583-6210-4f99-ad5a-1c9c90f6e893.jpeg#from=paste&height=653&id=ud4f01ea3&margin=%5Bobject%20Object%5D&originHeight=653&originWidth=1070&originalType=url&status=done&style=none&taskId=u1e2ecb7d-11e3-422c-8d04-781b7c669ce&width=1070">
 <meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/jpeg/223200/1617958588094-6a4314fa-0751-4606-8156-4551dc366cbc.jpeg#from=paste&height=438&id=ua436dde9&margin=%5Bobject%20Object%5D&originHeight=438&originWidth=720&originalType=url&status=done&style=none&taskId=u92a0cd88-92e8-4d99-a882-0f803b9bc6f&width=720">
-<meta property="article:published_time" content="2022-11-27T12:24:01.730Z">
-<meta property="article:modified_time" content="2022-11-27T12:25:53.385Z">
+<meta property="article:published_time" content="2021-04-09T12:46:25.000Z">
+<meta property="article:modified_time" content="2022-11-27T12:51:37.890Z">
 <meta property="article:author" content="Yan Zhang">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/jpeg/223200/1617958584178-89b2765e-1f77-4e4e-9b66-27a844d88b6f.jpeg#from=paste&height=465&id=ua3e5c3b0&margin=%5Bobject%20Object%5D&originHeight=465&originWidth=972&originalType=url&status=done&style=none&taskId=u93f586f2-91f5-43f6-adc0-0be45d6f92f&width=972">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="icon" href="/assets/MyPhoto.jpeg">
     
     <title>蒙特卡洛路径追踪 · Yan&#39;s Studio</title>
     <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
@@ -380,7 +380,7 @@
                 <div class="post-intro-meta">
                     <!-- 撰写日期 -->
                     <span class="iconfont-archer post-intro-calander">&#xe676;</span>
-                    <span class="post-intro-time">2022/11/27</span>
+                    <span class="post-intro-time">2021/04/09</span>
                     <!-- busuanzi -->
                     
                         <span id="busuanzi_container_page_pv" class="busuanzi-pv">
@@ -549,9 +549,9 @@
     
         <div class="license-wrapper">
             <p>Author：<a href="https://graphicyan.github.io">Yan Zhang</a>
-            <p>Link：<a href="https://graphicyan.github.io/2022/11/27/%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E8%B7%AF%E5%BE%84%E8%BF%BD%E8%B8%AA/">https://graphicyan.github.io/2022/11/27/%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E8%B7%AF%E5%BE%84%E8%BF%BD%E8%B8%AA/</a>
-            <p>Publish date：<a href="https://graphicyan.github.io/2022/11/27/%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E8%B7%AF%E5%BE%84%E8%BF%BD%E8%B8%AA/">November 27th 2022, 8:24:01 pm</a>
-            <p>Update date：<a href="https://graphicyan.github.io/2022/11/27/%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E8%B7%AF%E5%BE%84%E8%BF%BD%E8%B8%AA/">November 27th 2022, 8:25:53 pm</a>
+            <p>Link：<a href="https://graphicyan.github.io/2021/04/09/Monte-Carlo-Path-Tracing/">https://graphicyan.github.io/2021/04/09/Monte-Carlo-Path-Tracing/</a>
+            <p>Publish date：<a href="https://graphicyan.github.io/2021/04/09/Monte-Carlo-Path-Tracing/">April 9th 2021, 8:46:25 pm</a>
+            <p>Update date：<a href="https://graphicyan.github.io/2021/04/09/Monte-Carlo-Path-Tracing/">November 27th 2022, 8:51:37 pm</a>
             <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -559,12 +559,17 @@
     <ul class="post-paginator">
         <li class="next">
             
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2022/11/20/Mixed-Virtual-Production/" title="混合虚拟制片">
+                    <div class="nextTitle">混合虚拟制片</div>
+                </a>
+            
         </li>
         <li class="previous">
             
                 <div class="prevSlogan">Previous Post</div>
-                <a href="/2022/11/20/Mixed-Virtual-Production/" title="混合虚拟制片">
-                    <div class="prevTitle">混合虚拟制片</div>
+                <a href="/2021/04/02/Cook-Torrance-BRDF/" title="Cook-Torrance的BRDF">
+                    <div class="prevTitle">Cook-Torrance的BRDF</div>
                 </a>
             
         </li>
@@ -690,23 +695,6 @@
         </div>
         <!-- toc -->
         
-            <div class="toc-wrapper toc-wrapper-loding" style=
-
-
-
-
-
-
-
-    top:50vh;
-
->
-                <div class="toc-catalog">
-                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
-                </div>
-                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E7%A7%AF%E5%88%86-Monte-Carlo-Integration"><span class="toc-number">1.</span> <span class="toc-text">1 蒙特卡洛积分(Monte Carlo Integration)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E8%B7%AF%E5%BE%84%E8%BF%BD%E8%B8%AA-Monte-Carlo-Path-Tracing"><span class="toc-number">2.</span> <span class="toc-text">2 蒙特卡洛路径追踪(Monte Carlo Path Tracing)</span></a></li></ol>
-            </div>
-        
         <!-- sidebar -->
         <div class="sidebar sidebar-hide">
     <ul class="sidebar-tabs sidebar-tabs-active-0">
@@ -738,8 +726,6 @@
         
         
         
-        
-        
     
     
     
@@ -767,24 +753,24 @@
         </li>
     
         
-        <li class="archive-post-item">
-            <span class="archive-post-date">11/19</span>
-            <a class="archive-post-title" href="/2022/11/19/hello-world/">Hello World</a>
-        </li>
-    
-        
             
             
                 
                 </ul>
             
-            <div class="archive-year"> Invalid date </div>
+            <div class="archive-year"> 2021 </div>
             <ul class="year-list">
             
         
         <li class="archive-post-item">
-            <span class="archive-post-date">Invalid date</span>
-            <a class="archive-post-title" href="/2022/11/27/%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E8%B7%AF%E5%BE%84%E8%BF%BD%E8%B8%AA/">蒙特卡洛路径追踪</a>
+            <span class="archive-post-date">04/09</span>
+            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
+        </li>
+    
+        
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span>
+            <a class="archive-post-title" href="/2021/04/02/Cook-Torrance-BRDF/">Cook-Torrance的BRDF</a>
         </li>
     
     </div>
