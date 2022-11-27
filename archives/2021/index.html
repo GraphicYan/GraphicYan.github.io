@@ -428,20 +428,21 @@
             
         
         <article class="index-post">
-            <a class="abstract-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">
+            <a class="abstract-title" href="/2021/04/17/Importance-Sampling/">
                 
-                <span class="abstract-title-text">蒙特卡洛路径追踪</span>
+                <span class="abstract-title-text">重要性采样</span>
             </a>
             <div class="abstract-content">
                 
-1 蒙特卡洛积分(Monte Carlo Integration)首先让我们先搞懂蒙特卡洛路径追踪的这个“蒙特卡洛”的前缀到底指什么。蒙特卡洛积分的目的：当一个积分很难通过解析的方式得到答案的时候可以通过蒙特卡洛的方式近似得到积分结果，如下图所示：显然对于这样一个函数，很难去用一个数学式子去表示，因此无法用一般解析的方法直接求得积分值，而这时候就可以采用蒙特卡洛的思想了。蒙特卡洛积分的原理及做法：对函数值进行多次采样求均值作为积分值的近似该做法十分容易理解，想象一下如果对上图这个函数值进行均匀采样的话，其实就相当于将整个积分面积切成了许许多多个长方形，然后将这些小长方形的面积全部加起来...
+1 蒙特卡洛路径追踪简要回顾
+1.1 算法主要流程所有的全局光照算法其实都是围绕着如何求解渲染方程：着色点向发出的光线由两部分组成，一部分是本身的自发光(一般只有光源才有，其他物体为0)，另一部分由法线所在半球的各个方向上的光线共同贡献得到。路径追踪的方法也非常的直观，即每次碰撞到物体之后都去采样一条可能的scatter的方向，然后递归这个过程直到光线逃逸出场景，或达到终止条件，又或者击中光源形成一条真正可行的光路。简单图示如下：了解了基本的路径追踪的过程，那么伪代码也就比较好写了：Color color(Point p, Direction w, int depth){ if dep...
             </div>
             <!-- read more -->
             
             <div class="abstract-post-meta">
                 <!-- date -->
                 <div class="abstract-date" title="Last updated: 2022/11/27">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/04/09</span>
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/04/17</span>
                 </div>
                 <!-- tags -->
                 
@@ -456,21 +457,20 @@
             
         
         <article class="index-post">
-            <a class="abstract-title" href="/2021/04/07/Importance-Sampling/">
+            <a class="abstract-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">
                 
-                <span class="abstract-title-text">重要性采样</span>
+                <span class="abstract-title-text">蒙特卡洛路径追踪</span>
             </a>
             <div class="abstract-content">
                 
-1 蒙特卡洛路径追踪简要回顾
-1.1 算法主要流程所有的全局光照算法其实都是围绕着如何求解渲染方程：着色点向发出的光线由两部分组成，一部分是本身的自发光(一般只有光源才有，其他物体为0)，另一部分由法线所在半球的各个方向上的光线共同贡献得到。路径追踪的方法也非常的直观，即每次碰撞到物体之后都去采样一条可能的scatter的方向，然后递归这个过程直到光线逃逸出场景，或达到终止条件，又或者击中光源形成一条真正可行的光路。简单图示如下：了解了基本的路径追踪的过程，那么伪代码也就比较好写了：Color color(Point p, Direction w, int depth){ if dep...
+1 蒙特卡洛积分(Monte Carlo Integration)首先让我们先搞懂蒙特卡洛路径追踪的这个“蒙特卡洛”的前缀到底指什么。蒙特卡洛积分的目的：当一个积分很难通过解析的方式得到答案的时候可以通过蒙特卡洛的方式近似得到积分结果，如下图所示：显然对于这样一个函数，很难去用一个数学式子去表示，因此无法用一般解析的方法直接求得积分值，而这时候就可以采用蒙特卡洛的思想了。蒙特卡洛积分的原理及做法：对函数值进行多次采样求均值作为积分值的近似该做法十分容易理解，想象一下如果对上图这个函数值进行均匀采样的话，其实就相当于将整个积分面积切成了许许多多个长方形，然后将这些小长方形的面积全部加起来...
             </div>
             <!-- read more -->
             
             <div class="abstract-post-meta">
                 <!-- date -->
                 <div class="abstract-date" title="Last updated: 2022/11/27">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/04/07</span>
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/04/09</span>
                 </div>
                 <!-- tags -->
                 
@@ -714,6 +714,8 @@
         
         
         
+        
+        
     
     
     
@@ -751,14 +753,14 @@
             
         
         <li class="archive-post-item">
-            <span class="archive-post-date">04/09</span>
-            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
+            <span class="archive-post-date">04/17</span>
+            <a class="archive-post-title" href="/2021/04/17/Importance-Sampling/">重要性采样</a>
         </li>
     
         
         <li class="archive-post-item">
-            <span class="archive-post-date">04/07</span>
-            <a class="archive-post-title" href="/2021/04/07/Importance-Sampling/">重要性采样</a>
+            <span class="archive-post-date">04/09</span>
+            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
         </li>
     
         

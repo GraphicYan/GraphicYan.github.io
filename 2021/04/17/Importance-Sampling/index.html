@@ -22,7 +22,7 @@
     <meta name="description" content="1 蒙特卡洛路径追踪简要回顾 1.1 算法主要流程所有的全局光照算法其实都是围绕着如何求解渲染方程：着色点向发出的光线由两部分组成，一部分是本身的自发光(一般只有光源才有，其他物体为0)，另一部分由法线所在半球的各个方向上的光线共同贡献得到。路径追踪的方法也非常的直观，即每次碰撞到物体之后都去采样一条可能的scatter的方向，然后递归这个过程直到光线逃逸出场景，或达到终止条件，又或者击中光源形">
 <meta property="og:type" content="article">
 <meta property="og:title" content="重要性采样">
-<meta property="og:url" content="https://graphicyan.github.io/2021/04/07/Importance-Sampling/index.html">
+<meta property="og:url" content="https://graphicyan.github.io/2021/04/17/Importance-Sampling/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="1 蒙特卡洛路径追踪简要回顾 1.1 算法主要流程所有的全局光照算法其实都是围绕着如何求解渲染方程：着色点向发出的光线由两部分组成，一部分是本身的自发光(一般只有光源才有，其他物体为0)，另一部分由法线所在半球的各个方向上的光线共同贡献得到。路径追踪的方法也非常的直观，即每次碰撞到物体之后都去采样一条可能的scatter的方向，然后递归这个过程直到光线逃逸出场景，或达到终止条件，又或者击中光源形">
 <meta property="og:locale" content="en_US">
@@ -147,8 +147,8 @@
 <meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/jpeg/223200/1617959316182-746f232f-773a-498c-90ca-06c7012a8c5e.jpeg#from=paste&height=409&id=u77ad8fca&margin=%5Bobject%20Object%5D&originHeight=409&originWidth=409&originalType=url&status=done&style=none&taskId=u0a513cc0-9c01-4cdb-8aff-96dbd4d818f&width=409">
 <meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/jpeg/223200/1617959316238-ef0a34a4-29a7-4e13-b460-089019048712.jpeg#from=paste&height=407&id=u0018c6d5&margin=%5Bobject%20Object%5D&originHeight=407&originWidth=407&originalType=url&status=done&style=none&taskId=u17db7025-2177-44f5-ad6e-28dd0979c66&width=407">
 <meta property="og:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/jpeg/223200/1617959316361-e47c9faf-422e-4ffd-a0c4-9ea93caf5625.jpeg#from=paste&height=352&id=u95599bc1&margin=%5Bobject%20Object%5D&originHeight=352&originWidth=826&originalType=url&status=done&style=none&taskId=u6a2035d6-2e2f-424d-8c8d-b28b98f2ba0&width=826">
-<meta property="article:published_time" content="2021-04-07T11:33:15.000Z">
-<meta property="article:modified_time" content="2022-11-27T13:06:45.822Z">
+<meta property="article:published_time" content="2021-04-17T11:33:15.000Z">
+<meta property="article:modified_time" content="2022-11-27T13:28:16.845Z">
 <meta property="article:author" content="Yan Zhang">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://intranetproxy.alipay.com/skylark/lark/0/2021/svg/223200/1617959306608-cb40d2ff-ae77-44f0-86d0-190b4dfd766e.svg#from=paste&height=60&id=uc95b5c2c&margin=%5Bobject%20Object%5D&originHeight=60&originWidth=675&originalType=url&status=done&style=none&taskId=u42e1931e-ca11-4023-84e1-d4c1e6a3ac1&width=675">
@@ -458,7 +458,7 @@
                 <div class="post-intro-meta">
                     <!-- 撰写日期 -->
                     <span class="iconfont-archer post-intro-calander">&#xe676;</span>
-                    <span class="post-intro-time">2021/04/07</span>
+                    <span class="post-intro-time">2021/04/17</span>
                     <!-- busuanzi -->
                     
                         <span id="busuanzi_container_page_pv" class="busuanzi-pv">
@@ -636,9 +636,9 @@
     
         <div class="license-wrapper">
             <p>Author：<a href="https://graphicyan.github.io">Yan Zhang</a>
-            <p>Link：<a href="https://graphicyan.github.io/2021/04/07/Importance-Sampling/">https://graphicyan.github.io/2021/04/07/Importance-Sampling/</a>
-            <p>Publish date：<a href="https://graphicyan.github.io/2021/04/07/Importance-Sampling/">April 7th 2021, 7:33:15 pm</a>
-            <p>Update date：<a href="https://graphicyan.github.io/2021/04/07/Importance-Sampling/">November 27th 2022, 9:06:45 pm</a>
+            <p>Link：<a href="https://graphicyan.github.io/2021/04/17/Importance-Sampling/">https://graphicyan.github.io/2021/04/17/Importance-Sampling/</a>
+            <p>Publish date：<a href="https://graphicyan.github.io/2021/04/17/Importance-Sampling/">April 17th 2021, 7:33:15 pm</a>
+            <p>Update date：<a href="https://graphicyan.github.io/2021/04/17/Importance-Sampling/">November 27th 2022, 9:28:16 pm</a>
             <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -647,16 +647,16 @@
         <li class="next">
             
                 <div class="nextSlogan">Next Post</div>
-                <a href="/2021/04/09/Monte-Carlo-Path-Tracing/" title="蒙特卡洛路径追踪">
-                    <div class="nextTitle">蒙特卡洛路径追踪</div>
+                <a href="/2022/11/20/Mixed-Virtual-Production/" title="混合虚拟制片">
+                    <div class="nextTitle">混合虚拟制片</div>
                 </a>
             
         </li>
         <li class="previous">
             
                 <div class="prevSlogan">Previous Post</div>
-                <a href="/2021/04/02/Cook-Torrance-BRDF/" title="Cook-Torrance的BRDF">
-                    <div class="prevTitle">Cook-Torrance的BRDF</div>
+                <a href="/2021/04/09/Monte-Carlo-Path-Tracing/" title="蒙特卡洛路径追踪">
+                    <div class="prevTitle">蒙特卡洛路径追踪</div>
                 </a>
             
         </li>
@@ -842,6 +842,8 @@
         
         
         
+        
+        
     
     
     
@@ -879,14 +881,14 @@
             
         
         <li class="archive-post-item">
-            <span class="archive-post-date">04/09</span>
-            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
+            <span class="archive-post-date">04/17</span>
+            <a class="archive-post-title" href="/2021/04/17/Importance-Sampling/">重要性采样</a>
         </li>
     
         
         <li class="archive-post-item">
-            <span class="archive-post-date">04/07</span>
-            <a class="archive-post-title" href="/2021/04/07/Importance-Sampling/">重要性采样</a>
+            <span class="archive-post-date">04/09</span>
+            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
         </li>
     
         
