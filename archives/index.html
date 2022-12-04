@@ -461,6 +461,36 @@
             
         
         <article class="index-post">
+            <a class="abstract-title" href="/2022/10/08/C2BP-Params/">
+                
+                <span class="abstract-title-text">C++生成蓝图的参数类型记录</span>
+            </a>
+            <div class="abstract-content">
+                
+1. 普通参数在UE C++中寻常函数传参为UFUNCTION(BlueprintCallable) static void Func1(FString InputStr); 
+2. 多输出引脚但是在UE4的C++中，不带Const的引用在蓝图中是默认为输出引脚的，所以可以借此来实现蓝图的多引脚输出。UFUNCTION(BlueprintCallable) static void Func2(FString&amp; OutputStr); 具体蓝图节点如下在虚幻官方的蓝图文档中”在带大量返回参数的函数和返回结构体的函数之间优先前者。“
+所以返回大量参数的优先级更高，可以使用Type&...
+            </div>
+            <!-- read more -->
+            
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2022/12/04">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2022/10/08</span>
+                </div>
+                <!-- tags -->
+                
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+    
+        
+        
+        
+        
+            
+        
+        <article class="index-post">
             <a class="abstract-title" href="/2021/04/17/Importance-Sampling/">
                 
                 <span class="abstract-title-text">重要性采样</span>
@@ -728,7 +758,18 @@
         
         
         
+        
+        
+        
+        
+        
     
+        
+        
+        
+        
+        
+        
         
         
         
@@ -755,7 +796,7 @@
     
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 6
+        Total : 7
         </div>
         <!-- search  -->
         
@@ -773,6 +814,12 @@
         <li class="archive-post-item">
             <span class="archive-post-date">12/04</span>
             <a class="archive-post-title" href="/2022/12/04/Mixed-Virtual-Production/">混合虚拟制片</a>
+        </li>
+    
+        
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span>
+            <a class="archive-post-title" href="/2022/10/08/C2BP-Params/">C++生成蓝图的参数类型记录</a>
         </li>
     
         

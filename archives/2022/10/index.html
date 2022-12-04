@@ -21,7 +21,7 @@
     <meta name="description" content="">
     <meta property="og:type" content="website">
 <meta property="og:title" content="Hexo">
-<meta property="og:url" content="https://graphicyan.github.io/archives/2021/03/index.html">
+<meta property="og:url" content="https://graphicyan.github.io/archives/2022/10/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:locale" content="en_US">
 <meta property="article:author" content="Yan Zhang">
@@ -428,47 +428,22 @@
             
         
         <article class="index-post">
-            <a class="abstract-title" href="/2021/03/29/Learn-Rendering-Function/">
+            <a class="abstract-title" href="/2022/10/08/C2BP-Params/">
                 
-                <span class="abstract-title-text">理解渲染方程</span>
+                <span class="abstract-title-text">C++生成蓝图的参数类型记录</span>
             </a>
             <div class="abstract-content">
-                渲染方程知识在反射方程的基础之上添加了一个自发光项(Emission term)，从而使得反射方程更加的general：其中为自发光项，反射方程中的用，代替。 (tips：所有光线方向均指向外)接下来从一个点光源和单个物体的场景开始理解渲染方程：(点光源对一个点来说自然只有一个方向有入射光，所以这里没有了积分)多个点光源一个物体的情况：将这些所有的点光源的贡献全部求和即可，那么如果点光源变成了面光源呢？如下图所示：其实面光源就相当于无穷多个点光源的集合，只需要对 面光源所在的立体角范围进行积分，并且能够确定不同立体角方向的面光源的入射光radiance即可。那么更进一步的，再在场景当中加...
+                
+1. 普通参数在UE C++中寻常函数传参为UFUNCTION(BlueprintCallable) static void Func1(FString InputStr); 
+2. 多输出引脚但是在UE4的C++中，不带Const的引用在蓝图中是默认为输出引脚的，所以可以借此来实现蓝图的多引脚输出。UFUNCTION(BlueprintCallable) static void Func2(FString&amp; OutputStr); 具体蓝图节点如下在虚幻官方的蓝图文档中”在带大量返回参数的函数和返回结构体的函数之间优先前者。“
+所以返回大量参数的优先级更高，可以使用Type&...
             </div>
             <!-- read more -->
             
             <div class="abstract-post-meta">
                 <!-- date -->
                 <div class="abstract-date" title="Last updated: 2022/12/04">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/03/29</span>
-                </div>
-                <!-- tags -->
-                
-            </div>
-        </article>
-        <div class="index-post-divider"></div>
-    
-        
-        
-        
-        
-            
-        
-        <article class="index-post">
-            <a class="abstract-title" href="/2021/03/22/Learn-Radiometry/">
-                
-                <span class="abstract-title-text">辐射度量学笔记</span>
-            </a>
-            <div class="abstract-content">
-                射度量学其实是对光照的一套测量系统和单位，它能够准确的描述光线的物理性质。具体来说，我们需要明白的是其中的几个关于光线的概念，分别为：辐射能量(Radiant energy)，辐射通量(Radiant flux)，辐射强度(Radiant intensity)，irradiance，radiance，(对后两种概念没有合适的中文，所以就直接用英文了)，接下来就对这些概念进行具体解释。
-2.1 辐射能量(Radiant energy)和辐射通量(Radiant flux)首先看一看Radiant energy的定义：所谓辐射能量其实非常直观，就是辐射出来的电磁能量，单位为焦耳。可以用物理当...
-            </div>
-            <!-- read more -->
-            
-            <div class="abstract-post-meta">
-                <!-- date -->
-                <div class="abstract-date" title="Last updated: 2022/12/04">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/03/22</span>
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2022/10/08</span>
                 </div>
                 <!-- tags -->
                 
