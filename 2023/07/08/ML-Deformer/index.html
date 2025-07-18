@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Yan Zhang">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Yan Zhang">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="">
+    <meta name="description" content="原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&amp;#121;&amp;#97;&amp;#110;&amp;#122;&amp;#x68;&amp;#97;&amp;#x6e;&amp;#x67;&amp;#46;&amp;#99;&amp;#103;&amp;#64;&amp;#x67;&amp;#x6d;&amp;#x61;&amp;#105;&amp;#x6c;&amp;#46;&amp;#99;&amp;#x6f;&amp;#109; 或 https:&#x2F;&#x2F;graphicyan.github.io&#x2F;）  UE5中的应用示">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于机器学习的物理变形器">
+<meta property="og:url" content="https://graphicyan.github.io/2023/07/08/ML-Deformer/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&amp;#121;&amp;#97;&amp;#110;&amp;#122;&amp;#x68;&amp;#97;&amp;#x6e;&amp;#x67;&amp;#46;&amp;#99;&amp;#103;&amp;#64;&amp;#x67;&amp;#x6d;&amp;#x61;&amp;#105;&amp;#x6c;&amp;#46;&amp;#99;&amp;#x6f;&amp;#109; 或 https:&#x2F;&#x2F;graphicyan.github.io&#x2F;）  UE5中的应用示">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/ML-Deformer/image_000.gif#clientId=u4bdc6d29-ffc6-4&from=ui&id=u89367ca0&originHeight=364&originWidth=600&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=1480303&status=done&style=none&taskId=u1e8cc65e-20fe-48b4-80e8-d04f0823af3&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/ML-Deformer/image_001.gif#clientId=u4bdc6d29-ffc6-4&from=ui&id=u2061c80b&originHeight=364&originWidth=600&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=963967&status=done&style=none&taskId=u05d50c93-3dfb-477d-8a84-52655767d67&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/ML-Deformer/image_002.png#clientId=ue576d69d-1fe4-4&from=paste&id=u1fc8d6e3&originHeight=464&originWidth=1440&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=u491e2ce0-0b64-4487-b029-1417e003465&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/ML-Deformer/image_003.png#clientId=u4bdc6d29-ffc6-4&from=paste&height=944&id=ud1bf370a&originHeight=1275&originWidth=1209&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=537245&status=done&style=none&taskId=uc85f8b83-a62f-485b-a0e5-dc83c8ed582&title=&width=895.5556188198809">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/ML-Deformer/image_004.png#clientId=u6a4714c5-a100-4&from=paste&height=499&id=ue3f0bd87&originHeight=673&originWidth=1156&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=565062&status=done&style=none&taskId=u4824e172-1002-4ea6-9300-e21ef1ad3be&title=&width=856.2963567872476">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/ML-Deformer/image_005.gif#clientId=u4bdc6d29-ffc6-4&from=ui&id=u7222109f&originHeight=528&originWidth=744&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=9163271&status=done&style=none&taskId=u994a91b5-8948-407f-99be-1e9e5cd5dc2&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/ML-Deformer/image_006.png#clientId=u4bdc6d29-ffc6-4&from=paste&id=uc80db7e6&originHeight=969&originWidth=1871&originalType=url&ratio=1.3499999046325684&rotation=0&showTitle=false&size=505797&status=done&style=none&taskId=u7ce7d369-5fb0-48e3-89d4-ae3056cb865&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/ML-Deformer/image_007.gif#clientId=u6a4714c5-a100-4&from=ui&id=u28095488&originHeight=502&originWidth=888&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=36645300&status=done&style=none&taskId=u137207a1-6839-47ac-929e-5a9568243d0&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/ML-Deformer/image_008.gif#clientId=ub84dd715-4c16-4&from=ui&id=ufe1854b2&originHeight=402&originWidth=800&originalType=binary&ratio=1.5749999284744263&rotation=0&showTitle=false&size=11740088&status=done&style=none&taskId=ue32df4ed-345f-44f1-bab3-da0767fd324&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/ML-Deformer/image_009.png#clientId=u4bdc6d29-ffc6-4&from=paste&height=83&id=u69f89c35&originHeight=112&originWidth=580&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=26577&status=done&style=none&taskId=u9478678e-593e-496a-a7f0-79117cfcb1f&title=&width=429.6296599797609">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/ML-Deformer/image_010.png#clientId=u4bdc6d29-ffc6-4&from=paste&height=82&id=u28103d5c&originHeight=111&originWidth=793&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=32827&status=done&style=none&taskId=u2aee5806-7d12-475c-b7d8-87360ce007d&title=&width=587.4074489033627">
+<meta property="article:published_time" content="2023-07-08T02:45:15.000Z">
+<meta property="article:modified_time" content="2025-07-18T03:55:52.138Z">
+<meta property="article:author" content="Yan Zhang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://graphicyan.github.io/assets/post_images/ML-Deformer/image_000.gif#clientId=u4bdc6d29-ffc6-4&from=ui&id=u89367ca0&originHeight=364&originWidth=600&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=1480303&status=done&style=none&taskId=u1e8cc65e-20fe-48b4-80e8-d04f0823af3&title=">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/yan.jpg">
+    <title>基于机器学习的物理变形器 · Yan&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Yan's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Yan&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">基于机器学习的物理变形器</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                基于机器学习的物理变形器
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count word-count">747</span>Reading time: <span class="post-count reading-time">2 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2023/07/08</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <h2 id="原创性声明"><a href="#原创性声明" class="headerlink" title="原创性声明"></a>原创性声明</h2><p>本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（<a href="mailto:&#121;&#97;&#110;&#122;&#x68;&#97;&#x6e;&#x67;&#46;&#99;&#103;&#64;&#x67;&#x6d;&#x61;&#105;&#x6c;&#46;&#99;&#x6f;&#109;">&#121;&#97;&#110;&#122;&#x68;&#97;&#x6e;&#x67;&#46;&#99;&#103;&#64;&#x67;&#x6d;&#x61;&#105;&#x6c;&#46;&#99;&#x6f;&#109;</a> 或 <a href="https://graphicyan.github.io/%EF%BC%89">https://graphicyan.github.io/）</a></p>
+<p><img src="/assets/post_images/ML-Deformer/image_000.gif#clientId=u4bdc6d29-ffc6-4&from=ui&id=u89367ca0&originHeight=364&originWidth=600&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=1480303&status=done&style=none&taskId=u1e8cc65e-20fe-48b4-80e8-d04f0823af3&title=" alt="63438006e420c.gif"><br /><img src="/assets/post_images/ML-Deformer/image_001.gif#clientId=u4bdc6d29-ffc6-4&from=ui&id=u2061c80b&originHeight=364&originWidth=600&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=963967&status=done&style=none&taskId=u05d50c93-3dfb-477d-8a84-52655767d67&title=" alt="6343800937219.gif"><br><a name="Ht3aT"></a></p>
+<h3 id="UE5中的应用示例"><a href="#UE5中的应用示例" class="headerlink" title="UE5中的应用示例"></a>UE5中的应用示例</h3><p><a name="V2TZk"></a></p>
+<h4 id="Workflow"><a href="#Workflow" class="headerlink" title="Workflow"></a>Workflow</h4><p><img src="/assets/post_images/ML-Deformer/image_002.png#clientId=ue576d69d-1fe4-4&from=paste&id=u1fc8d6e3&originHeight=464&originWidth=1440&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=u491e2ce0-0b64-4487-b029-1417e003465&title="><br><a name="kobZ1"></a></p>
+<h4 id="ML-Deformer-in-UE5"><a href="#ML-Deformer-in-UE5" class="headerlink" title="ML Deformer in UE5"></a>ML Deformer in UE5</h4><p><a name="LDvdc"></a></p>
+<h5 id="Vertex-Delta-Model"><a href="#Vertex-Delta-Model" class="headerlink" title="Vertex Delta Model"></a>Vertex Delta Model</h5><ul>
+<li>基于GPU的神经网络。</li>
+<li>顶点差是参数。</li>
+<li>性能较为糟糕。<br><a name="hcNwh"></a></li>
+</ul>
+<h5 id="Neural-Morph-Model（NMM）"><a href="#Neural-Morph-Model（NMM）" class="headerlink" title="Neural Morph Model（NMM）"></a>Neural Morph Model（NMM）</h5><ul>
+<li>神经形变模型，UE5的Morph Target的神经网络版。</li>
+<li>基于CPU的神经网络。</li>
+<li>适用于Muscle、Flesh对象的拟合。</li>
+<li>需要针对特定对象进行二次训练，更新权重张量。（如：“火箭浣熊”与“星爵”的骨骼-肌肉动作明显不同）。<br><a name="qwVjw"></a></li>
+</ul>
+<h5 id="Nearest-Neighbor-Model（NNM）"><a href="#Nearest-Neighbor-Model（NNM）" class="headerlink" title="Nearest Neighbor Model（NNM）"></a>Nearest Neighbor Model（NNM）</h5><ul>
+<li>最近邻模型。</li>
+<li>适合布料对象的模拟。</li>
+</ul>
+<p><a name="dao12"></a></p>
+<h4 id="Performance-on-PS5"><a href="#Performance-on-PS5" class="headerlink" title="Performance on PS5"></a>Performance on PS5</h4><p><img src="/assets/post_images/ML-Deformer/image_003.png#clientId=u4bdc6d29-ffc6-4&from=paste&height=944&id=ud1bf370a&originHeight=1275&originWidth=1209&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=537245&status=done&style=none&taskId=uc85f8b83-a62f-485b-a0e5-dc83c8ed582&title=&width=895.5556188198809" alt="image.png"><br><a name="xR9fs"></a></p>
+<h3 id="肌肉模拟"><a href="#肌肉模拟" class="headerlink" title="肌肉模拟"></a>肌肉模拟</h3><p><img src="/assets/post_images/ML-Deformer/image_004.png#clientId=u6a4714c5-a100-4&from=paste&height=499&id=ue3f0bd87&originHeight=673&originWidth=1156&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=565062&status=done&style=none&taskId=u4824e172-1002-4ea6-9300-e21ef1ad3be&title=&width=856.2963567872476" alt="image.png"><br><a name="YPdde"></a></p>
+<h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><p><img src="/assets/post_images/ML-Deformer/image_005.gif#clientId=u4bdc6d29-ffc6-4&from=ui&id=u7222109f&originHeight=528&originWidth=744&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=9163271&status=done&style=none&taskId=u994a91b5-8948-407f-99be-1e9e5cd5dc2&title=" alt="MLAsset4.gif"><br /><img src="/assets/post_images/ML-Deformer/image_006.png#clientId=u4bdc6d29-ffc6-4&from=paste&id=uc80db7e6&originHeight=969&originWidth=1871&originalType=url&ratio=1.3499999046325684&rotation=0&showTitle=false&size=505797&status=done&style=none&taskId=u7ce7d369-5fb0-48e3-89d4-ae3056cb865&title=" alt="image.png"><br><a name="IHClX"></a></p>
+<h5 id="Local模式"><a href="#Local模式" class="headerlink" title="Local模式"></a>Local模式</h5><ul>
+<li>由多个单独的小网络学习各关节周围的变形。</li>
+<li>需要的数据集相对少。</li>
+<li>每根骨骼都会创建一组变形目标，总的Morph Traget数为：</li>
+</ul>
+<p>(num_bones + num_bone_groups) * num_morphs_per_bone_or_curve + (num_curves + num_curve_groups) * num_morphs_per_bone_or_curve + 1<br><a name="x99kd"></a></p>
+<h5 id="Global"><a href="#Global" class="headerlink" title="Global"></a>Global</h5><ul>
+<li>整个网络是全连接的。</li>
+<li>从所有相关关节的协调运动中学习变形。</li>
+<li>需要的数据集和训练时间也相对更长。</li>
+<li>网络实现与Local类似，且更简单一些。<br><a name="jKe2m"></a></li>
+</ul>
+<h4 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h4><ul>
+<li>使用Maya中的PosGenTool插件。</li>
+<li>官方推荐5000个随机pose，一般需要5000~15000个姿态。</li>
+<li>在Maya或Houdini中，使用离线的变形器进行肌肉模拟（如Houdini中基于PBD的Vellum）。</li>
+<li>输出肌肉文件（Alembic格式）通常比较大，几十~几百个G。<br><a name="JMkNn"></a></li>
+</ul>
+<h4 id="限制"><a href="#限制" class="headerlink" title="限制"></a>限制</h4><ul>
+<li>数据集生成、训练耗时。</li>
+<li>不同角色有较强的的特适性。<br><a name="BQ7Q9"></a></li>
+</ul>
+<h3 id="布料模拟"><a href="#布料模拟" class="headerlink" title="布料模拟"></a>布料模拟</h3><p><img src="/assets/post_images/ML-Deformer/image_007.gif#clientId=u6a4714c5-a100-4&from=ui&id=u28095488&originHeight=502&originWidth=888&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=36645300&status=done&style=none&taskId=u137207a1-6839-47ac-929e-5a9568243d0&title=" alt="physics-mlcloth-2.gif"><br><a name="r9zVS"></a></p>
+<h4 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h4><p><img src="/assets/post_images/ML-Deformer/image_008.gif#clientId=ub84dd715-4c16-4&from=ui&id=ufe1854b2&originHeight=402&originWidth=800&originalType=binary&ratio=1.5749999284744263&rotation=0&showTitle=false&size=11740088&status=done&style=none&taskId=ue32df4ed-345f-44f1-bab3-da0767fd324&title=" alt="physics-mlcloth.gif"><br />两个阶段<br><a name="b3KxA"></a></p>
+<h5 id="神经变形模型（ML-Deformer）"><a href="#神经变形模型（ML-Deformer）" class="headerlink" title="神经变形模型（ML Deformer）"></a>神经变形模型（ML Deformer）</h5><p><strong>低频率变形</strong>，使用多层感知机（MLP）建模，网络输出PCA系数。<br />pca_delta &#x3D; mean_delta + pca_coeff * pca_basis<br />推荐采用5000个姿势。<br><a name="IENTJ"></a></p>
+<h5 id="最近邻模型-Nerest-Neighbor"><a href="#最近邻模型-Nerest-Neighbor" class="headerlink" title="最近邻模型(Nerest Neighbor)"></a>最近邻模型(Nerest Neighbor)</h5><p><strong>高频率变形</strong>，ML的变体，从上述获得PCA系数后，在“最近邻”数据集中搜索最接近的值。<br />vertex_delta &#x3D; pca_delta + nearest_neighbor_delta<br />推荐采用50~100个姿势。<br />可以用KMeans Pose Generator来进行自动姿势选择。<br><a name="vbw99"></a></p>
+<h4 id="数据集-1"><a href="#数据集-1" class="headerlink" title="数据集"></a>数据集</h4><ul>
+<li>待仿真结果稳定，Houdini Vellum。</li>
+<li>关闭重力。</li>
+<li>ML Deformer使用尽可能随机的姿势，确保每个关节都充分采样了所有角度。</li>
+<li>ML Deformer尽量多一些姿势，建议5000个以上。<br><a name="hQIJI"></a></li>
+</ul>
+<h4 id="限制-1"><a href="#限制-1" class="headerlink" title="限制"></a>限制</h4><ul>
+<li>半静态服装，可预测褶皱，无法预测摇摆等动态移动。</li>
+<li>适合紧身服装，不适合宽松。</li>
+</ul>
+<p><a name="L1dLQ"></a></p>
+<h3 id="附：经典常用蒙皮方法"><a href="#附：经典常用蒙皮方法" class="headerlink" title="附：经典常用蒙皮方法"></a>附：经典常用蒙皮方法</h3><p><a name="xC40j"></a></p>
+<h4 id="线性蒙皮（LBS）"><a href="#线性蒙皮（LBS）" class="headerlink" title="线性蒙皮（LBS）"></a>线性蒙皮（LBS）</h4><p><img src="/assets/post_images/ML-Deformer/image_009.png#clientId=u4bdc6d29-ffc6-4&from=paste&height=83&id=u69f89c35&originHeight=112&originWidth=580&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=26577&status=done&style=none&taskId=u9478678e-593e-496a-a7f0-79117cfcb1f&title=&width=429.6296599797609" alt="image.png"><br><a name="nAqGe"></a></p>
+<h4 id="线性对偶四元数蒙皮（DQS"><a href="#线性对偶四元数蒙皮（DQS" class="headerlink" title="线性对偶四元数蒙皮（DQS)"></a>线性对偶四元数蒙皮（DQS)</h4><p><img src="/assets/post_images/ML-Deformer/image_010.png#clientId=u4bdc6d29-ffc6-4&from=paste&height=82&id=u28103d5c&originHeight=111&originWidth=793&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=32827&status=done&style=none&taskId=u2aee5806-7d12-475c-b7d8-87360ce007d&title=&width=587.4074489033627" alt="image.png"><br><a name="PyBC8"></a></p>
+<h4 id="姿态空间变形（Pose-Space-Deformer）"><a href="#姿态空间变形（Pose-Space-Deformer）" class="headerlink" title="姿态空间变形（Pose Space Deformer）"></a>姿态空间变形（Pose Space Deformer）</h4><ul>
+<li>UE5中的Morph Target的Deformer Graph</li>
+<li>Houdini中的Niagara的GPU Simulation</li>
+<li>非线性变形</li>
+<li>需要TA干引擎的货，审美基础上开发特适的变形器：“晶格变形器，簇变形器，褶皱变形器，张力变形器，抖动变形器”等。<br><a name="cOj8m"></a></li>
+</ul>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a target="_blank" rel="noopener" href="https://dev.epicgames.com/community/learning/tutorials/2lJy/unreal-engine-nearest-neighbor-model">Nearest Neighbor Model | Tutorial</a><br /><a target="_blank" rel="noopener" href="https://docs.unrealengine.com/5.2/zh-CN/machine-learning-cloth-simulation-overview/">机器学习布料模拟概述</a><br /><a target="_blank" rel="noopener" href="https://docs.unrealengine.com/5.2/zh-CN/how-to-use-the-machine-learning-deformer-in-unreal-engine/">如何使用机器学习变形器</a><br /><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/632849525">UE5 机器学习变形器解析</a></p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>Author：<a href="https://graphicyan.github.io">Yan Zhang</a>
+            <p>Link：<a href="https://graphicyan.github.io/2023/07/08/ML-Deformer/">https://graphicyan.github.io/2023/07/08/ML-Deformer/</a>
+            <p>Publish date：<a href="https://graphicyan.github.io/2023/07/08/ML-Deformer/">July 8th 2023, 10:45:15 am</a>
+            <p>Update date：<a href="https://graphicyan.github.io/2023/07/08/ML-Deformer/">July 18th 2025, 11:55:52 am</a>
+            <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/12/15/Dcc-Coords/" title="一图对比众3D引擎的坐标系">
+                    <div class="nextTitle">一图对比众3D引擎的坐标系</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2023/07/02/Dynamic-Bones/" title="基于动力学的骨骼动画技术综述">
+                    <div class="prevTitle">基于动力学的骨骼动画技术综述</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:yanzhang.cg@gmail.com" class="iconfont-archer email" title="email" ></a>
+                <a href="https://github.com/GraphicYan" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/wechat.png" />
+                </span>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E5%88%9B%E6%80%A7%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">原创性声明</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#UE5%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.1.</span> <span class="toc-text">UE5中的应用示例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Workflow"><span class="toc-number">1.1.1.</span> <span class="toc-text">Workflow</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ML-Deformer-in-UE5"><span class="toc-number">1.1.2.</span> <span class="toc-text">ML Deformer in UE5</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Vertex-Delta-Model"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">Vertex Delta Model</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Neural-Morph-Model%EF%BC%88NMM%EF%BC%89"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">Neural Morph Model（NMM）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Nearest-Neighbor-Model%EF%BC%88NNM%EF%BC%89"><span class="toc-number">1.1.2.3.</span> <span class="toc-text">Nearest Neighbor Model（NNM）</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Performance-on-PS5"><span class="toc-number">1.1.3.</span> <span class="toc-text">Performance on PS5</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%82%8C%E8%82%89%E6%A8%A1%E6%8B%9F"><span class="toc-number">1.2.</span> <span class="toc-text">肌肉模拟</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-number">1.2.1.</span> <span class="toc-text">原理</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Local%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">Local模式</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Global"><span class="toc-number">1.2.1.2.</span> <span class="toc-text">Global</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.2.2.</span> <span class="toc-text">数据集</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%99%90%E5%88%B6"><span class="toc-number">1.2.3.</span> <span class="toc-text">限制</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%83%E6%96%99%E6%A8%A1%E6%8B%9F"><span class="toc-number">1.3.</span> <span class="toc-text">布料模拟</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86-1"><span class="toc-number">1.3.1.</span> <span class="toc-text">原理</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%A5%9E%E7%BB%8F%E5%8F%98%E5%BD%A2%E6%A8%A1%E5%9E%8B%EF%BC%88ML-Deformer%EF%BC%89"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">神经变形模型（ML Deformer）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9C%80%E8%BF%91%E9%82%BB%E6%A8%A1%E5%9E%8B-Nerest-Neighbor"><span class="toc-number">1.3.1.2.</span> <span class="toc-text">最近邻模型(Nerest Neighbor)</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86-1"><span class="toc-number">1.3.2.</span> <span class="toc-text">数据集</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%99%90%E5%88%B6-1"><span class="toc-number">1.3.3.</span> <span class="toc-text">限制</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%99%84%EF%BC%9A%E7%BB%8F%E5%85%B8%E5%B8%B8%E7%94%A8%E8%92%99%E7%9A%AE%E6%96%B9%E6%B3%95"><span class="toc-number">1.4.</span> <span class="toc-text">附：经典常用蒙皮方法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BA%BF%E6%80%A7%E8%92%99%E7%9A%AE%EF%BC%88LBS%EF%BC%89"><span class="toc-number">1.4.1.</span> <span class="toc-text">线性蒙皮（LBS）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BA%BF%E6%80%A7%E5%AF%B9%E5%81%B6%E5%9B%9B%E5%85%83%E6%95%B0%E8%92%99%E7%9A%AE%EF%BC%88DQS"><span class="toc-number">1.4.2.</span> <span class="toc-text">线性对偶四元数蒙皮（DQS)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A7%BF%E6%80%81%E7%A9%BA%E9%97%B4%E5%8F%98%E5%BD%A2%EF%BC%88Pose-Space-Deformer%EF%BC%89"><span class="toc-number">1.4.3.</span> <span class="toc-text">姿态空间变形（Pose Space Deformer）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">1.5.</span> <span class="toc-text">参考</span></a></li></ol></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 16
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/15</span>
+            <a class="archive-post-title" href="/2023/12/15/Dcc-Coords/">一图对比众3D引擎的坐标系</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span>
+            <a class="archive-post-title" href="/2023/07/08/ML-Deformer/">基于机器学习的物理变形器</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span>
+            <a class="archive-post-title" href="/2023/07/02/Dynamic-Bones/">基于动力学的骨骼动画技术综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/Simulation-Dynamics-Engine/">仿真及动力学系统综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span>
+            <a class="archive-post-title" href="/2023/05/21/Build-WebRTC-For-MSVC/">编译可以在MSVC中使用的WebRTC库</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/21</span>
+            <a class="archive-post-title" href="/2023/02/21/Collaborative-Engine/">浅谈端云协同渲染</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span>
+            <a class="archive-post-title" href="/2022/12/29/Mixed-Virtual-Production/">混合虚拟制片</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span>
+            <a class="archive-post-title" href="/2022/10/08/C2BP-Params/">C++生成蓝图的参数类型记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/29</span>
+            <a class="archive-post-title" href="/2022/06/29/Schlick-Approximate/">Schilick的近似方法</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span>
+            <a class="archive-post-title" href="/2022/03/18/Illumination/">光通量、光强和照度</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/13</span>
+            <a class="archive-post-title" href="/2021/12/13/DS-VS-DL/">延迟渲染Vs延迟光照</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/17</span>
+            <a class="archive-post-title" href="/2021/04/17/Importance-Sampling/">重要性采样</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span>
+            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span>
+            <a class="archive-post-title" href="/2021/04/02/Cook-Torrance-BRDF/">Cook-Torrance的BRDF</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/29</span>
+            <a class="archive-post-title" href="/2021/03/29/Learn-Rendering-Function/">理解渲染方程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/22</span>
+            <a class="archive-post-title" href="/2021/03/22/Learn-Radiometry/">辐射度量学笔记</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://graphicyan.github.io",
+        root: siteMetaRoot,
+        author: "Yan Zhang"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+    </body>
+</html>

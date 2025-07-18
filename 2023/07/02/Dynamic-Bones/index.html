@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Yan Zhang">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Yan Zhang">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="">
+    <meta name="description" content="原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&amp;#121;&amp;#97;&amp;#x6e;&amp;#x7a;&amp;#x68;&amp;#x61;&amp;#x6e;&amp;#x67;&amp;#x2e;&amp;#99;&amp;#x67;&amp;#x40;&amp;#x67;&amp;#109;&amp;#x61;&amp;#105;&amp;#x6c;&amp;#x2e;&amp;#x63;&amp;#111;&amp;#x6d; 或 https:&#x2F;&#x2F;graphicyan.github.io&#x2F;）  Dyn">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于动力学的骨骼动画技术综述">
+<meta property="og:url" content="https://graphicyan.github.io/2023/07/02/Dynamic-Bones/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&amp;#121;&amp;#97;&amp;#x6e;&amp;#x7a;&amp;#x68;&amp;#x61;&amp;#x6e;&amp;#x67;&amp;#x2e;&amp;#99;&amp;#x67;&amp;#x40;&amp;#x67;&amp;#109;&amp;#x61;&amp;#105;&amp;#x6c;&amp;#x2e;&amp;#x63;&amp;#111;&amp;#x6d; 或 https:&#x2F;&#x2F;graphicyan.github.io&#x2F;）  Dyn">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_000.webp#clientId=u655dc2f2-1117-4&from=paste&id=u0435447e&originHeight=370&originWidth=605&originalType=url&ratio=1.2000000476837158&rotation=0&showTitle=false&status=done&style=none&taskId=u4838b198-897a-49ae-9043-d88a17deaa8&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_001.png#clientId=ucec9efd8-48da-4&from=paste&height=949&id=ude4f18a8&originHeight=1495&originWidth=1154&originalType=binary&ratio=1.5749999284744263&rotation=0&showTitle=false&size=452568&status=done&style=none&taskId=u3aa7ff6b-b222-4f80-b6f7-d60f0c97b97&title=&width=732.6984459724931">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_003.webp#clientId=ude7aa300-e271-4&from=paste&id=u8f5d0f6f&originHeight=658&originWidth=1101&originalType=url&ratio=1.399999976158142&rotation=0&showTitle=false&status=done&style=none&taskId=ucc8433b9-7172-492b-82a6-6facf2a3603&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_004.webp#clientId=ude7aa300-e271-4&from=paste&height=566&id=ud3dd9ba5&originHeight=576&originWidth=825&originalType=url&ratio=1.399999976158142&rotation=0&showTitle=false&status=done&style=none&taskId=ue0c92faf-af90-48b5-8a15-03687f7dbc4&title=&width=811">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_005.svg#card=math&code=%5CDelta%20P%20=%20P%20-%20P%5E%7B">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_006.svg#card=math&code=P%20=%20P%20+%20%5CDelta%20P%20*%20inertia&id=M4wUY">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_007.svg#card=math&code=P">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_008.svg#card=math&code=P%20=%20P%20+%20%5CDelta%20P%20*%20(1-damping)&id=fF5MB">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_009.svg#card=math&code=f%20=%20%5Coverrightarrow%7Bg_%7B0%7D%7D%20-%20%20%20%5Cfrac%20%7B%5Coverrightarrow%7Bg_%7Blocal%7D%7D%7D%7Blen(%5Coverrightarrow%7Bg_%7Blocal%7D%7D)%7D%20%5Ccdot%20%5Coverrightarrow%7Bg_%7B0%7D%7D%20%20+%20f_%7Bexternal%7D&id=OcJ5s">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_010.svg#card=math&code=P%20=%20P%20+%20f%0A&id=FB574">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_011.webp#clientId=ude7aa300-e271-4&from=paste&id=u22a000ae&originHeight=417&originWidth=992&originalType=url&ratio=1.399999976158142&rotation=0&showTitle=false&status=done&style=none&taskId=ub141369c-6ce0-4115-bb97-d77439186e5&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_012.svg#card=math&code=P_%7Btar%7D&id=rdSLS">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_013.svg#card=math&code=%5CDelta%20P_%7Btar%7D%20=%20P_%7Btar%7D%20-%20P&id=dkoS3">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_014.svg#card=math&code=P%20=%20P%20+%20%5CDelta%20P_%7Btar%7D*elasticity&id=fh4d8">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_015.svg#card=math&code=l_%7B0%7D&id=T1U37">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_016.svg#card=math&code=l_%7B0%7D%20=%20len(%20P_%7Bp0%7D%20-%20P_0)&id=zi7C8">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_017.svg#card=math&code=l_%7Bmax%7D&id=iLVVx">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_018.svg#card=math&code=l_%7Bmax%7D%20=%20l_0%20*%202%20*%20(1%20-%20stiffness)&id=pamW7">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_019.svg#card=math&code=P%20=%20P%20+%20(P_%7Btar%7D%20-P)%20*%20%5Cfrac%20%7Blen(P_%7Btar%7D%20-%20P)%20-%20l_%7Bmax%7D%7D%7Blen(P_%7Btar%7D-P)%7D&id=v4aFQ">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_020.svg#card=math&code=P%20=%20P%20+%20(P_p%20-%20P)%20*%20%5Cfrac%7Blen(P_p%20-%20P)%20-%20l_0%7D%7Blen(P_p%20-%20P)%7D&id=vPge0">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_021.svg#card=math&code=%5CDelta%20D_%7B0%7D%20=%20P_%7B0%7D%20-%20P_%7Bp0%7D&id=rgtRN">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_022.svg#card=math&code=%5CDelta%20D%20=%20P%20-%20P_%7Bp%7D&id=Ba6kK">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_023.svg#card=math&code=P_%7Bp%7D%20=%20rotateFromTo(%5CDelta%20D_0,%20%5CDelta%20D)%20*%20P_p&id=Qepdf">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_024.gif#clientId=u7b046daf-65b1-4&from=paste&id=u71fd1156&originHeight=300&originWidth=400&originalType=url&ratio=1.2000000476837158&rotation=0&showTitle=false&status=done&style=none&taskId=u87df1ded-83ce-4c7c-8608-08e2f6893ba&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_025.jpeg#clientId=u950b3e5d-3588-4&from=paste&id=uae307691&originHeight=552&originWidth=989&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=u7900d56b-d4b2-4512-87e3-313e4f124f8&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_026.gif#clientId=u950b3e5d-3588-4&from=paste&id=ucd5d7a94&originHeight=500&originWidth=700&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=u6b8f5556-7d98-47e9-a740-dfb0343b8ac&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_027.jpeg#clientId=u950b3e5d-3588-4&from=paste&id=u73f385e3&originHeight=344&originWidth=667&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=uaf227442-17cc-4aa1-a4fd-683670dc9ca&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_028.jpeg#clientId=u950b3e5d-3588-4&from=paste&id=u2761976b&originHeight=700&originWidth=823&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=u87485f14-f72b-4263-a891-729f3601d56&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_029.gif#clientId=u950b3e5d-3588-4&from=paste&height=303&id=ua74cf4cc&originHeight=256&originWidth=296&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=u5cb31d15-7d91-4f5a-a17b-5ea38a3bca4&title=&width=350">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_030.gif#clientId=u950b3e5d-3588-4&from=paste&height=303&id=u455a24eb&originHeight=288&originWidth=333&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=u28567d60-9291-4081-a213-97e2ea75abf&title=&width=350">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_031.gif#clientId=u950b3e5d-3588-4&from=paste&id=ud3845a9a&originHeight=288&originWidth=316&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=u60bead0b-016f-47ac-9331-b83a047d198&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_032.gif#clientId=u5a5dbcdc-ee2f-4&from=drop&id=u7128d2a3&originHeight=350&originWidth=600&originalType=binary&ratio=1.2000000476837158&rotation=0&showTitle=false&size=37755043&status=done&style=none&taskId=uc83ba475-8e0d-4608-a33b-655095201b6&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_033.png#clientId=u5f1033ca-072c-4&from=drop&id=u9a01c727&originHeight=614&originWidth=717&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=134150&status=done&style=none&taskId=u38777ba8-3035-4312-ba51-544cd3a3484&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_034.png#clientId=u5f1033ca-072c-4&from=drop&id=ufab10078&originHeight=564&originWidth=719&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=146621&status=done&style=none&taskId=u4a172f59-487e-494f-98fc-22c1b32b62f&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_035.png#clientId=u5f1033ca-072c-4&from=drop&id=u5ebefbf0&originHeight=437&originWidth=786&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=131622&status=done&style=none&taskId=u977fa9f7-1cf5-4415-8da7-c3796ce0d9f&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_036.png#clientId=u5f1033ca-072c-4&from=drop&id=ubaa9519d&originHeight=437&originWidth=789&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=106522&status=done&style=none&taskId=ube074231-e2d0-4bb5-900b-85d42501e49&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_037.png#clientId=u5f1033ca-072c-4&from=drop&id=u3a38fc37&originHeight=347&originWidth=314&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=37804&status=done&style=none&taskId=u2f22af71-9b9d-488f-8c00-9ed4c20a4bf&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_038.png#clientId=u5f1033ca-072c-4&from=drop&height=141&id=u3021e4a2&originHeight=190&originWidth=379&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=9378&status=done&style=none&taskId=uc2007127-14b6-4d15-9a8a-a6a02371485&title=&width=280.9861145019531">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_039.png#clientId=u5f1033ca-072c-4&from=drop&id=u58e2ccf2&originHeight=2609&originWidth=1069&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=328056&status=done&style=none&taskId=u03e49573-51dd-4caa-942c-4b353dde706&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_040.png#clientId=u982580dc-cf03-4&from=drop&id=u205d0ce5&originHeight=603&originWidth=916&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=128574&status=done&style=none&taskId=u907cd8ac-d6b5-489d-aaac-f2200f5a5ab&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_041.svg#card=math&code=%5CDelta%20d%20=%20%20direction(P_0%20-%20P_1)%20*%20(%5CDelta%20l%20*%20c)&id=wimp0">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_042.png#clientId=u99d481e1-e092-4&from=paste&height=439&id=ub9f95d4f&originHeight=593&originWidth=895&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=149015&status=done&style=none&taskId=uf7208d91-356a-4718-939a-4535f74e43a&title=&width=662.9630097963552">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_043.gif#clientId=uf4e54c24-1d96-4&from=drop&id=fOmQs&originHeight=240&originWidth=426&originalType=binary&ratio=1.2000000476837158&rotation=0&showTitle=false&size=2824691&status=done&style=none&taskId=ue1f67e24-c6a1-454f-b3f2-256c0c1bf04&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_044.gif#clientId=uf4e54c24-1d96-4&from=drop&id=hBF7D&originHeight=240&originWidth=426&originalType=binary&ratio=1.2000000476837158&rotation=0&showTitle=false&size=421035&status=done&style=none&taskId=u74ae1293-c4d2-4797-abd5-da61ce1358c&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_045.png#clientId=u99d481e1-e092-4&from=ui&id=u4049a8ca&originHeight=799&originWidth=462&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=64375&status=done&style=none&taskId=ub8542574-10c2-4fa2-a394-72aecc067b3&title=">
+<meta property="og:image" content="https://github.com/pafuhana1213/Screenshot/raw/master/KawaiiPhysics2.jpg#from=url&id=HKTAj&originHeight=761&originWidth=1694&originalType=binary&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_047.gif#clientId=u982580dc-cf03-4&from=drop&id=u5f2f5220&originHeight=270&originWidth=480&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=2351667&status=done&style=none&taskId=uda5849b6-9059-4a4a-bdbb-f9b5f50e6c9&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_048.gif#clientId=u982580dc-cf03-4&from=drop&id=uca11ac29&originHeight=270&originWidth=480&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=1878281&status=done&style=none&taskId=u690cef76-7378-4969-9a93-72777991449&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_049.gif#clientId=u982580dc-cf03-4&from=drop&id=u6b90d312&originHeight=353&originWidth=500&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=4840594&status=done&style=none&taskId=ucb818d2b-a8b0-4206-80b9-4230490d1ca&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_050.png#clientId=uddccf573-fc14-4&from=paste&height=856&id=uf9a129da&originHeight=1348&originWidth=2145&originalType=binary&ratio=1.5749999284744263&rotation=0&showTitle=false&size=748958&status=done&style=none&taskId=u4a638778-dc81-45b5-9fb6-1d26bef3d6b&title=&width=1361.904823753031">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_051.png#clientId=uddccf573-fc14-4&from=paste&height=999&id=u1c14a171&originHeight=1348&originWidth=2145&originalType=binary&ratio=1.5749999284744263&rotation=0&showTitle=false&size=738091&status=done&style=none&taskId=u4ec466eb-b960-4d4b-a222-950203320a4&title=&width=1588.8890011320468">
+<meta property="article:published_time" content="2023-07-02T07:17:15.000Z">
+<meta property="article:modified_time" content="2025-07-18T03:55:52.135Z">
+<meta property="article:author" content="Yan Zhang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://graphicyan.github.io/assets/post_images/Dynamic-Bones/image_000.webp#clientId=u655dc2f2-1117-4&from=paste&id=u0435447e&originHeight=370&originWidth=605&originalType=url&ratio=1.2000000476837158&rotation=0&showTitle=false&status=done&style=none&taskId=u4838b198-897a-49ae-9043-d88a17deaa8&title=">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/yan.jpg">
+    <title>基于动力学的骨骼动画技术综述 · Yan&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Yan's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Yan&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">基于动力学的骨骼动画技术综述</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                基于动力学的骨骼动画技术综述
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count word-count">3.3k</span>Reading time: <span class="post-count reading-time">13 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2023/07/02</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <h2 id="原创性声明"><a href="#原创性声明" class="headerlink" title="原创性声明"></a>原创性声明</h2><p>本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（<a href="mailto:&#121;&#97;&#x6e;&#x7a;&#x68;&#x61;&#x6e;&#x67;&#x2e;&#99;&#x67;&#x40;&#x67;&#109;&#x61;&#105;&#x6c;&#x2e;&#x63;&#111;&#x6d;">&#121;&#97;&#x6e;&#x7a;&#x68;&#x61;&#x6e;&#x67;&#x2e;&#99;&#x67;&#x40;&#x67;&#109;&#x61;&#105;&#x6c;&#x2e;&#x63;&#111;&#x6d;</a> 或 <a href="https://graphicyan.github.io/%EF%BC%89">https://graphicyan.github.io/）</a></p>
+<p><a name="qWnXp"></a></p>
+<h2 id="DynamicBone-Unity"><a href="#DynamicBone-Unity" class="headerlink" title="DynamicBone (Unity)"></a>DynamicBone (Unity)</h2><p><a name="ghTlk"></a></p>
+<h3 id="INTRO"><a href="#INTRO" class="headerlink" title="INTRO"></a>INTRO</h3><p><a target="_blank" rel="noopener" href="https://assetstore.unity.com/packages/tools/animation/dynamic-bone-16743">Dynamic Bone | Animation Tools | Unity Asset Store</a><br /><img src="/assets/post_images/Dynamic-Bones/image_000.webp#clientId=u655dc2f2-1117-4&from=paste&id=u0435447e&originHeight=370&originWidth=605&originalType=url&ratio=1.2000000476837158&rotation=0&showTitle=false&status=done&style=none&taskId=u4838b198-897a-49ae-9043-d88a17deaa8&title="><br />DynamicBone是一个简单的基于模拟弹簧振子的算法实现树状柔体的物理模拟插件。虽然基于模拟弹簧振子运动的算法实现，但是DynamicBone各节点之间的距离实际上不会发生变化。比起弹簧，父子节点之间的相对运动更接近串联的单摆。<br><a name="Ak973"></a></p>
+<h3 id="工作流"><a href="#工作流" class="headerlink" title="工作流"></a>工作流</h3><p><a name="bM8vS"></a></p>
+<h4 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h4><p>绑定Dynamic Bone，设置对应的Root、Colliders、及相关动力参数。<br /><img src="/assets/post_images/Dynamic-Bones/image_001.png#clientId=ucec9efd8-48da-4&from=paste&height=949&id=ude4f18a8&originHeight=1495&originWidth=1154&originalType=binary&ratio=1.5749999284744263&rotation=0&showTitle=false&size=452568&status=done&style=none&taskId=u3aa7ff6b-b222-4f80-b6f7-d60f0c97b97&title=&width=732.6984459724931" alt="image.png"></p>
+<p><a name="ZYken"></a></p>
+<h4 id="属性参数"><a href="#属性参数" class="headerlink" title="属性参数"></a>属性参数</h4><ul>
+<li><strong>Damping （阻尼）：</strong>阻止简谐运动的惯性运动，相当于弹簧的摩擦力。为0时简谐运动过程不会主动停止，为1时简谐运动过程不会发生。</li>
+<li><strong>Elasticity （弹性）：</strong>决定回振移动强度，在简谐运动过程中作为额外的作用力将节点拉到还原位置，相当于弹簧的弹力。为0时系统形变不会主动还原，为1时形变不会发生。</li>
+<li><strong>Stiffness （刚性）：</strong>限制最大振动幅度与方向，保证碰撞处理前节点不会跑到指定范围外，相当于弹簧的硬度。为0时不发挥作用，0到1时限制范围从2倍原始距离到0线性衰减。</li>
+<li><strong>Inert （惯性）：</strong>限制形变幅度，在每一帧的简谐运动迭代发生前，无条件随物体整体运动拉动节点，拉动距离为Inert * 整体运动距离 。</li>
+<li><strong>Update （更新频率）：</strong>DynamicBone计算频率，当游戏实际帧率高于这个更新频率时，DynamicBone会在每一帧进行消极计算，会尽量保持节点形状，但不会进行简谐运动模拟；当DynamicBone更新 频率远远高于游戏帧率的时候，DynamicBone会在脚本执行时尝试追帧，但每次最多执行4次，也就是更新频率实际最高只是当前游戏帧数的4倍。</li>
+<li><strong>Radius （半径）：</strong>指定每个节点与DynamicBoneCollider发生碰撞的半径，注意节点互相之间不存在碰撞关系，这个半径是0碰撞依然会生效。</li>
+<li><strong>Damping\Elasticity\Stiffness\Inert\Radius各属性的Distrib：</strong>指定属性随着节点深度递增发生的变化；</li>
+<li><strong>End Length\End Offset 末尾节点偏移量：</strong>指定特殊的末尾节点End Bone局部位置。</li>
+<li><strong>Gravity 重力：</strong>在DynamicBone节点上施加的重力，方向是在全局坐标系中的，注意DynamicBone的重力比较特殊，只在节点运动发生时起效，会在节点运动时把节点向重力方向拉动。</li>
+<li><strong>Force 常驻力：</strong>在DynamicBone节点上施加的额外力，方向是在全局坐标系中的，注意Force与Gravity不同，是无条件生效的，会一直把节点向指定方向拉动。</li>
+<li><strong>Colliders 碰撞体列表：</strong>会与DynamicBone各节点发生碰撞的碰撞体对象。</li>
+<li><strong>Exclusions 排除节点列表：</strong>在设置Root节点后，DynamicBone会根据节点的GameObject的父子关系沿着子GameObject方向自动生成节点树，Exclusions中所有节点及其子孙节点都不会 生成DynamicBone节点。</li>
+<li><strong>Freeze Axis 固定轴：</strong>非None的情况下，所有节点在局部坐标系的对应的轴上在值不会发生变化。</li>
+<li><strong>DistanceDisable 距离控制开关：</strong>开启或者关闭距离控制机制，开启后如果DynamicBone所在的物体超出了参考物体的参考距离范围，DynamicBone的所有行为都会停止。</li>
+<li><strong>Reference Object 参考物体：</strong>距离制机制的参考物体，如果为空则DynamicBone会选择场景内的主摄影机作为参考对象。</li>
+<li><strong>Distance To Object 参考距离：</strong>距离控制机制的参考距离。<br><a name="pPx8G"></a></li>
+</ul>
+<h3 id="算法实现"><a href="#算法实现" class="headerlink" title="算法实现"></a>算法实现</h3><p><a name="TLoWl"></a></p>
+<h4 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h4><p>计算惯性-&gt;计算受力（verlet：重力、摩擦力、阻力）-&gt; 模拟弹性 -&gt; 刚性还原（刚性偏移、碰撞、修正）<br /><img src="/assets/post_images/Dynamic-Bones/image_003.webp#clientId=ude7aa300-e271-4&from=paste&id=u8f5d0f6f&originHeight=658&originWidth=1101&originalType=url&ratio=1.399999976158142&rotation=0&showTitle=false&status=done&style=none&taskId=ucc8433b9-7172-492b-82a6-6facf2a3603&title="><br /><img src="/assets/post_images/Dynamic-Bones/image_004.webp#clientId=ude7aa300-e271-4&from=paste&height=566&id=ud3dd9ba5&originHeight=576&originWidth=825&originalType=url&ratio=1.399999976158142&rotation=0&showTitle=false&status=done&style=none&taskId=ue0c92faf-af90-48b5-8a15-03687f7dbc4&title=&width=811"><br><a name="u6GUM"></a></p>
+<h4 id="流程细节"><a href="#流程细节" class="headerlink" title="流程细节"></a>流程细节</h4><p><a name="kKEp2"></a></p>
+<h5 id="计算物体惯性"><a href="#计算物体惯性" class="headerlink" title="计算物体惯性"></a>计算物体惯性</h5><p><img src="/assets/post_images/Dynamic-Bones/image_005.svg#card=math&code=%5CDelta%20P%20=%20P%20-%20P%5E%7B'%7D&id=Bbrna"><br><a name="T4swO"></a></p>
+<h5 id="惯性模拟"><a href="#惯性模拟" class="headerlink" title="惯性模拟"></a>惯性模拟</h5><p><img src="/assets/post_images/Dynamic-Bones/image_006.svg#card=math&code=P%20=%20P%20+%20%5CDelta%20P%20*%20inertia&id=M4wUY"><br />记录此时<img src="/assets/post_images/Dynamic-Bones/image_007.svg#card=math&code=P'%20=%20P&id=DAIEz">，以备后续循环使用。<br><a name="eLwlU"></a></p>
+<h5 id="阻力模拟"><a href="#阻力模拟" class="headerlink" title="阻力模拟"></a>阻力模拟</h5><p><img src="/assets/post_images/Dynamic-Bones/image_008.svg#card=math&code=P%20=%20P%20+%20%5CDelta%20P%20*%20(1-damping)&id=fF5MB"><br><a name="NCGtF"></a></p>
+<h5 id="受力模拟"><a href="#受力模拟" class="headerlink" title="受力模拟"></a>受力模拟</h5><p><img src="/assets/post_images/Dynamic-Bones/image_009.svg#card=math&code=f%20=%20%5Coverrightarrow%7Bg_%7B0%7D%7D%20-%20%20%20%5Cfrac%20%7B%5Coverrightarrow%7Bg_%7Blocal%7D%7D%7D%7Blen(%5Coverrightarrow%7Bg_%7Blocal%7D%7D)%7D%20%5Ccdot%20%5Coverrightarrow%7Bg_%7B0%7D%7D%20%20+%20f_%7Bexternal%7D&id=OcJ5s"><br /><img src="/assets/post_images/Dynamic-Bones/image_010.svg#card=math&code=P%20=%20P%20+%20f%0A&id=FB574"><br /><img src="/assets/post_images/Dynamic-Bones/image_011.webp#clientId=ude7aa300-e271-4&from=paste&id=u22a000ae&originHeight=417&originWidth=992&originalType=url&ratio=1.399999976158142&rotation=0&showTitle=false&status=done&style=none&taskId=ub141369c-6ce0-4115-bb97-d77439186e5&title="><br><a name="B0X9p"></a></p>
+<h5 id="弹性模拟"><a href="#弹性模拟" class="headerlink" title="弹性模拟"></a>弹性模拟</h5><p>结合当前父节点的，算出该节点的理想位置<img src="/assets/post_images/Dynamic-Bones/image_012.svg#card=math&code=P_%7Btar%7D&id=rdSLS">。<br /><img src="/assets/post_images/Dynamic-Bones/image_013.svg#card=math&code=%5CDelta%20P_%7Btar%7D%20=%20P_%7Btar%7D%20-%20P&id=dkoS3"><br /><img src="/assets/post_images/Dynamic-Bones/image_014.svg#card=math&code=P%20=%20P%20+%20%5CDelta%20P_%7Btar%7D*elasticity&id=fh4d8"><br><a name="b0gf6"></a></p>
+<h5 id="刚性模拟"><a href="#刚性模拟" class="headerlink" title="刚性模拟"></a>刚性模拟</h5><p><img src="/assets/post_images/Dynamic-Bones/image_015.svg#card=math&code=l_%7B0%7D&id=T1U37">代表该段弹簧原长，父子节点间原本的距离  <img src="/assets/post_images/Dynamic-Bones/image_016.svg#card=math&code=l_%7B0%7D%20=%20len(%20P_%7Bp0%7D%20-%20P_0)&id=zi7C8"><br /><img src="/assets/post_images/Dynamic-Bones/image_017.svg#card=math&code=l_%7Bmax%7D&id=iLVVx">为节点可偏离理想位置的最大距离 <img src="/assets/post_images/Dynamic-Bones/image_018.svg#card=math&code=l_%7Bmax%7D%20=%20l_0%20*%202%20*%20(1%20-%20stiffness)&id=pamW7"><br />将节点限制在上述距离内 <img src="/assets/post_images/Dynamic-Bones/image_019.svg#card=math&code=P%20=%20P%20+%20(P_%7Btar%7D%20-P)%20*%20%5Cfrac%20%7Blen(P_%7Btar%7D%20-%20P)%20-%20l_%7Bmax%7D%7D%7Blen(P_%7Btar%7D-P)%7D&id=v4aFQ"><br><a name="Zd6O8"></a></p>
+<h5 id="碰撞处理"><a href="#碰撞处理" class="headerlink" title="碰撞处理"></a>碰撞处理</h5><p>提供sphere、capsule两种碰撞检测，如果嵌入，则直接penalty distance。<br><a name="ylRv9"></a></p>
+<h5 id="保持节点距离"><a href="#保持节点距离" class="headerlink" title="保持节点距离"></a>保持节点距离</h5><p>防止父子节点之间发生拉伸或压缩，<strong>始终维持理想距离</strong>。<br /><img src="/assets/post_images/Dynamic-Bones/image_020.svg#card=math&code=P%20=%20P%20+%20(P_p%20-%20P)%20*%20%5Cfrac%7Blen(P_p%20-%20P)%20-%20l_0%7D%7Blen(P_p%20-%20P)%7D&id=vPge0"><br><a name="YZgne"></a></p>
+<h5 id="修正旋转"><a href="#修正旋转" class="headerlink" title="修正旋转"></a>修正旋转</h5><p>计算原始子节点相对于父节点的位置 <img src="/assets/post_images/Dynamic-Bones/image_021.svg#card=math&code=%5CDelta%20D_%7B0%7D%20=%20P_%7B0%7D%20-%20P_%7Bp0%7D&id=rgtRN"><br />当前子节点相对于父节点的位置 <img src="/assets/post_images/Dynamic-Bones/image_022.svg#card=math&code=%5CDelta%20D%20=%20P%20-%20P_%7Bp%7D&id=Ba6kK"><br />让父节点的旋转与原始情况同步：<img src="/assets/post_images/Dynamic-Bones/image_023.svg#card=math&code=P_%7Bp%7D%20=%20rotateFromTo(%5CDelta%20D_0,%20%5CDelta%20D)%20*%20P_p&id=Qepdf"><br><a name="izCz7"></a></p>
+<h3 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h3><p><a name="Xr5pj"></a></p>
+<h4 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h4><ul>
+<li>参数少、使用友好。</li>
+<li>实现简单、性能相对还可以，全程显式计算。<br><a name="EBoDL"></a></li>
+</ul>
+<h4 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h4><ul>
+<li>缺乏弹簧的性质，不能模拟容易拉伸形变的物体。</li>
+<li>计算过程没有时间概念（默认单位时间），导致调参难度大。</li>
+<li>碰撞处理较为简单，仅支持球和胶囊体、且仅作用于指定的碰撞体上。<br><a name="OmKfJ"></a></li>
+</ul>
+<h4 id="优化方向"><a href="#优化方向" class="headerlink" title="优化方向"></a>优化方向</h4><ul>
+<li>性能：C++化、JobSystem、LOD降频</li>
+<li>碰撞方面优化。</li>
+<li>引入弹簧、隐式求解、XPBD（性能挑战）。<br><a name="oEWfQ"></a></li>
+</ul>
+<h2 id="AnimDynamics-Unreal"><a href="#AnimDynamics-Unreal" class="headerlink" title="AnimDynamics (Unreal)"></a>AnimDynamics (Unreal)</h2><p><a name="SkVFB"></a></p>
+<h3 id="INTRO-1"><a href="#INTRO-1" class="headerlink" title="INTRO"></a>INTRO</h3><p><a target="_blank" rel="noopener" href="https://docs.unrealengine.com/5.1/en-US/animation-blueprint-animdynamics-in-unreal-engine/">AnimDynamics</a><br /><img src="/assets/post_images/Dynamic-Bones/image_024.gif#clientId=u7b046daf-65b1-4&from=paste&id=u71fd1156&originHeight=300&originWidth=400&originalType=url&ratio=1.2000000476837158&rotation=0&showTitle=false&status=done&style=none&taskId=u87df1ded-83ce-4c7c-8608-08e2f6893ba&title="><br />AnimDynamics是UE4.11 Preview 5测试版本开始，发布的AnimationBlueprint中的新节点。功能是通过简单物理模拟计算，更新骨骼位置。优点是避免了使用纯物理模拟时计算量过大，并且能实现近似物理效果。尤其用于悬垂物（辫子，锁链等自由下垂物体）上可以获得非常好的结果。<br />为了实现低开销，AnimDynamics节点采用了一些值得留意的近似解算方法：</p>
+<ul>
+<li>使用<strong>盒体</strong>而非定义的动态骨骼来计算各节的惯性。</li>
+<li>不计算碰撞。相反，使用<strong>约束</strong>来限制移动。<br><a name="ZVXDg"></a></li>
+</ul>
+<h3 id="工作流-1"><a href="#工作流-1" class="headerlink" title="工作流"></a>工作流</h3><p><a name="pD8ZC"></a></p>
+<h4 id="基本操作-1"><a href="#基本操作-1" class="headerlink" title="基本操作"></a>基本操作</h4><p>AnimDynamics节点支持线性约束、角约束和平面约束，以便模拟基于物理的的运动。<strong>线性（Linear）</strong> 和 <strong>角（Angular）</strong> 约束可以受弹簧的驱动，提供更有弹性的感觉，而 <strong>平面（Planar）</strong> 约束可用于创建对象不会穿过的平面。<br /><img src="/assets/post_images/Dynamic-Bones/image_025.jpeg#clientId=u950b3e5d-3588-4&from=paste&id=uae307691&originHeight=552&originWidth=989&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=u7900d56b-d4b2-4512-87e3-313e4f124f8&title="><br />在AnimDynamics节点里，能够绑定RigidBody关联到指定Bone上，通过计算RigidBody的动量，在风，重力影响下更新动量，以及考虑附加的线性和角度的Limit，刷新Bone和RigidBody的位置。<br />通过启用 <strong>链（Chain）</strong> 属性，并选择 <strong>边界骨骼（Bound Bone）</strong> 和 <strong>链端（Chain End）</strong> ，Anim Dynamics将使用两者之间的骨骼生成链。除了 <strong>边界骨骼（Bound Bone）</strong> 之外，链中的每块骨骼都将在其上方生成一个约束盒体，以模拟与链中其他骨骼的运动和碰撞。这些约束盒体需要手动调整才能实现不错的效果。<br /><img src="/assets/post_images/Dynamic-Bones/image_026.gif#clientId=u950b3e5d-3588-4&from=paste&id=ucd5d7a94&originHeight=500&originWidth=700&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=u6b8f5556-7d98-47e9-a740-dfb0343b8ac&title="><br><a name="Xxadf"></a></p>
+<h4 id="碰撞模拟"><a href="#碰撞模拟" class="headerlink" title="碰撞模拟"></a>碰撞模拟</h4><ul>
+<li><strong>平面限制</strong>：将平面限制添加到角色的 <strong>根骨骼</strong> ，可以创建对象无法跨越的地面边界，以防结构看起来穿过了游戏世界的地面。</li>
+</ul>
+<p><img src="/assets/post_images/Dynamic-Bones/image_027.jpeg#clientId=u950b3e5d-3588-4&from=paste&id=u73f385e3&originHeight=344&originWidth=667&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=uaf227442-17cc-4aa1-a4fd-683670dc9ca&title="></p>
+<ul>
+<li><strong>球体限制：</strong>借助球体限制，你可以设置球体来包围模拟结构上的点，充当简单的碰撞预防，实现更动态的互动。</li>
+</ul>
+<p><img src="/assets/post_images/Dynamic-Bones/image_028.jpeg#clientId=u950b3e5d-3588-4&from=paste&id=u2761976b&originHeight=700&originWidth=823&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=u87485f14-f72b-4263-a891-729f3601d56&title="><br /><img src="/assets/post_images/Dynamic-Bones/image_029.gif#clientId=u950b3e5d-3588-4&from=paste&height=303&id=ua74cf4cc&originHeight=256&originWidth=296&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=u5cb31d15-7d91-4f5a-a17b-5ea38a3bca4&title=&width=350"><img src="/assets/post_images/Dynamic-Bones/image_030.gif#clientId=u950b3e5d-3588-4&from=paste&height=303&id=u455a24eb&originHeight=288&originWidth=333&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=u28567d60-9291-4081-a213-97e2ea75abf&title=&width=350"></p>
+<p><a name="vhExw"></a></p>
+<h4 id="属性参数-1"><a href="#属性参数-1" class="headerlink" title="属性参数"></a>属性参数</h4><ul>
+<li>**Chain **：是否使用链式Body绑定。若true则Bound Bone是Chain起点，Chain End是Chain终点，链中每个Bone都会绑上一个RigidBody。若false则只能选择BoundBone，对单个Bone绑定控制。</li>
+<li><strong>Bound Bone ：</strong>Body绑定的骨骼</li>
+<li><strong>Chain End ：</strong>使用链子时的终点</li>
+<li><strong>Box Extents ：</strong>Body的ShapeBox的大小，用于计算惯性张量InverseTensor。Box体积大小与惯性大小成正比。</li>
+<li><strong>Local Joint Offset ：</strong>Body相对于Bone的偏移值。偏移后类似于钟摆效果。</li>
+<li><strong>Gravity Scale ：</strong>重力作用比例，重力大小使用UPhysicsSetting中的Gravity</li>
+<li><strong>Linear Spring ：</strong>是否线性反弹，body会尝试弹回初始位置</li>
+<li><strong>Angular Spring ：</strong>是否角度反弹，body会尝试和指定角度目标一致</li>
+<li><strong>Linear Spring Constant ：</strong>计算线性反弹时的系数，越大反弹力越强</li>
+<li><strong>Angular Spring Constant ：</strong>计算角度反弹时的系数，越大反弹力越强<br><a name="HGGA3"></a></li>
+</ul>
+<h3 id="算法实现-1"><a href="#算法实现-1" class="headerlink" title="算法实现"></a>算法实现</h3><p><a name="ugOTs"></a></p>
+<h4 id="基于box的惯性更新"><a href="#基于box的惯性更新" class="headerlink" title="基于box的惯性更新"></a>基于box的惯性更新</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">FVector Force = <span class="built_in">FVector</span>(<span class="number">0.0f</span>, <span class="number">0.0f</span>,UPhysicsSettings::<span class="built_in">Get</span>()-&gt;DefaultGravityZ) * InBody-&gt;Mass *InBody-&gt;GravityScale;</span><br><span class="line">Force += WindVelocity *InBody-&gt;WindData.WindAdaption;</span><br><span class="line">InBody-&gt;LinearMomentum += Force *DeltaTime;</span><br><span class="line">InBody-&gt;NextPosition =InBody-&gt;Pose.Position + InBody-&gt;LinearMomentum * InBody-&gt;InverseMass *DeltaTime;</span><br></pre></td></tr></table></figure>
+<p><a name="qF0SF"></a></p>
+<h4 id="使用约束限制移动"><a href="#使用约束限制移动" class="headerlink" title="使用约束限制移动"></a>使用约束限制移动</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">FAnimNode_AnimDynamics::UpdateLimits</span><span class="params">(FComponentSpacePoseContext&amp; Output)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	...</span><br><span class="line">	<span class="type">const</span> FAnimPhysBodyDefinition&amp; PhysicsBodyDef = PhysicsBodyDefinitions[ActiveIndex];</span><br><span class="line">	...</span><br><span class="line">			<span class="keyword">if</span> (PhysicsBodyDef.ConstraintSetup.bLinearFullyLocked)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">// Rather than calculate prismatic limits, just lock the transform (1 limit instead of 6)</span></span><br><span class="line">			FAnimPhys::<span class="built_in">ConstrainPositionNailed</span>(NextTimeStep, LinearLimits, PrevBody, ShapeTransform.<span class="built_in">GetTranslation</span>(), &amp;RigidBody, Body1JointOffset);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">//  线速度</span></span><br><span class="line">			<span class="keyword">if</span> (PhysicsBodyDef.ConstraintSetup.LinearXLimitType != AnimPhysLinearConstraintType::Free)</span><br><span class="line">			&#123;</span><br><span class="line">				FAnimPhys::<span class="built_in">ConstrainAlongDirection</span>(NextTimeStep, LinearLimits, PrevBody, ShapeTransform.<span class="built_in">GetTranslation</span>(), &amp;RigidBody, Body1JointOffset, ShapeTransform.<span class="built_in">GetRotation</span>().<span class="built_in">GetAxisX</span>(), <span class="built_in">FVector2D</span>(PhysicsBodyDef.ConstraintSetup.LinearAxesMin.X, PhysicsBodyDef.ConstraintSetup.LinearAxesMax.X));</span><br><span class="line">			&#125;</span><br><span class="line">			...</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	...</span><br><span class="line">		<span class="comment">// 平面限制</span></span><br><span class="line">		<span class="keyword">if</span>(PlanarLimits.<span class="built_in">Num</span>() &gt; <span class="number">0</span> &amp;&amp; bUsePlanarLimit)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">for</span>(FAnimPhysPlanarLimit&amp; PlanarLimit : PlanarLimits)</span><br><span class="line">			&#123;</span><br><span class="line">				...</span><br><span class="line">				FAnimPhys::<span class="built_in">ConstrainPlanar</span>(NextTimeStep, LinearLimits, &amp;RigidBody, LimitPlaneTransform);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 球体限制</span></span><br><span class="line">		<span class="keyword">if</span>(SphericalLimits.<span class="built_in">Num</span>() &gt; <span class="number">0</span> &amp;&amp; bUseSphericalLimits)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">for</span>(FAnimPhysSphericalLimit&amp; SphericalLimit : SphericalLimits)</span><br><span class="line">			&#123;</span><br><span class="line">				...</span><br><span class="line">				<span class="keyword">switch</span>(SphericalLimit.LimitType)</span><br><span class="line">				&#123;</span><br><span class="line">				<span class="keyword">case</span> ESphericalLimitType::Inner:</span><br><span class="line">					FAnimPhys::<span class="built_in">ConstrainSphericalInner</span>(NextTimeStep, LinearLimits, &amp;RigidBody, SphereTransform, SphericalLimit.LimitRadius);</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				<span class="keyword">case</span> ESphericalLimitType::Outer:</span><br><span class="line">					FAnimPhys::<span class="built_in">ConstrainSphericalOuter</span>(NextTimeStep, LinearLimits, &amp;RigidBody, SphereTransform, SphericalLimit.LimitRadius);</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				<span class="keyword">default</span>:</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><a name="zGxH1"></a></p>
+<h3 id="优缺点-1"><a href="#优缺点-1" class="headerlink" title="优缺点"></a>优缺点</h3><p><a name="pEqXL"></a></p>
+<h4 id="优点-1"><a href="#优点-1" class="headerlink" title="优点"></a>优点</h4><ul>
+<li>轻量级、计算快。</li>
+<li>设计合理：骨骼惯性+约束，美术友好。<br><a name="yzUwj"></a></li>
+</ul>
+<h4 id="缺点-1"><a href="#缺点-1" class="headerlink" title="缺点"></a>缺点</h4><ul>
+<li>碰撞检测不ok。</li>
+<li>约束调节需要经验。</li>
+<li>还是假。</li>
+</ul>
+<p><img src="/assets/post_images/Dynamic-Bones/image_031.gif#clientId=u950b3e5d-3588-4&from=paste&id=ud3845a9a&originHeight=288&originWidth=316&originalType=url&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&taskId=u60bead0b-016f-47ac-9331-b83a047d198&title="><br><a name="M30hY"></a></p>
+<h2 id="OpenSource"><a href="#OpenSource" class="headerlink" title="OpenSource"></a>OpenSource</h2><p><a name="AexyZ"></a></p>
+<h3 id="JointDynamics"><a href="#JointDynamics" class="headerlink" title="JointDynamics"></a>JointDynamics</h3><p><a target="_blank" rel="noopener" href="https://github.com/SPARK-inc/SPCRJointDynamics">GitHub - SPARK-inc&#x2F;SPCRJointDynamics: 布風骨物理エンジン</a><br /><img src="/assets/post_images/Dynamic-Bones/image_032.gif#clientId=u5a5dbcdc-ee2f-4&from=drop&id=u7128d2a3&originHeight=350&originWidth=600&originalType=binary&ratio=1.2000000476837158&rotation=0&showTitle=false&size=37755043&status=done&style=none&taskId=uc83ba475-8e0d-4608-a33b-655095201b6&title=" alt="physics.gif"><br><a name="KL9FP"></a></p>
+<h4 id="工作流-2"><a href="#工作流-2" class="headerlink" title="工作流"></a>工作流</h4><ul>
+<li>为所有需要期待影响的骨骼添加 SPCRJointDynamicsPoint 组件。</li>
+</ul>
+<p><img src="/assets/post_images/Dynamic-Bones/image_033.png#clientId=u5f1033ca-072c-4&from=drop&id=u9a01c727&originHeight=614&originWidth=717&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=134150&status=done&style=none&taskId=u38777ba8-3035-4312-ba51-544cd3a3484&title=" alt="SpcrJointDynamcis_1.png"></p>
+<ul>
+<li>角色根节点添加 SPCRJointDynamicsController组件；并设置 Parent Transform。</li>
+</ul>
+<p><img src="/assets/post_images/Dynamic-Bones/image_034.png#clientId=u5f1033ca-072c-4&from=drop&id=ufab10078&originHeight=564&originWidth=719&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=146621&status=done&style=none&taskId=u4a172f59-487e-494f-98fc-22c1b32b62f&title=" alt="SpcrJointDynamcis_2.png"></p>
+<ul>
+<li>点击 Automatically detect the root points，自动配置子骨骼列表，并将根骨骼添加到列表中的子节点中。</li>
+</ul>
+<p><img src="/assets/post_images/Dynamic-Bones/image_035.png#clientId=u5f1033ca-072c-4&from=drop&id=u5ebefbf0&originHeight=437&originWidth=786&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=131622&status=done&style=none&taskId=u977fa9f7-1cf5-4415-8da7-c3796ce0d9f&title=" alt="SpcrJointDynamcis_3.png"></p>
+<ul>
+<li>在Controller中，设置相关约束参数（弹簧等）。</li>
+</ul>
+<p><img src="/assets/post_images/Dynamic-Bones/image_036.png#clientId=u5f1033ca-072c-4&from=drop&id=ubaa9519d&originHeight=437&originWidth=789&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=106522&status=done&style=none&taskId=ube074231-e2d0-4bb5-900b-85d42501e49&title=" alt="SpcrJointDynamcis_4.png"></p>
+<ul>
+<li>添加碰撞体。</li>
+</ul>
+<p><img src="/assets/post_images/Dynamic-Bones/image_037.png#clientId=u5f1033ca-072c-4&from=drop&id=u3a38fc37&originHeight=347&originWidth=314&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=37804&status=done&style=none&taskId=u2f22af71-9b9d-488f-8c00-9ed4c20a4bf&title=" alt="SPCRJointynamicsColliderAdd.png"><img src="/assets/post_images/Dynamic-Bones/image_038.png#clientId=u5f1033ca-072c-4&from=drop&height=141&id=u3021e4a2&originHeight=190&originWidth=379&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=9378&status=done&style=none&taskId=uc2007127-14b6-4d15-9a8a-a6a02371485&title=&width=280.9861145019531" alt="SPCRJointColliderSetting.png"><br><a name="Yd63W"></a></p>
+<h5 id="参数列表"><a href="#参数列表" class="headerlink" title="参数列表"></a>参数列表</h5><p><img src="/assets/post_images/Dynamic-Bones/image_039.png#clientId=u5f1033ca-072c-4&from=drop&id=u58e2ccf2&originHeight=2609&originWidth=1069&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=328056&status=done&style=none&taskId=u03e49573-51dd-4caa-942c-4b353dde706&title=" alt="SPCRJointDynamicsEachParameter.png"><br><a name="Q3Nga"></a></p>
+<h4 id="算法实现-2"><a href="#算法实现-2" class="headerlink" title="算法实现"></a>算法实现</h4><p><a name="pAEc4"></a></p>
+<h5 id="弹簧系统"><a href="#弹簧系统" class="headerlink" title="弹簧系统"></a>弹簧系统</h5><p><img src="/assets/post_images/Dynamic-Bones/image_040.png#clientId=u982580dc-cf03-4&from=drop&id=u205d0ce5&originHeight=603&originWidth=916&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=128574&status=done&style=none&taskId=u907cd8ac-d6b5-489d-aaac-f2200f5a5ab&title=" alt="SpcrJointDynamcis.png"><br><a name="CD2fS"></a></p>
+<h5 id="大致流程"><a href="#大致流程" class="headerlink" title="大致流程"></a>大致流程</h5><ul>
+<li>获取节点移动及旋转等。</li>
+<li>更新节点碰撞体（capsule）。</li>
+<li>类似DynamicBone的方法，更新节点位置（惯性、摩擦力、重力、其他外力等）。</li>
+<li>处理表面碰撞（checkCollision-&gt;capusle的精确碰撞）。</li>
+<li>迭代求解约束，显式求解。<img src="/assets/post_images/Dynamic-Bones/image_041.svg#card=math&code=%5CDelta%20d%20=%20%20direction(P_0%20-%20P_1)%20*%20(%5CDelta%20l%20*%20c)&id=wimp0"></li>
+<li>处理碰撞体间碰撞。</li>
+<li>更新位置、记录速度。</li>
+</ul>
+<p><img src="/assets/post_images/Dynamic-Bones/image_042.png#clientId=u99d481e1-e092-4&from=paste&height=439&id=ub9f95d4f&originHeight=593&originWidth=895&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=149015&status=done&style=none&taskId=uf7208d91-356a-4718-939a-4535f74e43a&title=&width=662.9630097963552" alt="image.png"><br><a name="v5s1y"></a></p>
+<h4 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h4><ul>
+<li>使用<strong>JobSystem</strong>实现加速。</li>
+<li>考虑了柔体的弹性，保证<strong>效率</strong>同时，得到了还不错的结果。</li>
+<li>工作流相对简洁，但对使用者来说有一定<strong>成本</strong>，要添加节点、调整各种弹簧参数。</li>
+<li>效果会比DynamicBone更加<strong>丰富</strong>，但处理精细碰撞会导致效率<strong>更低</strong>。<br><a name="N2BtN"></a></li>
+</ul>
+<h3 id="SoftBone"><a href="#SoftBone" class="headerlink" title="SoftBone"></a>SoftBone</h3><p><a target="_blank" rel="noopener" href="https://github.com/EZhex1991/EZSoftBone">GitHub - EZhex1991&#x2F;EZSoftBone: A simple kinetic simulator for Unity, you can use it to simulate hair&#x2F;tail&#x2F;breast&#x2F;skirt and other soft objects</a><br /><img src="/assets/post_images/Dynamic-Bones/image_043.gif#clientId=uf4e54c24-1d96-4&from=drop&id=fOmQs&originHeight=240&originWidth=426&originalType=binary&ratio=1.2000000476837158&rotation=0&showTitle=false&size=2824691&status=done&style=none&taskId=ue1f67e24-c6a1-454f-b3f2-256c0c1bf04&title=" alt="EZSoftBone_2.gif"><img src="/assets/post_images/Dynamic-Bones/image_044.gif#clientId=uf4e54c24-1d96-4&from=drop&id=hBF7D&originHeight=240&originWidth=426&originalType=binary&ratio=1.2000000476837158&rotation=0&showTitle=false&size=421035&status=done&style=none&taskId=u74ae1293-c4d2-4797-abd5-da61ce1358c&title=" alt="EZSoftBone_3.gif"></p>
+<ul>
+<li>All colliders supported (include MeshCollider)</li>
+<li>Net structure supported (Cloth simulation)</li>
+<li>Use EZSoftBoneMaterial to adjust effects, and reuse it on other EZSoftBones</li>
+<li>Inherit EZSoftBoneColliderBase to create custom colliders</li>
+<li>Beautiful wind simulator<br><a name="pI8bU"></a></li>
+</ul>
+<h4 id="工作流-3"><a href="#工作流-3" class="headerlink" title="工作流"></a>工作流</h4><ul>
+<li>设置骨骼的变换设置骨骼材质（可复用）</li>
+<li>设置外部碰撞体</li>
+<li>设置系统外力（重力、风力等）</li>
+</ul>
+<p><img src="/assets/post_images/Dynamic-Bones/image_045.png#clientId=u99d481e1-e092-4&from=ui&id=u4049a8ca&originHeight=799&originWidth=462&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=64375&status=done&style=none&taskId=ub8542574-10c2-4fa2-a394-72aecc067b3&title=" alt="EZSoftBone_Inspector.png"><br><a name="zsQ5r"></a></p>
+<h4 id="算法实现-3"><a href="#算法实现-3" class="headerlink" title="算法实现"></a>算法实现</h4><ul>
+<li>通过Resistance、Damping、Stiffness、Slackness，更新bone的位移。</li>
+<li>通过弹簧约束，更新两端bone的位置（显式）。</li>
+<li>碰撞检测并进行响应。</li>
+<li>记录速度，更新位置。<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line">Vector3 oldWorldPosition, newWorldPosition, expectedPosition;</span><br><span class="line">oldWorldPosition = newWorldPosition = bone.worldPosition;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Resistance (force resistance)</span></span><br><span class="line">Vector3 force = globalForce;</span><br><span class="line"><span class="keyword">if</span> (forceModule != null &amp;&amp; forceModule.isActiveAndEnabled)</span><br><span class="line">&#123;</span><br><span class="line">    force += forceModule.<span class="built_in">GetForce</span>(bone.normalizedLength) * forceScale;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (customForce != null)</span><br><span class="line">&#123;</span><br><span class="line">    force += <span class="built_in">customForce</span>(bone.normalizedLength);</span><br><span class="line">&#125;</span><br><span class="line">force.x *= transform.localScale.x;</span><br><span class="line">force.y *= transform.localScale.y;</span><br><span class="line">force.z *= transform.localScale.z;</span><br><span class="line">bone.speed += force * (<span class="number">1</span> - bone.resistance) / iterations;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Damping (inertia attenuation)</span></span><br><span class="line">bone.speed *= <span class="number">1</span> - bone.damping;</span><br><span class="line"><span class="keyword">if</span> (bone.speed.sqrMagnitude &gt; sleepThreshold)</span><br><span class="line">&#123;</span><br><span class="line">    newWorldPosition += bone.speed * deltaTime;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Stiffness (shape keeper)</span></span><br><span class="line">Vector3 parentMovement = bone.parentBone.worldPosition - bone.parentBone.transform.position;</span><br><span class="line">expectedPosition = bone.parentBone.transform.<span class="built_in">TransformPoint</span>(bone.localPosition) + parentMovement;</span><br><span class="line">newWorldPosition = Vector3.<span class="built_in">Lerp</span>(newWorldPosition, expectedPosition, bone.stiffness / iterations);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Slackness (length keeper)</span></span><br><span class="line"><span class="comment">// Length needs to be calculated with TransformVector to match runtime scaling</span></span><br><span class="line">Vector3 dirToParent = (newWorldPosition - bone.parentBone.worldPosition).normalized;</span><br><span class="line"><span class="type">float</span> lengthToParent = bone.parentBone.transform.<span class="built_in">TransformVector</span>(bone.localPosition).magnitude;</span><br><span class="line">expectedPosition = bone.parentBone.worldPosition + dirToParent * lengthToParent;</span><br><span class="line"><span class="type">int</span> lengthConstraints = <span class="number">1</span>;</span><br><span class="line"><span class="comment">// Sibling constraints</span></span><br><span class="line"><span class="keyword">if</span> (siblingConstraints != UnificationMode.None)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (bone.leftBone != null)</span><br><span class="line">    &#123;</span><br><span class="line">        Vector3 dirToLeft = (newWorldPosition - bone.leftBone.worldPosition).normalized;</span><br><span class="line">        <span class="type">float</span> lengthToLeft = bone.transform.<span class="built_in">TransformVector</span>(bone.leftPosition).magnitude;</span><br><span class="line">        expectedPosition += bone.leftBone.worldPosition + dirToLeft * lengthToLeft;</span><br><span class="line">        lengthConstraints++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (bone.rightBone != null)</span><br><span class="line">    &#123;</span><br><span class="line">        Vector3 dirToRight = (newWorldPosition - bone.rightBone.worldPosition).normalized;</span><br><span class="line">        <span class="type">float</span> lengthToRight = bone.transform.<span class="built_in">TransformVector</span>(bone.rightPosition).magnitude;</span><br><span class="line">        expectedPosition += bone.rightBone.worldPosition + dirToRight * lengthToRight;</span><br><span class="line">        lengthConstraints++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">expectedPosition /= lengthConstraints;</span><br><span class="line">newWorldPosition = Vector3.<span class="built_in">Lerp</span>(expectedPosition, newWorldPosition, bone.slackness / iterations);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Collision</span></span><br><span class="line"><span class="keyword">if</span> (bone.radius &gt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    foreach (EZSoftBoneColliderBase collider in EZSoftBoneColliderBase.EnabledColliders)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (bone.transform != collider.transform &amp;&amp; collisionLayers.<span class="built_in">Contains</span>(collider.gameObject.layer))</span><br><span class="line">            collider.<span class="built_in">Collide</span>(ref newWorldPosition, bone.radius);</span><br><span class="line">    &#125;</span><br><span class="line">    foreach (Collider collider in extraColliders)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (bone.transform != collider.transform &amp;&amp; collider.enabled)</span><br><span class="line">            EZSoftBoneUtility.<span class="built_in">PointOutsideCollider</span>(ref newWorldPosition, collider, bone.radius);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">bone.speed = (bone.speed + (newWorldPosition - oldWorldPosition) / deltaTime) * <span class="number">0.5f</span>;</span><br><span class="line">bone.worldPosition = newWorldPosition;</span><br></pre></td></tr></table></figure>
+<a name="bJHi8"></a></li>
+</ul>
+<h4 id="特点-1"><a href="#特点-1" class="headerlink" title="特点"></a>特点</h4><p>与JointDynamics精神上基本一致，但没有实现JobSystem，力学方程相对简单。<br><a name="N2zqI"></a></p>
+<h3 id="KawaiiPhysics"><a href="#KawaiiPhysics" class="headerlink" title="KawaiiPhysics"></a>KawaiiPhysics</h3><p>assets&#x2F;post_images&#x2F;Dynamic-Bones&#x2F;image_046.<a target="_blank" rel="noopener" href="https://github.com/pafuhana1213/KawaiiPhysics">GitHub - pafuhana1213&#x2F;KawaiiPhysics: KawaiiPhysics : Simple fake Physics for UnrealEngine4 &amp; 5</a><br /><img src="https://github.com/pafuhana1213/Screenshot/raw/master/KawaiiPhysics2.jpg#from=url&id=HKTAj&originHeight=761&originWidth=1694&originalType=binary&ratio=1.5749999284744263&rotation=0&showTitle=false&status=done&style=none&title="><br />是AnimDynamics的加强版，工作流与AnimDynamics一致，但效果更好。<br /><img src="/assets/post_images/Dynamic-Bones/image_047.gif#clientId=u982580dc-cf03-4&from=drop&id=u5f2f5220&originHeight=270&originWidth=480&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=2351667&status=done&style=none&taskId=uda5849b6-9059-4a4a-bdbb-f9b5f50e6c9&title=" alt="KawaiiPhysics0.gif"><img src="/assets/post_images/Dynamic-Bones/image_048.gif#clientId=u982580dc-cf03-4&from=drop&id=uca11ac29&originHeight=270&originWidth=480&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=1878281&status=done&style=none&taskId=u690cef76-7378-4969-9a93-72777991449&title=" alt="KawaiiPhysics1.gif"><img src="/assets/post_images/Dynamic-Bones/image_049.gif#clientId=u982580dc-cf03-4&from=drop&id=u6b90d312&originHeight=353&originWidth=500&originalType=binary&ratio=1.3499999046325684&rotation=0&showTitle=false&size=4840594&status=done&style=none&taskId=ucb818d2b-a8b0-4206-80b9-4230490d1ca&title=" alt="KawaiiPhysics4.gif"></p>
+<p><a name="GS8y4"></a></p>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><ul>
+<li>基于约束的刚性及显式求解的精髓？<ul>
+<li><strong>稳定</strong>！稳定！还是稳定！<strong>快速</strong>！快速！还是快速！ 牺牲真实感换来的安心。</li>
+</ul>
+</li>
+<li>效果更好的Magic Cloth对比，性能开销大很多（数倍）。</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/UWA4D/article/details/127788816">Magica Cloth_UWA的博客-CSDN博客</a></p>
+<ul>
+<li>为什么要把旋转反作用回父节点？<ul>
+<li>将子节点相对父节点的向量旋转，作用于父节点中，为了保持局部蒙皮的<strong>平滑</strong>，否则在节点处会有突兀感。</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/post_images/Dynamic-Bones/image_050.png#clientId=uddccf573-fc14-4&from=paste&height=856&id=uf9a129da&originHeight=1348&originWidth=2145&originalType=binary&ratio=1.5749999284744263&rotation=0&showTitle=false&size=748958&status=done&style=none&taskId=u4a638778-dc81-45b5-9fb6-1d26bef3d6b&title=&width=1361.904823753031" alt="image.png"><br /><img src="/assets/post_images/Dynamic-Bones/image_051.png#clientId=uddccf573-fc14-4&from=paste&height=999&id=u1c14a171&originHeight=1348&originWidth=2145&originalType=binary&ratio=1.5749999284744263&rotation=0&showTitle=false&size=738091&status=done&style=none&taskId=u4ec466eb-b960-4d4b-a222-950203320a4&title=&width=1588.8890011320468" alt="image.png"><br><a name="AHBqH"></a></p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><p><a target="_blank" rel="noopener" href="https://tedsieblog.wordpress.com/2020/03/10/verlet-integration-a-case-study-of-simple-dynamic-bone/">Verlet Integration – A Case Study of Simple Dynamic Bone</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/49188230">动态骨骼Dynamic Bone算法详解</a></p>
+</li>
+</ul>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>Author：<a href="https://graphicyan.github.io">Yan Zhang</a>
+            <p>Link：<a href="https://graphicyan.github.io/2023/07/02/Dynamic-Bones/">https://graphicyan.github.io/2023/07/02/Dynamic-Bones/</a>
+            <p>Publish date：<a href="https://graphicyan.github.io/2023/07/02/Dynamic-Bones/">July 2nd 2023, 3:17:15 pm</a>
+            <p>Update date：<a href="https://graphicyan.github.io/2023/07/02/Dynamic-Bones/">July 18th 2025, 11:55:52 am</a>
+            <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/07/08/ML-Deformer/" title="基于机器学习的物理变形器">
+                    <div class="nextTitle">基于机器学习的物理变形器</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2023/06/04/Simulation-Dynamics-Engine/" title="仿真及动力学系统综述">
+                    <div class="prevTitle">仿真及动力学系统综述</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:yanzhang.cg@gmail.com" class="iconfont-archer email" title="email" ></a>
+                <a href="https://github.com/GraphicYan" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/wechat.png" />
+                </span>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E5%88%9B%E6%80%A7%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">原创性声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DynamicBone-Unity"><span class="toc-number">2.</span> <span class="toc-text">DynamicBone (Unity)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#INTRO"><span class="toc-number">2.1.</span> <span class="toc-text">INTRO</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="toc-number">2.2.</span> <span class="toc-text">工作流</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C"><span class="toc-number">2.2.1.</span> <span class="toc-text">基本操作</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B1%9E%E6%80%A7%E5%8F%82%E6%95%B0"><span class="toc-number">2.2.2.</span> <span class="toc-text">属性参数</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.3.</span> <span class="toc-text">算法实现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A6%82%E8%A7%88"><span class="toc-number">2.3.1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B5%81%E7%A8%8B%E7%BB%86%E8%8A%82"><span class="toc-number">2.3.2.</span> <span class="toc-text">流程细节</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E7%89%A9%E4%BD%93%E6%83%AF%E6%80%A7"><span class="toc-number">2.3.2.1.</span> <span class="toc-text">计算物体惯性</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%83%AF%E6%80%A7%E6%A8%A1%E6%8B%9F"><span class="toc-number">2.3.2.2.</span> <span class="toc-text">惯性模拟</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%98%BB%E5%8A%9B%E6%A8%A1%E6%8B%9F"><span class="toc-number">2.3.2.3.</span> <span class="toc-text">阻力模拟</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8F%97%E5%8A%9B%E6%A8%A1%E6%8B%9F"><span class="toc-number">2.3.2.4.</span> <span class="toc-text">受力模拟</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BC%B9%E6%80%A7%E6%A8%A1%E6%8B%9F"><span class="toc-number">2.3.2.5.</span> <span class="toc-text">弹性模拟</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%9A%E6%80%A7%E6%A8%A1%E6%8B%9F"><span class="toc-number">2.3.2.6.</span> <span class="toc-text">刚性模拟</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%A2%B0%E6%92%9E%E5%A4%84%E7%90%86"><span class="toc-number">2.3.2.7.</span> <span class="toc-text">碰撞处理</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BF%9D%E6%8C%81%E8%8A%82%E7%82%B9%E8%B7%9D%E7%A6%BB"><span class="toc-number">2.3.2.8.</span> <span class="toc-text">保持节点距离</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BF%AE%E6%AD%A3%E6%97%8B%E8%BD%AC"><span class="toc-number">2.3.2.9.</span> <span class="toc-text">修正旋转</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">2.4.</span> <span class="toc-text">优缺点</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E7%82%B9"><span class="toc-number">2.4.1.</span> <span class="toc-text">优点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9"><span class="toc-number">2.4.2.</span> <span class="toc-text">缺点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E6%96%B9%E5%90%91"><span class="toc-number">2.4.3.</span> <span class="toc-text">优化方向</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AnimDynamics-Unreal"><span class="toc-number">3.</span> <span class="toc-text">AnimDynamics (Unreal)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#INTRO-1"><span class="toc-number">3.1.</span> <span class="toc-text">INTRO</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81-1"><span class="toc-number">3.2.</span> <span class="toc-text">工作流</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C-1"><span class="toc-number">3.2.1.</span> <span class="toc-text">基本操作</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A2%B0%E6%92%9E%E6%A8%A1%E6%8B%9F"><span class="toc-number">3.2.2.</span> <span class="toc-text">碰撞模拟</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B1%9E%E6%80%A7%E5%8F%82%E6%95%B0-1"><span class="toc-number">3.2.3.</span> <span class="toc-text">属性参数</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0-1"><span class="toc-number">3.3.</span> <span class="toc-text">算法实现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8Ebox%E7%9A%84%E6%83%AF%E6%80%A7%E6%9B%B4%E6%96%B0"><span class="toc-number">3.3.1.</span> <span class="toc-text">基于box的惯性更新</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E7%BA%A6%E6%9D%9F%E9%99%90%E5%88%B6%E7%A7%BB%E5%8A%A8"><span class="toc-number">3.3.2.</span> <span class="toc-text">使用约束限制移动</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%98%E7%BC%BA%E7%82%B9-1"><span class="toc-number">3.4.</span> <span class="toc-text">优缺点</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E7%82%B9-1"><span class="toc-number">3.4.1.</span> <span class="toc-text">优点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9-1"><span class="toc-number">3.4.2.</span> <span class="toc-text">缺点</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#OpenSource"><span class="toc-number">4.</span> <span class="toc-text">OpenSource</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#JointDynamics"><span class="toc-number">4.1.</span> <span class="toc-text">JointDynamics</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81-2"><span class="toc-number">4.1.1.</span> <span class="toc-text">工作流</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8"><span class="toc-number">4.1.1.1.</span> <span class="toc-text">参数列表</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0-2"><span class="toc-number">4.1.2.</span> <span class="toc-text">算法实现</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BC%B9%E7%B0%A7%E7%B3%BB%E7%BB%9F"><span class="toc-number">4.1.2.1.</span> <span class="toc-text">弹簧系统</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A4%A7%E8%87%B4%E6%B5%81%E7%A8%8B"><span class="toc-number">4.1.2.2.</span> <span class="toc-text">大致流程</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%B9%E7%82%B9"><span class="toc-number">4.1.3.</span> <span class="toc-text">特点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SoftBone"><span class="toc-number">4.2.</span> <span class="toc-text">SoftBone</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81-3"><span class="toc-number">4.2.1.</span> <span class="toc-text">工作流</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0-3"><span class="toc-number">4.2.2.</span> <span class="toc-text">算法实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%B9%E7%82%B9-1"><span class="toc-number">4.2.3.</span> <span class="toc-text">特点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#KawaiiPhysics"><span class="toc-number">4.3.</span> <span class="toc-text">KawaiiPhysics</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%9D%E8%80%83"><span class="toc-number">5.</span> <span class="toc-text">思考</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#References"><span class="toc-number">6.</span> <span class="toc-text">References</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 16
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/15</span>
+            <a class="archive-post-title" href="/2023/12/15/Dcc-Coords/">一图对比众3D引擎的坐标系</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span>
+            <a class="archive-post-title" href="/2023/07/08/ML-Deformer/">基于机器学习的物理变形器</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span>
+            <a class="archive-post-title" href="/2023/07/02/Dynamic-Bones/">基于动力学的骨骼动画技术综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/Simulation-Dynamics-Engine/">仿真及动力学系统综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span>
+            <a class="archive-post-title" href="/2023/05/21/Build-WebRTC-For-MSVC/">编译可以在MSVC中使用的WebRTC库</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/21</span>
+            <a class="archive-post-title" href="/2023/02/21/Collaborative-Engine/">浅谈端云协同渲染</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span>
+            <a class="archive-post-title" href="/2022/12/29/Mixed-Virtual-Production/">混合虚拟制片</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span>
+            <a class="archive-post-title" href="/2022/10/08/C2BP-Params/">C++生成蓝图的参数类型记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/29</span>
+            <a class="archive-post-title" href="/2022/06/29/Schlick-Approximate/">Schilick的近似方法</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span>
+            <a class="archive-post-title" href="/2022/03/18/Illumination/">光通量、光强和照度</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/13</span>
+            <a class="archive-post-title" href="/2021/12/13/DS-VS-DL/">延迟渲染Vs延迟光照</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/17</span>
+            <a class="archive-post-title" href="/2021/04/17/Importance-Sampling/">重要性采样</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span>
+            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span>
+            <a class="archive-post-title" href="/2021/04/02/Cook-Torrance-BRDF/">Cook-Torrance的BRDF</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/29</span>
+            <a class="archive-post-title" href="/2021/03/29/Learn-Rendering-Function/">理解渲染方程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/22</span>
+            <a class="archive-post-title" href="/2021/03/22/Learn-Radiometry/">辐射度量学笔记</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://graphicyan.github.io",
+        root: siteMetaRoot,
+        author: "Yan Zhang"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+    </body>
+</html>

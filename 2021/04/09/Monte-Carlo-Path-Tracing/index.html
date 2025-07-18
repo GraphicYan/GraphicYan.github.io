@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Yan Zhang">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Yan Zhang">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="">
+    <meta name="description" content="1 蒙特卡洛积分(Monte Carlo Integration)首先让我们先搞懂蒙特卡洛路径追踪的这个“蒙特卡洛”的前缀到底指什么。蒙特卡洛积分的目的：当一个积分很难通过解析的方式得到答案的时候可以通过蒙特卡洛的方式近似得到积分结果，如下图所示：显然对于这样一个函数，很难去用一个数学式子去表示，因此无法用一般解析的方法直接求得积分值，而这时候就可以采用蒙特卡洛的思想了。蒙特卡洛积分的原理及做法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="蒙特卡洛路径追踪">
+<meta property="og:url" content="https://graphicyan.github.io/2021/04/09/Monte-Carlo-Path-Tracing/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 蒙特卡洛积分(Monte Carlo Integration)首先让我们先搞懂蒙特卡洛路径追踪的这个“蒙特卡洛”的前缀到底指什么。蒙特卡洛积分的目的：当一个积分很难通过解析的方式得到答案的时候可以通过蒙特卡洛的方式近似得到积分结果，如下图所示：显然对于这样一个函数，很难去用一个数学式子去表示，因此无法用一般解析的方法直接求得积分值，而这时候就可以采用蒙特卡洛的思想了。蒙特卡洛积分的原理及做法">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_000.jpeg#from=paste&height=465&id=ua3e5c3b0&margin=%5Bobject%20Object%5D&originHeight=465&originWidth=972&originalType=url&status=done&style=none&taskId=u93f586f2-91f5-43f6-adc0-0be45d6f92f&width=972">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_001.jpeg#from=paste&height=312&id=uccb8931e&margin=%5Bobject%20Object%5D&originHeight=312&originWidth=720&originalType=url&status=done&style=none&taskId=ueb8a0d57-effa-4d00-aab3-93ac40945a9&width=720">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_002.svg#from=paste&height=26&id=u97b99c16&margin=%5Bobject%20Object%5D&originHeight=26&originWidth=40&originalType=url&status=done&style=none&taskId=u1f0743ff-df22-4776-bed7-48f753a5f65&width=40">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_003.svg#from=paste&height=26&id=ufa7fff45&margin=%5Bobject%20Object%5D&originHeight=26&originWidth=41&originalType=url&status=done&style=none&taskId=u746a5df6-81dc-4365-b71f-f25379a15fe&width=41">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_004.svg#from=paste&height=26&id=u0c5b427c&margin=%5Bobject%20Object%5D&originHeight=26&originWidth=40&originalType=url&status=done&style=none&taskId=u96cf039e-f386-421f-8f43-ece5d2cf2ec&width=40">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_005.svg#from=paste&height=75&id=udbaa2c00&margin=%5Bobject%20Object%5D&originHeight=75&originWidth=675&originalType=url&status=done&style=none&taskId=ua49d2c89-0275-46b1-8647-194a1ae23c3&width=675">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_006.svg#from=paste&height=128&id=ub94060e4&margin=%5Bobject%20Object%5D&originHeight=128&originWidth=675&originalType=url&status=done&style=none&taskId=uc4675539-0a13-4c8e-8dbd-04fa718f99a&width=675">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_007.jpeg#from=paste&height=419&id=u6e859c29&margin=%5Bobject%20Object%5D&originHeight=419&originWidth=981&originalType=url&status=done&style=none&taskId=u190db0df-b13e-48af-8e2a-2e09451a2c8&width=981">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_008.svg#from=paste&height=60&id=u7d57ee44&margin=%5Bobject%20Object%5D&originHeight=60&originWidth=675&originalType=url&status=done&style=none&taskId=u4560d234-b5ec-41e6-b74b-5255bcdcae6&width=675">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_009.svg#from=paste&height=60&id=u28e55cc7&margin=%5Bobject%20Object%5D&originHeight=60&originWidth=675&originalType=url&status=done&style=none&taskId=u400eb71e-8b34-423f-8cde-6b275dcb47d&width=675">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_010.jpeg#from=paste&height=455&id=u83c398d7&margin=%5Bobject%20Object%5D&originHeight=455&originWidth=834&originalType=url&status=done&style=none&taskId=u4d8aec06-8fb1-4915-b64c-2737a3f0154&width=834">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_011.svg#from=paste&height=60&id=u7861ff52&margin=%5Bobject%20Object%5D&originHeight=60&originWidth=675&originalType=url&status=done&style=none&taskId=u67322ac1-b840-4ba7-9e1c-9ddd4262adc&width=675">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_012.svg#from=paste&height=18&id=ud25e40b1&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=20&originalType=url&status=done&style=none&taskId=u1bb8ac53-ef49-428b-b9de-86c46d9bdb8&width=20">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_013.svg#from=paste&height=26&id=u25d2e54f&margin=%5Bobject%20Object%5D&originHeight=26&originWidth=95&originalType=url&status=done&style=none&taskId=u1d86738d-455c-4fa2-a8d5-54aa2d7399d&width=95">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_014.svg#from=paste&height=75&id=u57b847cd&margin=%5Bobject%20Object%5D&originHeight=75&originWidth=675&originalType=url&status=done&style=none&taskId=u96b60ec5-dee4-475f-a972-9f0e87c2e42&width=675">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_015.svg#from=paste&height=18&id=u09805f98&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=20&originalType=url&status=done&style=none&taskId=u233f9e3a-a00a-434a-869f-13e71e71245&width=20">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_016.jpeg#from=paste&height=301&id=u061e096e&margin=%5Bobject%20Object%5D&originHeight=301&originWidth=720&originalType=url&status=done&style=none&taskId=u53fea0f1-dc22-4521-87f8-ba3ab23d0ce&width=720">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_017.svg#from=paste&height=18&id=uc0e63b7a&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=20&originalType=url&status=done&style=none&taskId=u79fa320c-2665-4350-9b3c-2ae2a0d1986&width=20">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_018.jpeg#from=paste&height=511&id=ucbc0f9ea&margin=%5Bobject%20Object%5D&originHeight=511&originWidth=1003&originalType=url&status=done&style=none&taskId=u0430062b-13cc-4619-86e6-43a80197f01&width=1003">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_019.jpeg#from=paste&height=532&id=uf1411439&margin=%5Bobject%20Object%5D&originHeight=532&originWidth=1018&originalType=url&status=done&style=none&taskId=u08e87e4c-d19a-4c0c-9d76-f8279631bba&width=1018">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_020.jpeg#from=paste&height=347&id=u718cad7f&margin=%5Bobject%20Object%5D&originHeight=347&originWidth=720&originalType=url&status=done&style=none&taskId=ud2fa0238-8810-4a05-b762-70e01488c7c&width=720">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_021.jpeg#from=paste&height=260&id=uf994797b&margin=%5Bobject%20Object%5D&originHeight=260&originWidth=720&originalType=url&status=done&style=none&taskId=u687dadf2-c890-422f-aa63-87a15c745fc&width=720">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_022.jpeg#from=paste&height=350&id=ufae6dd78&margin=%5Bobject%20Object%5D&originHeight=350&originWidth=720&originalType=url&status=done&style=none&taskId=ua2966784-9448-47a8-bdde-c4f3842083b&width=720">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_023.jpeg#from=paste&height=385&id=ud33a0200&margin=%5Bobject%20Object%5D&originHeight=385&originWidth=962&originalType=url&status=done&style=none&taskId=u0e8883de-cdad-4b4d-b6a3-444df9d8f18&width=962">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_024.jpeg#from=paste&height=535&id=ub3204d22&margin=%5Bobject%20Object%5D&originHeight=535&originWidth=1002&originalType=url&status=done&style=none&taskId=ubae95d8a-984f-4bab-9649-bcf01c63816&width=1002">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_025.svg#from=paste&height=20&id=uc35d1ad2&margin=%5Bobject%20Object%5D&originHeight=20&originWidth=16&originalType=url&status=done&style=none&taskId=u31c19752-1d8c-4a30-99bb-855e744f6b6&width=16">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_026.svg#from=paste&height=26&id=u35f3531e&margin=%5Bobject%20Object%5D&originHeight=26&originWidth=50&originalType=url&status=done&style=none&taskId=ubdee8569-905e-4074-a91c-70ad09e84c0&width=50">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_027.svg#from=paste&height=21&id=u75b37006&margin=%5Bobject%20Object%5D&originHeight=21&originWidth=52&originalType=url&status=done&style=none&taskId=u21af54ad-560f-4489-84fb-31ab02774b9&width=52">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_028.svg#from=paste&height=45&id=ueca43bce&margin=%5Bobject%20Object%5D&originHeight=45&originWidth=675&originalType=url&status=done&style=none&taskId=u4565a796-fd58-49d0-8955-26b0bfdf936&width=675">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_029.jpeg#from=paste&height=391&id=ub1b4a58e&margin=%5Bobject%20Object%5D&originHeight=391&originWidth=720&originalType=url&status=done&style=none&taskId=u2ae9124f-1523-440f-9b5f-f0eb4076bdb&width=720">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_030.jpeg#from=paste&height=366&id=u36b7dc30&margin=%5Bobject%20Object%5D&originHeight=366&originWidth=1063&originalType=url&status=done&style=none&taskId=uc0e727d0-a1a1-4575-9fd8-e270179481f&width=1063">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_031.svg#from=paste&height=26&id=uea2f183c&margin=%5Bobject%20Object%5D&originHeight=26&originWidth=98&originalType=url&status=done&style=none&taskId=ud30ce8f9-d074-4cd4-bd08-d4f46fd0919&width=98">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_032.svg#from=paste&height=51&id=udc99f34b&margin=%5Bobject%20Object%5D&originHeight=51&originWidth=121&originalType=url&status=done&style=none&taskId=ucd52a7a8-ddfd-42fa-a2f3-0994d522c17&width=121">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_033.svg#from=paste&height=60&id=u6c487aaf&margin=%5Bobject%20Object%5D&originHeight=60&originWidth=675&originalType=url&status=done&style=none&taskId=u58d927ac-edf0-4b53-a01d-95e5b0d942b&width=675">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_034.svg#from=paste&height=18&id=u0183de77&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=20&originalType=url&status=done&style=none&taskId=uabc2d9dc-836c-4ee2-ac06-4c194102f18&width=20">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_035.svg#from=paste&height=18&id=ub1bfc2af&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=20&originalType=url&status=done&style=none&taskId=uc23ec23d-5020-4077-bf79-a7edb582a1b&width=20">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_036.jpeg#from=paste&height=705&id=u9c4b2678&margin=%5Bobject%20Object%5D&originHeight=705&originWidth=1064&originalType=url&status=done&style=none&taskId=u58c884a0-9b6a-473a-bd2d-6a464030a49&width=1064">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_037.svg#from=paste&height=23&id=u18d56fbf&margin=%5Bobject%20Object%5D&originHeight=23&originWidth=45&originalType=url&status=done&style=none&taskId=u74bc15c0-1ef0-4212-b185-53dfb03c3ad&width=45">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_038.svg#from=paste&height=51&id=ud7021b99&margin=%5Bobject%20Object%5D&originHeight=51&originWidth=87&originalType=url&status=done&style=none&taskId=u45be2643-27de-4ae8-9ca4-d286f773d76&width=87">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_039.svg#from=paste&height=122&id=u280fed83&margin=%5Bobject%20Object%5D&originHeight=122&originWidth=675&originalType=url&status=done&style=none&taskId=u85bcae76-9ee3-452d-808b-be7ce1e9da8&width=675">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_040.svg#from=paste&height=18&id=u154f196b&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=20&originalType=url&status=done&style=none&taskId=u1f791c47-e17b-4812-af88-3a4768465ac&width=20">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_041.jpeg#from=paste&height=653&id=ud4f01ea3&margin=%5Bobject%20Object%5D&originHeight=653&originWidth=1070&originalType=url&status=done&style=none&taskId=u1e2ecb7d-11e3-422c-8d04-781b7c669ce&width=1070">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_042.jpeg#from=paste&height=438&id=ua436dde9&margin=%5Bobject%20Object%5D&originHeight=438&originWidth=720&originalType=url&status=done&style=none&taskId=u92a0cd88-92e8-4d99-a882-0f803b9bc6f&width=720">
+<meta property="article:published_time" content="2021-04-09T12:46:25.000Z">
+<meta property="article:modified_time" content="2025-07-18T03:55:52.139Z">
+<meta property="article:author" content="Yan Zhang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://graphicyan.github.io/assets/post_images/Monte-Carlo-Path-Tracing/image_000.jpeg#from=paste&height=465&id=ua3e5c3b0&margin=%5Bobject%20Object%5D&originHeight=465&originWidth=972&originalType=url&status=done&style=none&taskId=u93f586f2-91f5-43f6-adc0-0be45d6f92f&width=972">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/yan.jpg">
+    <title>蒙特卡洛路径追踪 · Yan&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Yan's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Yan&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">蒙特卡洛路径追踪</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                蒙特卡洛路径追踪
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count word-count">2.2k</span>Reading time: <span class="post-count reading-time">7 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2021/04/09</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><a name="XFBgD"></a></p>
+<h2 id="1-蒙特卡洛积分-Monte-Carlo-Integration"><a href="#1-蒙特卡洛积分-Monte-Carlo-Integration" class="headerlink" title="1 蒙特卡洛积分(Monte Carlo Integration)"></a><strong>1 蒙特卡洛积分(Monte Carlo Integration)</strong></h2><p>首先让我们先搞懂蒙特卡洛路径追踪的这个“蒙特卡洛”的前缀到底指什么。<br /><strong>蒙特卡洛积分的目的：</strong>当一个积分很难通过解析的方式得到答案的时候可以通过蒙特卡洛的方式近似得到积分结果，如下图所示：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_000.jpeg#from=paste&height=465&id=ua3e5c3b0&margin=%5Bobject%20Object%5D&originHeight=465&originWidth=972&originalType=url&status=done&style=none&taskId=u93f586f2-91f5-43f6-adc0-0be45d6f92f&width=972"><br />显然对于这样一个函数，很难去用一个数学式子去表示，因此无法用一般解析的方法直接求得积分值，而这时候就可以采用蒙特卡洛的思想了。<br /><strong>蒙特卡洛积分的原理及做法：</strong>对函数值进行多次采样求均值作为积分值的近似<br />该做法十分容易理解，想象一下如果对上图这个函数值进行<strong>均匀采样</strong>的话，其实就相当于将整个积分面积切成了许许多多个长方形，然后将这些小长方形的面积全部加起来。没错，该做法其实就与黎曼积分的想法几乎一致。但蒙特卡洛积分更加的general，因为它可以指定一个分布来对被积分的值进行采样，定义如下：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_001.jpeg#from=paste&height=312&id=uccb8931e&margin=%5Bobject%20Object%5D&originHeight=312&originWidth=720&originalType=url&status=done&style=none&taskId=ueb8a0d57-effa-4d00-aab3-93ac40945a9&width=720"><br />如图所示，我们希望求出一个函数<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_002.svg#from=paste&height=26&id=u97b99c16&margin=%5Bobject%20Object%5D&originHeight=26&originWidth=40&originalType=url&status=done&style=none&taskId=u1f0743ff-df22-4776-bed7-48f753a5f65&width=40">在积分域<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_003.svg#from=paste&height=26&id=ufa7fff45&margin=%5Bobject%20Object%5D&originHeight=26&originWidth=41&originalType=url&status=done&style=none&taskId=u746a5df6-81dc-4365-b71f-f25379a15fe&width=41">上的积分值，选定一个采样的分布<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_004.svg#from=paste&height=26&id=u0c5b427c&margin=%5Bobject%20Object%5D&originHeight=26&originWidth=40&originalType=url&status=done&style=none&taskId=u96cf039e-f386-421f-8f43-ece5d2cf2ec&width=40">，通过对该分布来进行多次的函数值采样，最后估计的值如图中最下方式子所示。<br />这里对该式子进行一个简单的推导。相信大家都知道，求均值的做法其实也是对期望的逼近，因此：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_005.svg#from=paste&height=75&id=udbaa2c00&margin=%5Bobject%20Object%5D&originHeight=75&originWidth=675&originalType=url&status=done&style=none&taskId=ua49d2c89-0275-46b1-8647-194a1ae23c3&width=675"><br />那么对于这样一个服从某一分布的期望的计算套公式直接计算得：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_006.svg#from=paste&height=128&id=ub94060e4&margin=%5Bobject%20Object%5D&originHeight=128&originWidth=675&originalType=url&status=done&style=none&taskId=uc4675539-0a13-4c8e-8dbd-04fa718f99a&width=675"><br />通过以上推导即可明白蒙特卡洛的近似正是对积分值的一个无偏估计。<br />但在本文中为了方便，所有的采样都使用均匀采样，因此很容易推出：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_007.jpeg#from=paste&height=419&id=u6e859c29&margin=%5Bobject%20Object%5D&originHeight=419&originWidth=981&originalType=url&status=done&style=none&taskId=u190db0df-b13e-48af-8e2a-2e09451a2c8&width=981"><br />因此，<strong>蒙特卡洛在此来说就是一个帮助求得困难积分值的方法</strong>。<br><a name="FEDrv"></a></p>
+<h2 id="2-蒙特卡洛路径追踪-Monte-Carlo-Path-Tracing"><a href="#2-蒙特卡洛路径追踪-Monte-Carlo-Path-Tracing" class="headerlink" title="2 蒙特卡洛路径追踪(Monte Carlo Path Tracing)"></a><strong>2 蒙特卡洛路径追踪(Monte Carlo Path Tracing)</strong></h2><p>回顾一下上篇文章中所得到的渲染方程：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_008.svg#from=paste&height=60&id=u7d57ee44&margin=%5Bobject%20Object%5D&originHeight=60&originWidth=675&originalType=url&status=done&style=none&taskId=u4560d234-b5ec-41e6-b74b-5255bcdcae6&width=675"><br />要想解出以上方程的解主要有两个难点：</p>
+<ol>
+<li>积分的计算</li>
+<li>递归形式</li>
+</ol>
+<p>而解决这些难点自然就要利用上节中所提到的蒙特卡洛积分方法了。<br />在进入具体计算之前，对渲染方程做出一点小修改，即舍弃一下自发光项(因为除了光源其他物体不会发光), 以方便进行计算推导：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_009.svg#from=paste&height=60&id=u28e55cc7&margin=%5Bobject%20Object%5D&originHeight=60&originWidth=675&originalType=url&status=done&style=none&taskId=u400eb71e-8b34-423f-8cde-6b275dcb47d&width=675"><br />从具体例子出发，首先仅仅考虑直接光照：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_010.jpeg#from=paste&height=455&id=u83c398d7&margin=%5Bobject%20Object%5D&originHeight=455&originWidth=834&originalType=url&status=done&style=none&taskId=u4d8aec06-8fb1-4915-b64c-2737a3f0154&width=834"><br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_011.svg#from=paste&height=60&id=u7861ff52&margin=%5Bobject%20Object%5D&originHeight=60&originWidth=675&originalType=url&status=done&style=none&taskId=u67322ac1-b840-4ba7-9e1c-9ddd4262adc&width=675"><br />再次观察该修改过之后的方程其实就只是一个单纯的积分计算了，其物理含义为着色点p到摄像机或人眼的Radiance值。<br />回想第一章所提的，对于一个困难积分只要选定一个被积分变量的采样分布即可通过蒙特卡洛的方法得到积分结果的近似值，而此时的被积分值为<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_012.svg#from=paste&height=18&id=ud25e40b1&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=20&originalType=url&status=done&style=none&taskId=u1bb8ac53-ef49-428b-b9de-86c46d9bdb8&width=20">，选定<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_013.svg#from=paste&height=26&id=u25d2e54f&margin=%5Bobject%20Object%5D&originHeight=26&originWidth=95&originalType=url&status=done&style=none&taskId=u1d86738d-455c-4fa2-a8d5-54aa2d7399d&width=95">，不难得出积分近似结果如下：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_014.svg#from=paste&height=75&id=u57b847cd&margin=%5Bobject%20Object%5D&originHeight=75&originWidth=675&originalType=url&status=done&style=none&taskId=u96b60ec5-dee4-475f-a972-9f0e87c2e42&width=675"><br />正如一开始所说，先单独考虑直接光照，因此只有当采样的方向<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_015.svg#from=paste&height=18&id=u09805f98&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=20&originalType=url&status=done&style=none&taskId=u233f9e3a-a00a-434a-869f-13e71e71245&width=20">击中光源的时候，光源才会对该着色点有贡献，计算伪代码如下：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_016.jpeg#from=paste&height=301&id=u061e096e&margin=%5Bobject%20Object%5D&originHeight=301&originWidth=720&originalType=url&status=done&style=none&taskId=u53fea0f1-dc22-4521-87f8-ba3ab23d0ce&width=720"><br />显而易见的，单独仅仅考虑直接光照自然是不够的，还需要间接光照，即当采样的<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_017.svg#from=paste&height=18&id=uc0e63b7a&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=20&originalType=url&status=done&style=none&taskId=u79fa320c-2665-4350-9b3c-2ae2a0d1986&width=20">方向碰撞到了别的物体，如下图所示：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_018.jpeg#from=paste&height=511&id=ucbc0f9ea&margin=%5Bobject%20Object%5D&originHeight=511&originWidth=1003&originalType=url&status=done&style=none&taskId=u0430062b-13cc-4619-86e6-43a80197f01&width=1003"><br />此时采样的光线碰撞到了另一个物体的Q点，那么该条路径对着色点P的贡献是多少呢？自然是在点Q的直接光照再乘上反射到该方向上的百分比了！显然这是一个类似光线追踪的递归过程，不同在于该方法通过对光线方向的采样从而找出一条条可行的路径，这也正是为什么叫路径追踪的原因，伪代码如下：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_019.jpeg#from=paste&height=532&id=uf1411439&margin=%5Bobject%20Object%5D&originHeight=532&originWidth=1018&originalType=url&status=done&style=none&taskId=u08e87e4c-d19a-4c0c-9d76-f8279631bba&width=1018"><br />至此，我们成功通过蒙特卡洛的方式解出了渲染方程的积分值，也通过考虑直接光照与间接光照解决了递归的问题。但该方法至此有一个非常致命的缺陷：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_020.jpeg#from=paste&height=347&id=u718cad7f&margin=%5Bobject%20Object%5D&originHeight=347&originWidth=720&originalType=url&status=done&style=none&taskId=ud2fa0238-8810-4a05-b762-70e01488c7c&width=720"><br />我们通过每次对光线方向的采样从而解出方程，假设每次采样100条，那么从人眼出发的第一次采样就是100条，在进行第二次反射之后就是10000条，依次类推，反射越多次光线数量便会爆炸增长，计算量会无法负担，那么如何才能使得光线数量不爆炸增长呢？<strong>唯有每次只采样一个方向！N&#x3D;1</strong><br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_021.jpeg#from=paste&height=260&id=uf994797b&margin=%5Bobject%20Object%5D&originHeight=260&originWidth=720&originalType=url&status=done&style=none&taskId=u687dadf2-c890-422f-aa63-87a15c745fc&width=720"><br />每次如果只采样一个方向那么所带来的问题也是显而易见的，积分计算的结果会非常的noisy，虽然蒙特卡洛积分是无偏估计，但样本越少显然偏差越大。但该问题很好解决，如果每次只去寻找一条路径结果不好，那么重复多次寻找到多条路径，将多条路径的结果求得平均即可！如下图所示：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_022.jpeg#from=paste&height=350&id=ufae6dd78&margin=%5Bobject%20Object%5D&originHeight=350&originWidth=720&originalType=url&status=done&style=none&taskId=ua2966784-9448-47a8-bdde-c4f3842083b&width=720"><br />改良之后的Path Tracing伪代码如下：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_023.jpeg#from=paste&height=385&id=ud33a0200&margin=%5Bobject%20Object%5D&originHeight=385&originWidth=962&originalType=url&status=done&style=none&taskId=u0e8883de-cdad-4b4d-b6a3-444df9d8f18&width=962"><br />通过对经过像素的光线重复采样，每次在反射的时候只按分布随机选取一个方向，解决了只对经过像素的光线采样一次，而对反射光线按分布采样多次所导致的光线爆炸问题。<br />那么现在所有的问题都解决了吗？还没有！因为shade函数的递归没有出口，永远不会停下。 但这里并不没有采用类似光线追踪当中设定反射深度显示的给出递归出口的方法，而是非常精妙的采用了<strong>俄罗斯轮盘赌(Russian Roulette)<strong>。<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_024.jpeg#from=paste&height=535&id=ub3204d22&margin=%5Bobject%20Object%5D&originHeight=535&originWidth=1002&originalType=url&status=done&style=none&taskId=ubae95d8a-984f-4bab-9649-bcf01c63816&width=1002"><br />给你一把左轮，两发子弹，你不知道哪一发会真正的射出子弹，因此拿这把左轮射自己，你有4&#x2F;6的概率活下来，这就是俄罗斯轮盘赌的概念。<br />将其应用在路径追踪当中，首先设定一个概率<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_025.svg#from=paste&height=20&id=uc35d1ad2&margin=%5Bobject%20Object%5D&originHeight=20&originWidth=16&originalType=url&status=done&style=none&taskId=u31c19752-1d8c-4a30-99bb-855e744f6b6&width=16">, 有P的概率光线会继续递归并设置返回值为<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_026.svg#from=paste&height=26&id=u35f3531e&margin=%5Bobject%20Object%5D&originHeight=26&originWidth=50&originalType=url&status=done&style=none&taskId=ubdee8569-905e-4074-a91c-70ad09e84c0&width=50">，有<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_027.svg#from=paste&height=21&id=u75b37006&margin=%5Bobject%20Object%5D&originHeight=21&originWidth=52&originalType=url&status=done&style=none&taskId=u21af54ad-560f-4489-84fb-31ab02774b9&width=52">的概率光线停止递归，并返回0。这样巧妙的设定之下光线一定会在某次反射之后停止递归，并且计算的结果依然是无偏的，因为Radiance的期望不变，证明如下：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_028.svg#from=paste&height=45&id=ueca43bce&margin=%5Bobject%20Object%5D&originHeight=45&originWidth=675&originalType=url&status=done&style=none&taskId=u4565a796-fd58-49d0-8955-26b0bfdf936&width=675"><br />shade函数的伪代码变更如下，使得可以停止递归了：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_029.jpeg#from=paste&height=391&id=ub1b4a58e&margin=%5Bobject%20Object%5D&originHeight=391&originWidth=720&originalType=url&status=done&style=none&taskId=u2ae9124f-1523-440f-9b5f-f0eb4076bdb&width=720"><br />至此，我们的路径追踪算法已经完成大半，只差最后一个小问题！现在的路径追踪效率非常的低下，如图所示：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_030.jpeg#from=paste&height=366&id=u36b7dc30&margin=%5Bobject%20Object%5D&originHeight=366&originWidth=1063&originalType=url&status=done&style=none&taskId=uc0e727d0-a1a1-4575-9fd8-e270179481f&width=1063"><br />在每次计算直接光照的时候，通过均匀采样任选一个方向，但很少会的光线可以hit光源，尤其当光源较小的时候，这种现象越明显，大量采样的光线都被浪费了。<br />因此在计算直接光照的时候改进为</strong>直接对光源进行采样！</strong>这样所有采样的光线都一定会击中光源(如果中间没有别的物体)，没有光线再会被浪费了。假设光源的面积为A，那么对光源进行采样的<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_031.svg#from=paste&height=26&id=uea2f183c&margin=%5Bobject%20Object%5D&originHeight=26&originWidth=98&originalType=url&status=done&style=none&taskId=ud30ce8f9-d074-4cd4-bd08-d4f46fd0919&width=98">(因为<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_032.svg#from=paste&height=51&id=udc99f34b&margin=%5Bobject%20Object%5D&originHeight=51&originWidth=121&originalType=url&status=done&style=none&taskId=ucd52a7a8-ddfd-42fa-a2f3-0994d522c17&width=121">)，但原始的渲染方程：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_033.svg#from=paste&height=60&id=u6c487aaf&margin=%5Bobject%20Object%5D&originHeight=60&originWidth=675&originalType=url&status=done&style=none&taskId=u58d927ac-edf0-4b53-a01d-95e5b0d942b&width=675"><br />很明显是对光线方向<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_034.svg#from=paste&height=18&id=u0183de77&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=20&originalType=url&status=done&style=none&taskId=uabc2d9dc-836c-4ee2-ac06-4c194102f18&width=20">进行积分的，如果想要对光源进行采样的并依然使用蒙题卡洛的方法，那么一定要将其修改为对光源面积 dA的积分，换言之就是需要找到dA与d<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_035.svg#from=paste&height=18&id=ub1bfc2af&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=20&originalType=url&status=done&style=none&taskId=uc23ec23d-5020-4077-bf79-a7edb582a1b&width=20">的关系即可。如下图所示：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_036.jpeg#from=paste&height=705&id=u9c4b2678&margin=%5Bobject%20Object%5D&originHeight=705&originWidth=1064&originalType=url&status=done&style=none&taskId=u58c884a0-9b6a-473a-bd2d-6a464030a49&width=1064"><br />关系式中的<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_037.svg#from=paste&height=23&id=u18d56fbf&margin=%5Bobject%20Object%5D&originHeight=23&originWidth=45&originalType=url&status=done&style=none&taskId=u74bc15c0-1ef0-4212-b185-53dfb03c3ad&width=45">是为了计算出光源上微分面积元正对半球的面积，之后再按照立体角的定义<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_038.svg#from=paste&height=51&id=ud7021b99&margin=%5Bobject%20Object%5D&originHeight=51&originWidth=87&originalType=url&status=done&style=none&taskId=u45be2643-27de-4ae8-9ca4-d286f773d76&width=87">，除以着色点x与光源采样点x’距离的平方即可。于是根据图中二者的关系可将渲染方程改写如下：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_039.svg#from=paste&height=122&id=u280fed83&margin=%5Bobject%20Object%5D&originHeight=122&originWidth=675&originalType=url&status=done&style=none&taskId=u85bcae76-9ee3-452d-808b-be7ce1e9da8&width=675"><br />这样便成功从<img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_040.svg#from=paste&height=18&id=u154f196b&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=20&originalType=url&status=done&style=none&taskId=u1f791c47-e17b-4812-af88-3a4768465ac&width=20">积分转到了对光源面积A的积分，就可以利用蒙特卡洛的方法对光源进行采样从而计算直接光照的积分值了，对于间接光照，依然采用先前的方法进行光线方向的均匀采样。最终伪代码如下，分直接光照和间接光照两部分计算：<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_041.jpeg#from=paste&height=653&id=ud4f01ea3&margin=%5Bobject%20Object%5D&originHeight=653&originWidth=1070&originalType=url&status=done&style=none&taskId=u1e2ecb7d-11e3-422c-8d04-781b7c669ce&width=1070"><br />tips:计算直接光照的时候还需要判断光源与着色点之间是否有物体遮挡，该做法也很简单，只需从着色点x向光源采样点x’发出一条检测光线判断是否与光源之外的物体相交即可，如图所示:<br /><img src="/assets/post_images/Monte-Carlo-Path-Tracing/image_042.jpeg#from=paste&height=438&id=ua436dde9&margin=%5Bobject%20Object%5D&originHeight=438&originWidth=720&originalType=url&status=done&style=none&taskId=u92a0cd88-92e8-4d99-a882-0f803b9bc6f&width=720"></p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>Author：<a href="https://graphicyan.github.io">Yan Zhang</a>
+            <p>Link：<a href="https://graphicyan.github.io/2021/04/09/Monte-Carlo-Path-Tracing/">https://graphicyan.github.io/2021/04/09/Monte-Carlo-Path-Tracing/</a>
+            <p>Publish date：<a href="https://graphicyan.github.io/2021/04/09/Monte-Carlo-Path-Tracing/">April 9th 2021, 8:46:25 pm</a>
+            <p>Update date：<a href="https://graphicyan.github.io/2021/04/09/Monte-Carlo-Path-Tracing/">July 18th 2025, 11:55:52 am</a>
+            <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2021/04/17/Importance-Sampling/" title="重要性采样">
+                    <div class="nextTitle">重要性采样</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2021/04/02/Cook-Torrance-BRDF/" title="Cook-Torrance的BRDF">
+                    <div class="prevTitle">Cook-Torrance的BRDF</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:yanzhang.cg@gmail.com" class="iconfont-archer email" title="email" ></a>
+                <a href="https://github.com/GraphicYan" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/wechat.png" />
+                </span>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E7%A7%AF%E5%88%86-Monte-Carlo-Integration"><span class="toc-number">1.</span> <span class="toc-text">1 蒙特卡洛积分(Monte Carlo Integration)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E8%B7%AF%E5%BE%84%E8%BF%BD%E8%B8%AA-Monte-Carlo-Path-Tracing"><span class="toc-number">2.</span> <span class="toc-text">2 蒙特卡洛路径追踪(Monte Carlo Path Tracing)</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 16
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/15</span>
+            <a class="archive-post-title" href="/2023/12/15/Dcc-Coords/">一图对比众3D引擎的坐标系</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span>
+            <a class="archive-post-title" href="/2023/07/08/ML-Deformer/">基于机器学习的物理变形器</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span>
+            <a class="archive-post-title" href="/2023/07/02/Dynamic-Bones/">基于动力学的骨骼动画技术综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/Simulation-Dynamics-Engine/">仿真及动力学系统综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span>
+            <a class="archive-post-title" href="/2023/05/21/Build-WebRTC-For-MSVC/">编译可以在MSVC中使用的WebRTC库</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/21</span>
+            <a class="archive-post-title" href="/2023/02/21/Collaborative-Engine/">浅谈端云协同渲染</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span>
+            <a class="archive-post-title" href="/2022/12/29/Mixed-Virtual-Production/">混合虚拟制片</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span>
+            <a class="archive-post-title" href="/2022/10/08/C2BP-Params/">C++生成蓝图的参数类型记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/29</span>
+            <a class="archive-post-title" href="/2022/06/29/Schlick-Approximate/">Schilick的近似方法</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span>
+            <a class="archive-post-title" href="/2022/03/18/Illumination/">光通量、光强和照度</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/13</span>
+            <a class="archive-post-title" href="/2021/12/13/DS-VS-DL/">延迟渲染Vs延迟光照</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/17</span>
+            <a class="archive-post-title" href="/2021/04/17/Importance-Sampling/">重要性采样</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span>
+            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span>
+            <a class="archive-post-title" href="/2021/04/02/Cook-Torrance-BRDF/">Cook-Torrance的BRDF</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/29</span>
+            <a class="archive-post-title" href="/2021/03/29/Learn-Rendering-Function/">理解渲染方程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/22</span>
+            <a class="archive-post-title" href="/2021/03/22/Learn-Radiometry/">辐射度量学笔记</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://graphicyan.github.io",
+        root: siteMetaRoot,
+        author: "Yan Zhang"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+    </body>
+</html>

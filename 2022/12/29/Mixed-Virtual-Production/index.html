@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Yan Zhang">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Yan Zhang">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="">
+    <meta name="description" content="原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&amp;#x79;&amp;#x61;&amp;#x6e;&amp;#x7a;&amp;#x68;&amp;#97;&amp;#x6e;&amp;#103;&amp;#46;&amp;#99;&amp;#x67;&amp;#x40;&amp;#x67;&amp;#109;&amp;#x61;&amp;#x69;&amp;#x6c;&amp;#x2e;&amp;#99;&amp;#111;&amp;#109; 或 https:&#x2F;&#x2F;graphicyan.github.io&#x2F;）  1 引言">
+<meta property="og:type" content="article">
+<meta property="og:title" content="混合虚拟制片">
+<meta property="og:url" content="https://graphicyan.github.io/2022/12/29/Mixed-Virtual-Production/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&amp;#x79;&amp;#x61;&amp;#x6e;&amp;#x7a;&amp;#x68;&amp;#97;&amp;#x6e;&amp;#103;&amp;#46;&amp;#99;&amp;#x67;&amp;#x40;&amp;#x67;&amp;#109;&amp;#x61;&amp;#x69;&amp;#x6c;&amp;#x2e;&amp;#99;&amp;#111;&amp;#109; 或 https:&#x2F;&#x2F;graphicyan.github.io&#x2F;）  1 引言">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_000.png#clientId=ubddb27b3-df19-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=650&id=Hql4I&margin=%5Bobject%20Object%5D&name=image.png&originHeight=650&originWidth=909&originalType=binary&ratio=1&rotation=0&showTitle=false&size=627633&status=done&style=none&taskId=u11e864b5-03c2-4425-8405-e629bcd0d23&title=&width=909">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_001.png#clientId=u5a6f63bb-8cfc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=213&id=u61741d30&margin=%5Bobject%20Object%5D&name=image.png&originHeight=503&originWidth=755&originalType=binary&ratio=1&rotation=0&showTitle=false&size=590437&status=done&style=none&taskId=u8e4870e9-1d33-4398-98eb-d51af2cf2b0&title=&width=319.5">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_002.png#clientId=u5a6f63bb-8cfc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=214&id=u28101a6f&margin=%5Bobject%20Object%5D&name=image.png&originHeight=393&originWidth=755&originalType=binary&ratio=1&rotation=0&showTitle=false&size=433553&status=done&style=none&taskId=u237d6df6-9d54-4404-9a37-70708d3fc6f&title=&width=411.5">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_003.png#clientId=u8c606a1b-79ba-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=272&id=ub1cb421e&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1076&originWidth=2890&originalType=binary&ratio=1&rotation=0&showTitle=false&size=2732989&status=done&style=none&taskId=u6f882e4e-4942-45f2-bef0-7ff90e61f42&title=&width=730">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_004.png#clientId=u8c606a1b-79ba-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=498&id=uf24894e6&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1128&originWidth=1650&originalType=binary&ratio=1&rotation=0&showTitle=false&size=2146673&status=done&style=none&taskId=u6fbf0a06-9f9c-4e78-9b69-4d0d699561b&title=&width=729">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_009.png#clientId=ubddb27b3-df19-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=1033&id=u314e8537&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1549&originWidth=1345&originalType=binary&ratio=1&rotation=0&showTitle=false&size=839245&status=done&style=none&taskId=uf404c7c6-b333-4201-8bdd-b0fe8f96074&title=&width=896.6666666666666">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_010.jpeg#clientId=u477df368-560d-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=321&id=u0b847d58&margin=%5Bobject%20Object%5D&name=%E6%B7%B7%E5%90%88%E8%99%9A%E6%8B%9F%E5%88%B6%E7%89%87%E5%9B%BE.jpg&originHeight=642&originWidth=1524&originalType=binary&ratio=1&rotation=0&showTitle=false&size=132445&status=done&style=none&taskId=u1f53aa12-b2ff-484f-a67d-97400a24841&title=&width=762">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_011.png#clientId=u5a6f63bb-8cfc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=292&id=i4AjS&margin=%5Bobject%20Object%5D&name=image.png&originHeight=584&originWidth=755&originalType=binary&ratio=1&rotation=0&showTitle=false&size=408292&status=done&style=none&taskId=u42c8414e-ecb8-416f-91dd-e5ed8eab31a&title=&width=377.5">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_012.png#clientId=u5a6f63bb-8cfc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=200&id=cf36g&margin=%5Bobject%20Object%5D&name=image.png&originHeight=400&originWidth=755&originalType=binary&ratio=1&rotation=0&showTitle=false&size=136058&status=done&style=none&taskId=u2fa777ed-d48f-4df2-8155-f9f1c61a44d&title=&width=377.5">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_013.png#clientId=ub8cf7548-2ac3-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=227&id=uf9b416ae&margin=%5Bobject%20Object%5D&name=image.png&originHeight=746&originWidth=1502&originalType=binary&ratio=1&rotation=0&showTitle=false&size=689244&status=done&style=none&taskId=u202e5cce-4e17-446c-9eb2-e9bd10c3350&title=&width=458">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_014.png#clientId=ub8cf7548-2ac3-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=336&id=ufdf99058&margin=%5Bobject%20Object%5D&name=image.png&originHeight=672&originWidth=924&originalType=binary&ratio=1&rotation=0&showTitle=false&size=557760&status=done&style=none&taskId=u1bba402b-eae6-40d1-a1c1-04ab48dc53b&title=&width=462">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_015.png#clientId=u5a6f63bb-8cfc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=459&id=u68abbdc1&margin=%5Bobject%20Object%5D&name=image.png&originHeight=918&originWidth=1502&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1636386&status=done&style=none&taskId=u88d73e1f-ea4e-418e-9789-d6b3fd65daa&title=&width=751">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_016.webp#clientId=u57957d9e-e995-4&crop=0&crop=0&crop=1&crop=1&from=paste&id=OeoKH&margin=%5Bobject%20Object%5D&originHeight=432&originWidth=720&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ubc738fa7-40c9-4641-a529-1ee3eace453&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_017.svg#clientId=u3279c955-d4b5-4&crop=0&crop=0&crop=1&crop=1&from=paste&id=u2a494eee&margin=%5Bobject%20Object%5D&originHeight=107&originWidth=309&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u1b455fb8-d3b9-42ba-bfd6-f3c017a2b9c&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_018.png#clientId=u3279c955-d4b5-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=436&id=u47e6f004&margin=%5Bobject%20Object%5D&name=image.png&originHeight=2390&originWidth=800&originalType=url&ratio=1&rotation=0&showTitle=false&size=2383259&status=done&style=none&taskId=u3caee2ba-9b4f-4db9-b7fe-bb67f93b8aa&title=&width=146">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_019.png#clientId=u3279c955-d4b5-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=934&id=u529f7b59&margin=%5Bobject%20Object%5D&name=image.png&originHeight=934&originWidth=1783&originalType=binary&ratio=1&rotation=0&showTitle=false&size=698682&status=done&style=none&taskId=u8e7748ad-0b75-4712-85bf-aa63577115f&title=&width=1783">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_020.png#clientId=u3279c955-d4b5-4&crop=0&crop=0&crop=1&crop=0.3578&from=paste&height=1199&id=u3edf8867&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1199&originWidth=623&originalType=binary&ratio=1&rotation=0&showTitle=false&size=408751&status=done&style=none&taskId=uceaa066b-7795-41c5-b3c5-71aaf74b68d&title=&width=623">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_021.png#clientId=u3279c955-d4b5-4&crop=0&crop=0.658&crop=1&crop=1&from=paste&height=1199&id=u0debed4a&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1199&originWidth=623&originalType=binary&ratio=1&rotation=0&showTitle=false&size=408751&status=done&style=none&taskId=ue3b0bd3d-34ee-4c37-9d2d-5fd685d6e8f&title=&width=623">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_022.png#clientId=u07ca26a8-5a08-4&crop=0&crop=0&crop=1&crop=0.3561&from=paste&height=1202&id=u54d3f252&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1202&originWidth=622&originalType=binary&ratio=1&rotation=0&showTitle=false&size=404528&status=done&style=none&taskId=uc2c26653-35e5-4071-b2d6-2f0d2035059&title=&width=622">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_023.png#clientId=u07ca26a8-5a08-4&crop=0&crop=0.6614&crop=1&crop=1&from=paste&height=1202&id=u65bbedff&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1202&originWidth=622&originalType=binary&ratio=1&rotation=0&showTitle=false&size=404528&status=done&style=none&taskId=u533da177-4481-45d7-9af8-c3f520e615c&title=&width=622">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_024.png#clientId=ubddb27b3-df19-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=1090&id=u0a60d8d0&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1090&originWidth=1224&originalType=binary&ratio=1&rotation=0&showTitle=false&size=646296&status=done&style=none&taskId=u318a9ec8-8ba6-47bc-a2fb-e238b1da564&title=&width=1224">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_025.png#clientId=u0dec3e3b-d024-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=903&id=ue1ddef64&margin=%5Bobject%20Object%5D&name=image.png&originHeight=903&originWidth=1964&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1677702&status=done&style=none&taskId=u20b34a76-1cfd-4a7a-936c-bdb751ba010&title=&width=1964">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_026.png#clientId=u87bbbf1a-9c7b-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=718&id=ua5b99c35&margin=%5Bobject%20Object%5D&name=image.png&originHeight=718&originWidth=1924&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1815526&status=done&style=none&taskId=u50de4f2e-739b-49d8-97e7-e7b1b2e42ee&title=&width=1924">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_027.png#clientId=u87bbbf1a-9c7b-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=244&id=u62f0857a&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1080&originWidth=774&originalType=binary&ratio=1&rotation=0&showTitle=false&size=983582&status=done&style=none&taskId=u0d42098e-cd0d-4e73-8f8c-be629bb7947&title=&width=175">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_028.png#clientId=u87bbbf1a-9c7b-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=241&id=ucaf37159&margin=%5Bobject%20Object%5D&name=image.png&originHeight=986&originWidth=1901&originalType=binary&ratio=1&rotation=0&showTitle=false&size=2171235&status=done&style=none&taskId=uf11d593e-c128-4a95-8aad-33bda68879c&title=&width=464">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_029.png#clientId=u87bbbf1a-9c7b-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=705&id=u88fd1597&margin=%5Bobject%20Object%5D&name=image.png&originHeight=705&originWidth=1308&originalType=binary&ratio=1&rotation=0&showTitle=false&size=817116&status=done&style=none&taskId=u55881efb-9d8d-4aa4-914a-97358207108&title=&width=1308">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_030.png#clientId=u17153e6d-fafc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=1085&id=ua6bf3143&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1085&originWidth=1914&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1464336&status=done&style=none&taskId=u316ffb25-8863-4413-a2a6-bde5cddfc3a&title=&width=1914">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_031.png#clientId=u17153e6d-fafc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=1083&id=u4ffc6f23&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1083&originWidth=1921&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1432373&status=done&style=none&taskId=u662118d6-3fe1-40a7-af48-24829209149&title=&width=1921">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_032.png#clientId=u17153e6d-fafc-4&crop=0&crop=0&crop=1&crop=1&from=drop&id=ub3ea852d&margin=%5Bobject%20Object%5D&name=pattern.png&originHeight=1240&originWidth=1754&originalType=binary&ratio=1&rotation=0&showTitle=false&size=27835&status=done&style=none&taskId=ue3ee435a-a228-454b-8e4a-43e294b3be7&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_033.png#clientId=u17153e6d-fafc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=1082&id=u0dbcf2a6&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1082&originWidth=1921&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1019530&status=done&style=none&taskId=u9c995602-56a3-4c5f-95eb-d86f7d48a74&title=&width=1921">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_034.gif#clientId=u17153e6d-fafc-4&crop=0&crop=0&crop=1&crop=1&from=paste&id=ubea3081b&margin=%5Bobject%20Object%5D&originHeight=738&originWidth=1064&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u8d102be5-167c-4b90-9298-1fd7c697d9a&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_035.png#clientId=ubddb27b3-df19-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=783&id=u00122f4a&margin=%5Bobject%20Object%5D&name=image.png&originHeight=783&originWidth=1185&originalType=binary&ratio=1&rotation=0&showTitle=false&size=610049&status=done&style=none&taskId=u01c3e452-2d0e-4a8b-87fa-f11a37b3ab8&title=&width=1185">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_036.png#clientId=u2b9a282e-6a4a-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=202&id=u04861c18&margin=%5Bobject%20Object%5D&name=image.png&originHeight=404&originWidth=2026&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1054381&status=done&style=none&taskId=u10127d8d-4806-42cb-ac1e-ffd15a77471&title=&width=1013">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_037.png#clientId=u2b9a282e-6a4a-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=211&id=uf1755c99&margin=%5Bobject%20Object%5D&name=image.png&originHeight=422&originWidth=1406&originalType=binary&ratio=1&rotation=0&showTitle=false&size=635162&status=done&style=none&taskId=u10c4b511-f268-4218-94cc-d496c75b9c5&title=&width=703">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_038.png#clientId=u2b9a282e-6a4a-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=345&id=u92fcb1ff&margin=%5Bobject%20Object%5D&name=image.png&originHeight=690&originWidth=1332&originalType=binary&ratio=1&rotation=0&showTitle=false&size=795638&status=done&style=none&taskId=uc83ed21a-aabb-448f-8ba5-1fec2776b3a&title=&width=666">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_039.png#clientId=uc27945cb-ef56-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=485&id=u2e5833c8&margin=%5Bobject%20Object%5D&name=image.png&originHeight=970&originWidth=2592&originalType=binary&ratio=1&rotation=0&showTitle=false&size=2316953&status=done&style=none&taskId=uda8eced5-783f-400f-b6c9-58704630afa&title=&width=1296">
+<meta property="article:published_time" content="2022-12-29T06:23:29.000Z">
+<meta property="article:modified_time" content="2025-07-18T03:55:52.138Z">
+<meta property="article:author" content="Yan Zhang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://graphicyan.github.io/assets/post_images/Mixed-Virtual-Production/image_000.png#clientId=ubddb27b3-df19-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=650&id=Hql4I&margin=%5Bobject%20Object%5D&name=image.png&originHeight=650&originWidth=909&originalType=binary&ratio=1&rotation=0&showTitle=false&size=627633&status=done&style=none&taskId=u11e864b5-03c2-4425-8405-e629bcd0d23&title=&width=909">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/yan.jpg">
+    <title>混合虚拟制片 · Yan&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Yan's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Yan&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">混合虚拟制片</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                混合虚拟制片
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count word-count">2.4k</span>Reading time: <span class="post-count reading-time">9 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2022/12/29</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <h2 id="原创性声明"><a href="#原创性声明" class="headerlink" title="原创性声明"></a>原创性声明</h2><p>本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（<a href="mailto:&#x79;&#x61;&#x6e;&#x7a;&#x68;&#97;&#x6e;&#103;&#46;&#99;&#x67;&#x40;&#x67;&#109;&#x61;&#x69;&#x6c;&#x2e;&#99;&#111;&#109;">&#x79;&#x61;&#x6e;&#x7a;&#x68;&#97;&#x6e;&#103;&#46;&#99;&#x67;&#x40;&#x67;&#109;&#x61;&#x69;&#x6c;&#x2e;&#99;&#111;&#109;</a> 或 <a href="https://graphicyan.github.io/%EF%BC%89">https://graphicyan.github.io/）</a></p>
+<p><a name="FpCHr"></a></p>
+<h2 id="1-引言"><a href="#1-引言" class="headerlink" title="1 引言"></a>1 引言</h2><p><a name="OghkJ"></a></p>
+<h3 id="1-1-虚拟制片"><a href="#1-1-虚拟制片" class="headerlink" title="1.1 虚拟制片"></a>1.1 虚拟制片</h3><p><a name="Hdwct"></a></p>
+<h4 id="1-1-1-混合虚拟制片"><a href="#1-1-1-混合虚拟制片" class="headerlink" title="1.1.1 混合虚拟制片"></a>1.1.1 混合虚拟制片</h4><p>混合虚拟制片是一种通过摄像机追踪将绿幕摄影与CG元素合成的技术，可为摄影导<br />演和摄影助理提供实时预览，并在后期制作阶段中完善；也可直接作为摄像机的最<br />终画面。这类虚拟制片已在现场直播中使用了一段时间，特别是在体育节目中，不<br />过越来越多的专题片和连播片也在应用该技术。混合虚拟制片的两种主要模式是实<br />时制作和后期制作。<br />绿幕中的实时混合虚拟制片最早出现在广播新闻天气预报中，天气预报员通过色键<br />技术与天气预报图像融为一体。这类效果通常差强人意，摄像机是固定的，而且质<br />量不可能达到电影级水准。尽管如此，近年来随着GPU速度的提升和实时引擎的引<br />入，这类解决方案的质量有了很大提高。例如，Zero Density系统利用虚幻引擎制作<br />各种新闻和娱乐节目的现场合成效果。将Zero Density用于演播室内实时虚拟制片的<br />用户包括福克斯体育、Canal +、RTL、TF1和天空新闻。<br />在拍摄绿幕时，后期制作类型的混合虚拟制片可使用摄像机跟踪数据，从而提供实<br />时的镜头内合成图像。实时合成通常使用代理分辨率。在绿幕前捕捉&#x2F;拍摄演员和道<br />具时，它通常用作勾画镜头的参照。后期制作类型的混合虚拟制片旨在帮助导演、<br />摄影导演和摄影助理更好地掌握虚拟元素（例如 CG角色的位置）并设置扩展，以便<br />在后期中更好地集成视觉特效。《奇幻森林》在制作时采用了该方法的高级版本。<br />这种技术还广泛应用于最近的电视连续剧中，例如《复仇》、《泛美航空》、《童<br />话镇》以及《美国众神》。<br /><img src="/assets/post_images/Mixed-Virtual-Production/image_000.png#clientId=ubddb27b3-df19-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=650&id=Hql4I&margin=%5Bobject%20Object%5D&name=image.png&originHeight=650&originWidth=909&originalType=binary&ratio=1&rotation=0&showTitle=false&size=627633&status=done&style=none&taskId=u11e864b5-03c2-4425-8405-e629bcd0d23&title=&width=909" alt="image.png"><br><a name="OK3M0"></a></p>
+<h4 id="1-1-2-应用场景"><a href="#1-1-2-应用场景" class="headerlink" title="1.1.2 应用场景"></a>1.1.2 应用场景</h4><p><img src="/assets/post_images/Mixed-Virtual-Production/image_001.png#clientId=u5a6f63bb-8cfc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=213&id=u61741d30&margin=%5Bobject%20Object%5D&name=image.png&originHeight=503&originWidth=755&originalType=binary&ratio=1&rotation=0&showTitle=false&size=590437&status=done&style=none&taskId=u8e4870e9-1d33-4398-98eb-d51af2cf2b0&title=&width=319.5" alt="image.png"><img src="/assets/post_images/Mixed-Virtual-Production/image_002.png#clientId=u5a6f63bb-8cfc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=214&id=u28101a6f&margin=%5Bobject%20Object%5D&name=image.png&originHeight=393&originWidth=755&originalType=binary&ratio=1&rotation=0&showTitle=false&size=433553&status=done&style=none&taskId=u237d6df6-9d54-4404-9a37-70708d3fc6f&title=&width=411.5" alt="image.png"><br /><img src="/assets/post_images/Mixed-Virtual-Production/image_003.png#clientId=u8c606a1b-79ba-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=272&id=ub1cb421e&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1076&originWidth=2890&originalType=binary&ratio=1&rotation=0&showTitle=false&size=2732989&status=done&style=none&taskId=u6f882e4e-4942-45f2-bef0-7ff90e61f42&title=&width=730" alt="image.png"><br /><img src="/assets/post_images/Mixed-Virtual-Production/image_004.png#clientId=u8c606a1b-79ba-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=498&id=uf24894e6&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1128&originWidth=1650&originalType=binary&ratio=1&rotation=0&showTitle=false&size=2146673&status=done&style=none&taskId=u6fbf0a06-9f9c-4e78-9b69-4d0d699561b&title=&width=729" alt="image.png"></p>
+<p><a name="CGWVE"></a></p>
+<h4 id="1-1-3-工作流特性"><a href="#1-1-3-工作流特性" class="headerlink" title="1.1.3 工作流特性"></a>1.1.3 工作流特性</h4><p><a name="lXoax"></a><br>assets&#x2F;post_images&#x2F;Mixed-Virtual-Production&#x2F;image_008.assets&#x2F;post_images&#x2F;Mixed-Virtual-Production&#x2F;image_007.assets&#x2F;post_images&#x2F;Mixed-Virtual-Production&#x2F;image_006.assets&#x2F;post_images&#x2F;Mixed-Virtual-Production&#x2F;image_005.#### <img src="/assets/post_images/Mixed-Virtual-Production/image_009.png#clientId=ubddb27b3-df19-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=1033&id=u314e8537&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1549&originWidth=1345&originalType=binary&ratio=1&rotation=0&showTitle=false&size=839245&status=done&style=none&taskId=uf404c7c6-b333-4201-8bdd-b0fe8f96074&title=&width=896.6666666666666" alt="image.png"><br><a name="vwKhS"></a></p>
+<h3 id="1-2-关键词"><a href="#1-2-关键词" class="headerlink" title="1.2 关键词"></a>1.2 关键词</h3><p><a name="ZiLol"></a></p>
+<h4 id="1-2-1-绿幕（Green-Screen）"><a href="#1-2-1-绿幕（Green-Screen）" class="headerlink" title="1.2.1 绿幕（Green Screen）"></a>1.2.1 绿幕（Green Screen）</h4><p>理论上可以是任何颜色的单色背景，使其在处理后为透明或者从拍摄中除去。通常是亮绿色（bright green），因为其与人体皮肤距离最远。<br><a name="yWgK6"></a></p>
+<h4 id="1-2-2-色键技术（Chroma-Key）"><a href="#1-2-2-色键技术（Chroma-Key）" class="headerlink" title="1.2.2 色键技术（Chroma Key）"></a>1.2.2 色键技术（Chroma Key）</h4><p>基于色调（hue）对图片做分层或合成。<br><a name="Eq7fK"></a></p>
+<h4 id="1-2-3-抠图（Keying）"><a href="#1-2-3-抠图（Keying）" class="headerlink" title="1.2.3 抠图（Keying）"></a>1.2.3 抠图（Keying）</h4><p>使用视频编辑软件在后处理阶段移除绿幕背景。<br><a name="y3sIx"></a></p>
+<h4 id="1-2-4-溢色（Spill）"><a href="#1-2-4-溢色（Spill）" class="headerlink" title="1.2.4 溢色（Spill）"></a>1.2.4 溢色（Spill）</h4><p>来自绿幕反射的有色光达到主物体上而产生，影响抠图阶段，需用各种手段来抑制。<br><a name="QGp6c"></a></p>
+<h3 id="1-3-关键要素"><a href="#1-3-关键要素" class="headerlink" title="1.3 关键要素"></a>1.3 关键要素</h3><p><a name="VR6i3"></a></p>
+<h4 id="1-3-1-正确的绿"><a href="#1-3-1-正确的绿" class="headerlink" title="1.3.1 正确的绿"></a>1.3.1 正确的绿</h4><p>用非反射材质的绿幕（棉优于尼龙），最好是 chorma key green 或者 digi green。偶尔也需要用到蓝幕，取决于想要拍摄的场景：<a target="_blank" rel="noopener" href="https://www.premiumbeat.com/blog/blue-screen-vs-green-screen/">blue screen vs green screen</a>。<br><a name="pWiUx"></a></p>
+<h4 id="1-3-2-主体和背景要分开"><a href="#1-3-2-主体和背景要分开" class="headerlink" title="1.3.2 主体和背景要分开"></a>1.3.2 主体和背景要分开</h4><p>最好保持主体距离绿幕6英尺以上（1.8m），这能很大程度降低溢色、避免不想要的阴影投射在绿幕上。<br><a name="tuTh3"></a></p>
+<h4 id="1-3-3-输入决定成败（RAW-is-King）"><a href="#1-3-3-输入决定成败（RAW-is-King）" class="headerlink" title="1.3.3 输入决定成败（RAW is King）"></a>1.3.3 输入决定成败（RAW is King）</h4><p>尽可能使用越高的比特率视频、最少压缩的编解码器。10bit颜色由于8bit，ProRes442&#x2F;444或者最好RAW格式的输入。<br><a name="OItsU"></a></p>
+<h4 id="1-3-4-光要打好"><a href="#1-3-4-光要打好" class="headerlink" title="1.3.4 光要打好"></a>1.3.4 光要打好</h4><p>前景、背景要分开打光，绿幕背景的打光要尽可能的均匀。<br><a name="trLIl"></a></p>
+<h4 id="1-3-5-处理动态模糊"><a href="#1-3-5-处理动态模糊" class="headerlink" title="1.3.5 处理动态模糊"></a>1.3.5 处理动态模糊</h4><p>使用尽可能高的快门速度来减少动态模糊，有助于创造更加纯净的抠图。但在后处理时，要把动态模糊加回来。<br><a name="q65c4"></a></p>
+<h4 id="1-3-6-用专业的抠图软件"><a href="#1-3-6-用专业的抠图软件" class="headerlink" title="1.3.6 用专业的抠图软件"></a>1.3.6 用专业的抠图软件</h4><p>Ae、Pr、HitFilm各种后期软件，还有开源的专业抠图软件比如<a target="_blank" rel="noopener" href="http://www.blackmagicdesign.com/products/davinciresolve/fusion">DaVinci Resolve</a>。</p>
+<p><a name="wfiAO"></a></p>
+<h2 id="2-系统配置与实现"><a href="#2-系统配置与实现" class="headerlink" title="2 系统配置与实现"></a>2 系统配置与实现</h2><p><a name="WimVy"></a></p>
+<h3 id="2-1-整体框架"><a href="#2-1-整体框架" class="headerlink" title="2.1 整体框架"></a>2.1 整体框架</h3><p><a name="aZhfl"></a></p>
+<h4 id="2-1-1-流程参考"><a href="#2-1-1-流程参考" class="headerlink" title="2.1.1 流程参考"></a>2.1.1 流程参考</h4><p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=lRQvi5Jc_Js">https://www.youtube.com/watch?v=lRQvi5Jc_Js</a><br><a name="WvvEu"></a></p>
+<h4 id="2-1-2-系统框图"><a href="#2-1-2-系统框图" class="headerlink" title="2.1.2 系统框图"></a>2.1.2 系统框图</h4><p><img src="/assets/post_images/Mixed-Virtual-Production/image_010.jpeg#clientId=u477df368-560d-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=321&id=u0b847d58&margin=%5Bobject%20Object%5D&name=%E6%B7%B7%E5%90%88%E8%99%9A%E6%8B%9F%E5%88%B6%E7%89%87%E5%9B%BE.jpg&originHeight=642&originWidth=1524&originalType=binary&ratio=1&rotation=0&showTitle=false&size=132445&status=done&style=none&taskId=u1f53aa12-b2ff-484f-a67d-97400a24841&title=&width=762" alt="混合虚拟制片图.jpg"><br><a name="YKK78"></a></p>
+<h3 id="2-2-配置绿幕"><a href="#2-2-配置绿幕" class="headerlink" title="2.2 配置绿幕"></a>2.2 配置绿幕</h3><p><a name="v4bSh"></a></p>
+<h4 id="2-2-1-绿幕整套装备"><a href="#2-2-1-绿幕整套装备" class="headerlink" title="2.2.1 绿幕整套装备"></a>2.2.1 绿幕整套装备</h4><p><img src="/assets/post_images/Mixed-Virtual-Production/image_011.png#clientId=u5a6f63bb-8cfc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=292&id=i4AjS&margin=%5Bobject%20Object%5D&name=image.png&originHeight=584&originWidth=755&originalType=binary&ratio=1&rotation=0&showTitle=false&size=408292&status=done&style=none&taskId=u42c8414e-ecb8-416f-91dd-e5ed8eab31a&title=&width=377.5" alt="image.png"><br />Neewer green screen kit（190 dollars）<br />This massive package boasts a 6×9 screen that includes a white and black backdrop, an 8.5×10 stand support system, six clamps, four light stands, two umbrellas, two softboxes, four daylight bulbs, and bags to carry the kit around.<br><a name="BpB85"></a></p>
+<h4 id="2-2-2-DIY"><a href="#2-2-2-DIY" class="headerlink" title="2.2.2 DIY"></a>2.2.2 DIY</h4><p><a target="_blank" rel="noopener" href="https://youtu.be/PDJsKiaKmAE">New Rules of Greenscreen</a></p>
+<ul>
+<li>绿幕：工艺布料、彩色泡沫板、墙体刷漆（哑光漆）。</li>
+<li>灯光：分开打光、柔和、减少反射、LED更佳。</li>
+<li>支架：稳定、平整。</li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_012.png#clientId=u5a6f63bb-8cfc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=200&id=cf36g&margin=%5Bobject%20Object%5D&name=image.png&originHeight=400&originWidth=755&originalType=binary&ratio=1&rotation=0&showTitle=false&size=136058&status=done&style=none&taskId=u2fa777ed-d48f-4df2-8155-f9f1c61a44d&title=&width=377.5" alt="image.png"><br />（参考<a target="_blank" rel="noopener" href="https://www.amazon.com/Photography-Backdrop-Continuous-Chromakey-Background/dp/B075VM76MV/ref=sr_1_1_sspa">EMART Kit</a>）<br><a name="LkPt3"></a></p>
+<h3 id="2-3-硬件配置"><a href="#2-3-硬件配置" class="headerlink" title="2.3 硬件配置"></a>2.3 硬件配置</h3><p><a name="Dbt2j"></a></p>
+<h4 id="2-3-1-硬件需要"><a href="#2-3-1-硬件需要" class="headerlink" title="2.3.1 硬件需要"></a>2.3.1 硬件需要</h4><ul>
+<li>Vive Tracker</li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_013.png#clientId=ub8cf7548-2ac3-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=227&id=uf9b416ae&margin=%5Bobject%20Object%5D&name=image.png&originHeight=746&originWidth=1502&originalType=binary&ratio=1&rotation=0&showTitle=false&size=689244&status=done&style=none&taskId=u202e5cce-4e17-446c-9eb2-e9bd10c3350&title=&width=458" alt="image.png"></p>
+<ul>
+<li>Video I&#x2F;O Card（专业级）</li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_014.png#clientId=ub8cf7548-2ac3-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=336&id=ufdf99058&margin=%5Bobject%20Object%5D&name=image.png&originHeight=672&originWidth=924&originalType=binary&ratio=1&rotation=0&showTitle=false&size=557760&status=done&style=none&taskId=u1bba402b-eae6-40d1-a1c1-04ab48dc53b&title=&width=462" alt="image.png"><br><a name="IBVqC"></a></p>
+<h4 id="2-3-2-场地配置"><a href="#2-3-2-场地配置" class="headerlink" title="2.3.2 场地配置"></a>2.3.2 场地配置</h4><ul>
+<li>确定场地尺寸</li>
+<li>结合虚拟勘景</li>
+<li>推算所需绿幕尺寸</li>
+<li>布置现场</li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_015.png#clientId=u5a6f63bb-8cfc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=459&id=u68abbdc1&margin=%5Bobject%20Object%5D&name=image.png&originHeight=918&originWidth=1502&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1636386&status=done&style=none&taskId=u88d73e1f-ea4e-418e-9789-d6b3fd65daa&title=&width=751" alt="image.png"><br><a name="pa7T8"></a></p>
+<h4 id="2-3-3-相机配置"><a href="#2-3-3-相机配置" class="headerlink" title="2.3.3 相机配置"></a>2.3.3 相机配置</h4><ul>
+<li>低ISO、高快门速度、大光圈、高像素。</li>
+<li>相机类型（配合不同的IO及算法接口）。</li>
+<li>畸变校准（参数获取）。</li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_016.webp#clientId=u57957d9e-e995-4&crop=0&crop=0&crop=1&crop=1&from=paste&id=OeoKH&margin=%5Bobject%20Object%5D&originHeight=432&originWidth=720&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ubc738fa7-40c9-4641-a529-1ee3eace453&title="><br><a name="cOf6u"></a></p>
+<h4 id="2-3-4-灯光布置"><a href="#2-3-4-灯光布置" class="headerlink" title="2.3.4 灯光布置"></a>2.3.4 灯光布置</h4><ul>
+<li>布光均匀。</li>
+<li>灯光柔和扩散。</li>
+<li>主体和绿幕分开打光。<br><a name="hhl88"></a></li>
+</ul>
+<h3 id="2-4-软件需要"><a href="#2-4-软件需要" class="headerlink" title="2.4 软件需要"></a>2.4 软件需要</h3><p><a name="fw00V"></a></p>
+<h4 id="2-4-1-离线后处理合成"><a href="#2-4-1-离线后处理合成" class="headerlink" title="2.4.1 离线后处理合成"></a>2.4.1 离线后处理合成</h4><ul>
+<li>抠图，后期软件+人工。</li>
+<li>图层叠放。</li>
+<li>特效及后处理。</li>
+<li>生成动态模糊。<br><a name="aosqS"></a></li>
+</ul>
+<h4 id="2-4-2-实时合成"><a href="#2-4-2-实时合成" class="headerlink" title="2.4.2 实时合成"></a>2.4.2 实时合成</h4><ul>
+<li>去Montion Blur。</li>
+<li>自动色键获取。</li>
+<li>抠图和去溢色。</li>
+<li>实时渲染及图层合并。</li>
+<li>光影融合。</li>
+<li>加Motion Blur。</li>
+</ul>
+<p><a name="smP18"></a></p>
+<h2 id="3-基于Unreal"><a href="#3-基于Unreal" class="headerlink" title="3 基于Unreal"></a>3 基于Unreal</h2><p><a name="A9oc1"></a></p>
+<h3 id="3-1-实时合成"><a href="#3-1-实时合成" class="headerlink" title="3.1 实时合成"></a>3.1 实时合成</h3><p><a name="Jf3Fi"></a></p>
+<h4 id="3-1-1-Chroma-Keying（抠图）"><a href="#3-1-1-Chroma-Keying（抠图）" class="headerlink" title="3.1.1 Chroma Keying（抠图）"></a>3.1.1 Chroma Keying（抠图）</h4><ul>
+<li>RGB to YCoCg（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/YCoCg">https://en.wikipedia.org/wiki/YCoCg</a>）</li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_017.svg#clientId=u3279c955-d4b5-4&crop=0&crop=0&crop=1&crop=1&from=paste&id=u2a494eee&margin=%5Bobject%20Object%5D&originHeight=107&originWidth=309&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u1b455fb8-d3b9-42ba-bfd6-f3c017a2b9c&title="><img src="/assets/post_images/Mixed-Virtual-Production/image_018.png#clientId=u3279c955-d4b5-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=436&id=u47e6f004&margin=%5Bobject%20Object%5D&name=image.png&originHeight=2390&originWidth=800&originalType=url&ratio=1&rotation=0&showTitle=false&size=2383259&status=done&style=none&taskId=u3caee2ba-9b4f-4db9-b7fe-bb67f93b8aa&title=&width=146" alt="image.png"></p>
+<ul>
+<li>Chroma Mask multiplied by Luma</li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_019.png#clientId=u3279c955-d4b5-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=934&id=u529f7b59&margin=%5Bobject%20Object%5D&name=image.png&originHeight=934&originWidth=1783&originalType=binary&ratio=1&rotation=0&showTitle=false&size=698682&status=done&style=none&taskId=u8e7748ad-0b75-4712-85bf-aa63577115f&title=&width=1783" alt="image.png"></p>
+<ul>
+<li>SmoothStep</li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_020.png#clientId=u3279c955-d4b5-4&crop=0&crop=0&crop=1&crop=0.3578&from=paste&height=1199&id=u3edf8867&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1199&originWidth=623&originalType=binary&ratio=1&rotation=0&showTitle=false&size=408751&status=done&style=none&taskId=uceaa066b-7795-41c5-b3c5-71aaf74b68d&title=&width=623" alt="image.png"><img src="/assets/post_images/Mixed-Virtual-Production/image_021.png#clientId=u3279c955-d4b5-4&crop=0&crop=0.658&crop=1&crop=1&from=paste&height=1199&id=u0debed4a&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1199&originWidth=623&originalType=binary&ratio=1&rotation=0&showTitle=false&size=408751&status=done&style=none&taskId=ue3b0bd3d-34ee-4c37-9d2d-5fd685d6e8f&title=&width=623" alt="image.png"><br><a name="bgL8e"></a></p>
+<h4 id="3-1-2-Despill（去溢色）"><a href="#3-1-2-Despill（去溢色）" class="headerlink" title="3.1.2 Despill（去溢色）"></a>3.1.2 Despill（去溢色）</h4><ul>
+<li>RGB to HSV</li>
+<li>Minus KeyColor Hue</li>
+<li>Smooth by Hue Range</li>
+<li>Lerp to Desaturation by Hue Diff</li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_022.png#clientId=u07ca26a8-5a08-4&crop=0&crop=0&crop=1&crop=0.3561&from=paste&height=1202&id=u54d3f252&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1202&originWidth=622&originalType=binary&ratio=1&rotation=0&showTitle=false&size=404528&status=done&style=none&taskId=uc2c26653-35e5-4071-b2d6-2f0d2035059&title=&width=622" alt="image.png"><img src="/assets/post_images/Mixed-Virtual-Production/image_023.png#clientId=u07ca26a8-5a08-4&crop=0&crop=0.6614&crop=1&crop=1&from=paste&height=1202&id=u65bbedff&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1202&originWidth=622&originalType=binary&ratio=1&rotation=0&showTitle=false&size=404528&status=done&style=none&taskId=u533da177-4481-45d7-9af8-c3f520e615c&title=&width=622" alt="image.png"><br><a name="Msjfr"></a></p>
+<h4 id="3-1-3-前后景及切片"><a href="#3-1-3-前后景及切片" class="headerlink" title="3.1.3 前后景及切片"></a>3.1.3 前后景及切片</h4><ul>
+<li>前景层对象捕获。</li>
+<li>媒体流抠图及mask贴片。</li>
+<li>背景实时渲染。</li>
+<li>各种叠放逻辑进行合图。</li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_024.png#clientId=ubddb27b3-df19-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=1090&id=u0a60d8d0&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1090&originWidth=1224&originalType=binary&ratio=1&rotation=0&showTitle=false&size=646296&status=done&style=none&taskId=u318a9ec8-8ba6-47bc-a2fb-e238b1da564&title=&width=1224" alt="image.png"><br /><img src="/assets/post_images/Mixed-Virtual-Production/image_025.png#clientId=u0dec3e3b-d024-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=903&id=ue1ddef64&margin=%5Bobject%20Object%5D&name=image.png&originHeight=903&originWidth=1964&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1677702&status=done&style=none&taskId=u20b34a76-1cfd-4a7a-936c-bdb751ba010&title=&width=1964" alt="image.png"><br><a name="fyZn0"></a></p>
+<h4 id="3-1-4-光影融合"><a href="#3-1-4-光影融合" class="headerlink" title="3.1.4 光影融合"></a>3.1.4 光影融合</h4><p><a name="scuW3"></a></p>
+<h3 id="3-2-镜头及输入流"><a href="#3-2-镜头及输入流" class="headerlink" title="3.2 镜头及输入流"></a>3.2 镜头及输入流</h3><p><a name="xxfuv"></a></p>
+<h4 id="3-2-1-镜头位置绑定"><a href="#3-2-1-镜头位置绑定" class="headerlink" title="3.2.1 镜头位置绑定"></a>3.2.1 镜头位置绑定</h4><p><img src="/assets/post_images/Mixed-Virtual-Production/image_026.png#clientId=u87bbbf1a-9c7b-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=718&id=ua5b99c35&margin=%5Bobject%20Object%5D&name=image.png&originHeight=718&originWidth=1924&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1815526&status=done&style=none&taskId=u50de4f2e-739b-49d8-97e7-e7b1b2e42ee&title=&width=1924" alt="image.png"></p>
+<ul>
+<li>入瞳点（entrance pupil)对齐保证无视差。</li>
+<li>入瞳点测量。 <a target="_blank" rel="noopener" href="http://www.johnhpanos.com/epcalib.htm">http://www.johnhpanos.com/epcalib.htm</a></li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_027.png#clientId=u87bbbf1a-9c7b-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=244&id=u62f0857a&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1080&originWidth=774&originalType=binary&ratio=1&rotation=0&showTitle=false&size=983582&status=done&style=none&taskId=u0d42098e-cd0d-4e73-8f8c-be629bb7947&title=&width=175" alt="image.png"><img src="/assets/post_images/Mixed-Virtual-Production/image_028.png#clientId=u87bbbf1a-9c7b-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=241&id=ucaf37159&margin=%5Bobject%20Object%5D&name=image.png&originHeight=986&originWidth=1901&originalType=binary&ratio=1&rotation=0&showTitle=false&size=2171235&status=done&style=none&taskId=uf11d593e-c128-4a95-8aad-33bda68879c&title=&width=464" alt="image.png"></p>
+<ul>
+<li>启动Steam VR，链接Vive Tracker到电脑。</li>
+<li>开启LiveLink，创建虚拟Tracker，并实时链接到C Vive。</li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_029.png#clientId=u87bbbf1a-9c7b-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=705&id=u88fd1597&margin=%5Bobject%20Object%5D&name=image.png&originHeight=705&originWidth=1308&originalType=binary&ratio=1&rotation=0&showTitle=false&size=817116&status=done&style=none&taskId=u55881efb-9d8d-4aa4-914a-97358207108&title=&width=1308" alt="image.png"><br><a name="XCXKH"></a></p>
+<h4 id="3-2-2-镜头畸变校准"><a href="#3-2-2-镜头畸变校准" class="headerlink" title="3.2.2 镜头畸变校准"></a>3.2.2 镜头畸变校准</h4><p><img src="/assets/post_images/Mixed-Virtual-Production/image_030.png#clientId=u17153e6d-fafc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=1085&id=ua6bf3143&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1085&originWidth=1914&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1464336&status=done&style=none&taskId=u316ffb25-8863-4413-a2a6-bde5cddfc3a&title=&width=1914" alt="image.png"><br /><img src="/assets/post_images/Mixed-Virtual-Production/image_031.png#clientId=u17153e6d-fafc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=1083&id=u4ffc6f23&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1083&originWidth=1921&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1432373&status=done&style=none&taskId=u662118d6-3fe1-40a7-af48-24829209149&title=&width=1921" alt="image.png"><img src="/assets/post_images/Mixed-Virtual-Production/image_032.png#clientId=u17153e6d-fafc-4&crop=0&crop=0&crop=1&crop=1&from=drop&id=ub3ea852d&margin=%5Bobject%20Object%5D&name=pattern.png&originHeight=1240&originWidth=1754&originalType=binary&ratio=1&rotation=0&showTitle=false&size=27835&status=done&style=none&taskId=ue3ee435a-a228-454b-8e4a-43e294b3be7&title=" alt="pattern.png"></p>
+<ul>
+<li><strong>悬垂线</strong>在正常的物理镜头中，一般不会是完全竖直的。</li>
+<li>相机拍摄模式、焦距、镜头、分辨率均会决定摄像头的畸变情况，任意调整需触发<strong>重新校准</strong>。</li>
+<li>常用<strong>棋盘格</strong>来进行畸变参数计算采集，连续拍多组位置、角度不同的棋盘格相片，用CV的方法可以计算。</li>
+<li><strong>输入流矫正（REtracker Calibrator）</strong></li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_033.png#clientId=u17153e6d-fafc-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=1082&id=u0dbcf2a6&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1082&originWidth=1921&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1019530&status=done&style=none&taskId=u9c995602-56a3-4c5f-95eb-d86f7d48a74&title=&width=1921" alt="image.png"></p>
+<ul>
+<li><strong>虚拟相机逆矫正（LiveLinkXR &amp; Calibration）</strong></li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_034.gif#clientId=u17153e6d-fafc-4&crop=0&crop=0&crop=1&crop=1&from=paste&id=ubea3081b&margin=%5Bobject%20Object%5D&originHeight=738&originWidth=1064&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u8d102be5-167c-4b90-9298-1fd7c697d9a&title="><br><a name="iul6e"></a></p>
+<h4 id="3-2-3-专业采集卡"><a href="#3-2-3-专业采集卡" class="headerlink" title="3.2.3 专业采集卡"></a>3.2.3 专业采集卡</h4><ul>
+<li>AJA or BMD</li>
+</ul>
+<p><img src="/assets/post_images/Mixed-Virtual-Production/image_035.png#clientId=ubddb27b3-df19-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=783&id=u00122f4a&margin=%5Bobject%20Object%5D&name=image.png&originHeight=783&originWidth=1185&originalType=binary&ratio=1&rotation=0&showTitle=false&size=610049&status=done&style=none&taskId=u01c3e452-2d0e-4a8b-87fa-f11a37b3ab8&title=&width=1185" alt="image.png"><br />（<a target="_blank" rel="noopener" href="https://www.aja.com/products/kona-5-oem">https://www.aja.com/products/kona-5-oem</a>）</p>
+<ul>
+<li>AJA I&#x2F;O or BlackMagic I&#x2F;O software</li>
+<li>时间码和集中同步，AJA或BlackMagic有对应的GenLock可以直接用，如果是非采集卡普通摄像头需要自己加。</li>
+</ul>
+<p><a name="eLAgB"></a></p>
+<h2 id="4-缺陷与方向"><a href="#4-缺陷与方向" class="headerlink" title="4 缺陷与方向"></a>4 缺陷与方向</h2><p><a name="Pc5ed"></a></p>
+<h3 id="4-1-问题分析"><a href="#4-1-问题分析" class="headerlink" title="4.1 问题分析"></a>4.1 问题分析</h3><p>完美的软硬件结合配合最高配置将使得整个流程输出的质量误差极小，然而实际过程中不会有那么多完美的状态，其中引入问题的关键点主要如下。<br><a name="ZTbHC"></a></p>
+<h4 id="4-1-1-相机误差"><a href="#4-1-1-相机误差" class="headerlink" title="4.1.1 相机误差"></a>4.1.1 相机误差</h4><ul>
+<li>相机参数不够好。</li>
+<li>相机镜头畸变矫正错误。</li>
+<li>相机存在的动态模糊不易消除，模式固定或快门速度不够。</li>
+<li>相机与PC的I&#x2F;O问题而引入的误差。</li>
+<li>相机与PC或引擎软件的时间码同步出现问题。<br><a name="DeozJ"></a></li>
+</ul>
+<h4 id="4-1-2-绿幕环境问题"><a href="#4-1-2-绿幕环境问题" class="headerlink" title="4.1.2 绿幕环境问题"></a>4.1.2 绿幕环境问题</h4><ul>
+<li>灯光不够柔和。</li>
+<li>绿幕表面被打亮的不够均匀。</li>
+<li>人与绿幕间的反射、阴影影响。<br><a name="RCC87"></a></li>
+</ul>
+<h4 id="4-1-3-抠图算法难点"><a href="#4-1-3-抠图算法难点" class="headerlink" title="4.1.3 抠图算法难点"></a>4.1.3 抠图算法难点</h4><ul>
+<li>基于色度的抠图，也会削弱主物体。</li>
+<li>溢色难题。</li>
+<li>参数自适应。</li>
+<li>边缘融合。<br><a name="HtSCf"></a></li>
+</ul>
+<h4 id="4-1-4-光影合成问题"><a href="#4-1-4-光影合成问题" class="headerlink" title="4.1.4 光影合成问题"></a>4.1.4 光影合成问题</h4><ul>
+<li>虚拟阴影。</li>
+<li>虚拟GI效果。<br><a name="qMOmy"></a></li>
+</ul>
+<h4 id="4-1-5-虚实空间对应难"><a href="#4-1-5-虚实空间对应难" class="headerlink" title="4.1.5 虚实空间对应难"></a>4.1.5 虚实空间对应难</h4><ul>
+<li>真实环境与虚拟空间尺寸难对应。</li>
+<li>非绑Tracker的物体难定位。</li>
+<li>物体运动带来的精度误差，同时对实时性也是挑战。<br><a name="lkilt"></a></li>
+</ul>
+<h3 id="4-2-相关Research"><a href="#4-2-相关Research" class="headerlink" title="4.2 相关Research"></a>4.2 相关Research</h3><p><a name="rkOG4"></a></p>
+<h4 id="4-2-1-背景分割"><a href="#4-2-1-背景分割" class="headerlink" title="4.2.1 背景分割"></a>4.2.1 背景分割</h4><p><img src="/assets/post_images/Mixed-Virtual-Production/image_036.png#clientId=u2b9a282e-6a4a-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=202&id=u04861c18&margin=%5Bobject%20Object%5D&name=image.png&originHeight=404&originWidth=2026&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1054381&status=done&style=none&taskId=u10127d8d-4806-42cb-ac1e-ffd15a77471&title=&width=1013" alt="image.png"><a target="_blank" rel="noopener" href="https://grail.cs.washington.edu/projects/background-matting/">https://grail.cs.washington.edu/projects/background-matting/</a><br><a name="Zvvph"></a></p>
+<h4 id="4-2-2-抠图和去溢色"><a href="#4-2-2-抠图和去溢色" class="headerlink" title="4.2.2 抠图和去溢色"></a>4.2.2 抠图和去溢色</h4><p><img src="/assets/post_images/Mixed-Virtual-Production/image_037.png#clientId=u2b9a282e-6a4a-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=211&id=uf1755c99&margin=%5Bobject%20Object%5D&name=image.png&originHeight=422&originWidth=1406&originalType=binary&ratio=1&rotation=0&showTitle=false&size=635162&status=done&style=none&taskId=u10c4b511-f268-4218-94cc-d496c75b9c5&title=&width=703" alt="image.png"><br /><a target="_blank" rel="noopener" href="http://yaksoy.github.io/keying/">http://yaksoy.github.io/keying/</a><br><a name="lXGb3"></a></p>
+<h4 id="4-2-3-单目相机姿态识别"><a href="#4-2-3-单目相机姿态识别" class="headerlink" title="4.2.3 单目相机姿态识别"></a>4.2.3 单目相机姿态识别</h4><p><img src="/assets/post_images/Mixed-Virtual-Production/image_038.png#clientId=u2b9a282e-6a4a-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=345&id=u92fcb1ff&margin=%5Bobject%20Object%5D&name=image.png&originHeight=690&originWidth=1332&originalType=binary&ratio=1&rotation=0&showTitle=false&size=795638&status=done&style=none&taskId=uc83ed21a-aabb-448f-8ba5-1fec2776b3a&title=&width=666" alt="image.png"><br /><a target="_blank" rel="noopener" href="https://vcai.mpi-inf.mpg.de/projects/PhysCap/">https://vcai.mpi-inf.mpg.de/projects/PhysCap/</a><br><a name="Beg2K"></a></p>
+<h3 id="4-3-整体解决方案"><a href="#4-3-整体解决方案" class="headerlink" title="4.3 整体解决方案"></a>4.3 整体解决方案</h3><p><a name="LhANv"></a></p>
+<h4 id="4-3-1-Virtual-Stage"><a href="#4-3-1-Virtual-Stage" class="headerlink" title="4.3.1 Virtual Stage"></a>4.3.1 Virtual Stage</h4><p><img src="/assets/post_images/Mixed-Virtual-Production/image_039.png#clientId=uc27945cb-ef56-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=485&id=u2e5833c8&margin=%5Bobject%20Object%5D&name=image.png&originHeight=970&originWidth=2592&originalType=binary&ratio=1&rotation=0&showTitle=false&size=2316953&status=done&style=none&taskId=uda8eced5-783f-400f-b6c9-58704630afa&title=&width=1296" alt="image.png"><br /><a target="_blank" rel="noopener" href="https://www.microsoft.com/en-us/ai/ai-lab-virtual-stage">https://www.microsoft.com/en-us/ai/ai-lab-virtual-stage</a><br><a name="bcHZf"></a></p>
+<h4 id="4-3-2-视频算法抠图"><a href="#4-3-2-视频算法抠图" class="headerlink" title="4.3.2 视频算法抠图"></a>4.3.2 视频算法抠图</h4><p>参考钉钉、腾讯会议、FaceTime。<br><a name="HRB8T"></a></p>
+<h3 id="5-引用"><a href="#5-引用" class="headerlink" title="5 引用"></a>5 引用</h3><ul>
+<li>《Interactive High-Quality Green-Screen Keying via Color Unmixing》 <a target="_blank" rel="noopener" href="http://yaksoy.github.io/keying/">http://yaksoy.github.io/keying/</a></li>
+<li>《Efficient mask expansion for green-screen keying using color distributions》<a target="_blank" rel="noopener" href="https://dl.acm.org/doi/abs/10.1145/3306214.3338595">https://dl.acm.org/doi/abs/10.1145/3306214.3338595</a></li>
+<li>《Human Instance Matting via Mutual Guidance and Multi-Instance Refinement》 <a target="_blank" rel="noopener" href="https://ieeexplore.ieee.org/document/9879184">https://ieeexplore.ieee.org/document/9879184</a></li>
+<li>《PhysCap: Physically Plausible Monocular 3D Motion Capture in Real Time》 <a target="_blank" rel="noopener" href="https://vcai.mpi-inf.mpg.de/projects/PhysCap/">https://vcai.mpi-inf.mpg.de/projects/PhysCap/</a></li>
+<li>《Despilling and Color Replacement》<a target="_blank" rel="noopener" href="https://learn.foundry.com/nuke/content/comp_environment/keying_with_chromakeyer/despill_controls.html">https://learn.foundry.com/nuke/content/comp_environment&#x2F;keying_with_chromakeyer&#x2F;despill_controls.html</a></li>
+<li>《Unreal实时合成入门课程》<a target="_blank" rel="noopener" href="https://dev.epicgames.com/community/learning/courses/eOD/unreal-engine-cf1068/jyB4/unreal-engine-44093a">https://dev.epicgames.com/community/learning/courses/eOD/unreal-engine-cf1068/jyB4/unreal-engine-44093a</a></li>
+<li>《在UE4中设置色键材质》<a target="_blank" rel="noopener" href="https://www.unrealengine.com/zh-CN/tech-blog/setting-up-a-chroma-key-material-in-ue4">https://www.unrealengine.com/zh-CN/tech-blog/setting-up-a-chroma-key-material-in-ue4</a></li>
+<li>《虚幻引擎文档》 <a target="_blank" rel="noopener" href="https://docs.unrealengine.com/4.27/zh-CN/">https://docs.unrealengine.com/4.27/zh-CN/</a></li>
+<li>《Virtual Production Tutorials,  by Greg Corson》 <a target="_blank" rel="noopener" href="https://www.youtube.com/playlist?list=PL4A6BJ4uPvvt1igHNPBNR3CeOsCLGyZ2U">https://www.youtube.com/playlist?list=PL4A6BJ4uPvvt1igHNPBNR3CeOsCLGyZ2U</a></li>
+<li>《虚拟制片实践指南》第一册、第二册 <a target="_blank" rel="noopener" href="https://yuque.antfin.com/attachments/lark/0/2022/pdf/223200/1666949482141-97a1695f-ba31-415b-9879-25aa57d17d17.pdf?_lake_card=%7B%22src%22:%22https://yuque.antfin.com/attachments/lark/0/2022/pdf/223200/1666949482141-97a1695f-ba31-415b-9879-25aa57d17d17.pdf%22,%22name%22:%22%E8%99%9A%E6%8B%9F%E5%88%B6%E7%89%87%E6%8C%87%E5%8D%97%E7%AC%AC%E4%B8%80%E5%86%8C.pdf%22,%22size%22:20932905,%22type%22:%22application/pdf%22,%22ext%22:%22pdf%22,%22source%22:%22%22,%22status%22:%22done%22,%22mode%22:%22title%22,%22download%22:true,%22taskId%22:%22u6d52e7f8-e594-4e68-9836-19bbe1ae1f8%22,%22taskType%22:%22upload%22,%22__spacing%22:%22both%22,%22id%22:%22u9531c776%22,%22margin%22:%7B%22top%22:true,%22bottom%22:true%7D,%22card%22:%22file%22%7D">虚拟制片指南第一册.pdf</a><a target="_blank" rel="noopener" href="https://yuque.antfin.com/attachments/lark/0/2022/pdf/223200/1666949486777-10af9d97-2d5e-44d5-a72b-9b6c5430f139.pdf?_lake_card=%7B%22src%22:%22https://yuque.antfin.com/attachments/lark/0/2022/pdf/223200/1666949486777-10af9d97-2d5e-44d5-a72b-9b6c5430f139.pdf%22,%22name%22:%22%E3%80%8A%E8%99%9A%E6%8B%9F%E5%88%B6%E7%89%87%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97%E3%80%8B%E7%AC%AC%E4%BA%8C%E5%86%8C.pdf%22,%22size%22:24601037,%22type%22:%22application/pdf%22,%22ext%22:%22pdf%22,%22source%22:%22%22,%22status%22:%22done%22,%22mode%22:%22title%22,%22download%22:true,%22taskId%22:%22u22192589-dece-4ae0-903e-fb98ba7dc8d%22,%22taskType%22:%22upload%22,%22__spacing%22:%22both%22,%22id%22:%22ua911cfc7%22,%22margin%22:%7B%22top%22:true,%22bottom%22:true%7D,%22card%22:%22file%22%7D">《虚拟制片实践指南》第二册.pdf</a></li>
+<li>《单反科普专栏》 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/46716827">https://zhuanlan.zhihu.com/p/46716827</a></li>
+</ul>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>Author：<a href="https://graphicyan.github.io">Yan Zhang</a>
+            <p>Link：<a href="https://graphicyan.github.io/2022/12/29/Mixed-Virtual-Production/">https://graphicyan.github.io/2022/12/29/Mixed-Virtual-Production/</a>
+            <p>Publish date：<a href="https://graphicyan.github.io/2022/12/29/Mixed-Virtual-Production/">December 29th 2022, 2:23:29 pm</a>
+            <p>Update date：<a href="https://graphicyan.github.io/2022/12/29/Mixed-Virtual-Production/">July 18th 2025, 11:55:52 am</a>
+            <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/02/21/Collaborative-Engine/" title="浅谈端云协同渲染">
+                    <div class="nextTitle">浅谈端云协同渲染</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2022/10/08/C2BP-Params/" title="C++生成蓝图的参数类型记录">
+                    <div class="prevTitle">C++生成蓝图的参数类型记录</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:yanzhang.cg@gmail.com" class="iconfont-archer email" title="email" ></a>
+                <a href="https://github.com/GraphicYan" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/wechat.png" />
+                </span>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E5%88%9B%E6%80%A7%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">原创性声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%BC%95%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">1 引言</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E8%99%9A%E6%8B%9F%E5%88%B6%E7%89%87"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 虚拟制片</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-1-%E6%B7%B7%E5%90%88%E8%99%9A%E6%8B%9F%E5%88%B6%E7%89%87"><span class="toc-number">2.1.1.</span> <span class="toc-text">1.1.1 混合虚拟制片</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-2-%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">2.1.2.</span> <span class="toc-text">1.1.2 应用场景</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-3-%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%89%B9%E6%80%A7"><span class="toc-number">2.1.3.</span> <span class="toc-text">1.1.3 工作流特性</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E5%85%B3%E9%94%AE%E8%AF%8D"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 关键词</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-1-%E7%BB%BF%E5%B9%95%EF%BC%88Green-Screen%EF%BC%89"><span class="toc-number">2.2.1.</span> <span class="toc-text">1.2.1 绿幕（Green Screen）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-2-%E8%89%B2%E9%94%AE%E6%8A%80%E6%9C%AF%EF%BC%88Chroma-Key%EF%BC%89"><span class="toc-number">2.2.2.</span> <span class="toc-text">1.2.2 色键技术（Chroma Key）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-3-%E6%8A%A0%E5%9B%BE%EF%BC%88Keying%EF%BC%89"><span class="toc-number">2.2.3.</span> <span class="toc-text">1.2.3 抠图（Keying）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-4-%E6%BA%A2%E8%89%B2%EF%BC%88Spill%EF%BC%89"><span class="toc-number">2.2.4.</span> <span class="toc-text">1.2.4 溢色（Spill）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E5%85%B3%E9%94%AE%E8%A6%81%E7%B4%A0"><span class="toc-number">2.3.</span> <span class="toc-text">1.3 关键要素</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-1-%E6%AD%A3%E7%A1%AE%E7%9A%84%E7%BB%BF"><span class="toc-number">2.3.1.</span> <span class="toc-text">1.3.1 正确的绿</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-2-%E4%B8%BB%E4%BD%93%E5%92%8C%E8%83%8C%E6%99%AF%E8%A6%81%E5%88%86%E5%BC%80"><span class="toc-number">2.3.2.</span> <span class="toc-text">1.3.2 主体和背景要分开</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-3-%E8%BE%93%E5%85%A5%E5%86%B3%E5%AE%9A%E6%88%90%E8%B4%A5%EF%BC%88RAW-is-King%EF%BC%89"><span class="toc-number">2.3.3.</span> <span class="toc-text">1.3.3 输入决定成败（RAW is King）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-4-%E5%85%89%E8%A6%81%E6%89%93%E5%A5%BD"><span class="toc-number">2.3.4.</span> <span class="toc-text">1.3.4 光要打好</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-5-%E5%A4%84%E7%90%86%E5%8A%A8%E6%80%81%E6%A8%A1%E7%B3%8A"><span class="toc-number">2.3.5.</span> <span class="toc-text">1.3.5 处理动态模糊</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-6-%E7%94%A8%E4%B8%93%E4%B8%9A%E7%9A%84%E6%8A%A0%E5%9B%BE%E8%BD%AF%E4%BB%B6"><span class="toc-number">2.3.6.</span> <span class="toc-text">1.3.6 用专业的抠图软件</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E4%B8%8E%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.</span> <span class="toc-text">2 系统配置与实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E6%95%B4%E4%BD%93%E6%A1%86%E6%9E%B6"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 整体框架</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-1-%E6%B5%81%E7%A8%8B%E5%8F%82%E8%80%83"><span class="toc-number">3.1.1.</span> <span class="toc-text">2.1.1 流程参考</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-2-%E7%B3%BB%E7%BB%9F%E6%A1%86%E5%9B%BE"><span class="toc-number">3.1.2.</span> <span class="toc-text">2.1.2 系统框图</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E9%85%8D%E7%BD%AE%E7%BB%BF%E5%B9%95"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 配置绿幕</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-1-%E7%BB%BF%E5%B9%95%E6%95%B4%E5%A5%97%E8%A3%85%E5%A4%87"><span class="toc-number">3.2.1.</span> <span class="toc-text">2.2.1 绿幕整套装备</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-2-DIY"><span class="toc-number">3.2.2.</span> <span class="toc-text">2.2.2 DIY</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E7%A1%AC%E4%BB%B6%E9%85%8D%E7%BD%AE"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 硬件配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-1-%E7%A1%AC%E4%BB%B6%E9%9C%80%E8%A6%81"><span class="toc-number">3.3.1.</span> <span class="toc-text">2.3.1 硬件需要</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-2-%E5%9C%BA%E5%9C%B0%E9%85%8D%E7%BD%AE"><span class="toc-number">3.3.2.</span> <span class="toc-text">2.3.2 场地配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-3-%E7%9B%B8%E6%9C%BA%E9%85%8D%E7%BD%AE"><span class="toc-number">3.3.3.</span> <span class="toc-text">2.3.3 相机配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-4-%E7%81%AF%E5%85%89%E5%B8%83%E7%BD%AE"><span class="toc-number">3.3.4.</span> <span class="toc-text">2.3.4 灯光布置</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E8%BD%AF%E4%BB%B6%E9%9C%80%E8%A6%81"><span class="toc-number">3.4.</span> <span class="toc-text">2.4 软件需要</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-1-%E7%A6%BB%E7%BA%BF%E5%90%8E%E5%A4%84%E7%90%86%E5%90%88%E6%88%90"><span class="toc-number">3.4.1.</span> <span class="toc-text">2.4.1 离线后处理合成</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-2-%E5%AE%9E%E6%97%B6%E5%90%88%E6%88%90"><span class="toc-number">3.4.2.</span> <span class="toc-text">2.4.2 实时合成</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%9F%BA%E4%BA%8EUnreal"><span class="toc-number">4.</span> <span class="toc-text">3 基于Unreal</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%AE%9E%E6%97%B6%E5%90%88%E6%88%90"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 实时合成</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-1-Chroma-Keying%EF%BC%88%E6%8A%A0%E5%9B%BE%EF%BC%89"><span class="toc-number">4.1.1.</span> <span class="toc-text">3.1.1 Chroma Keying（抠图）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-2-Despill%EF%BC%88%E5%8E%BB%E6%BA%A2%E8%89%B2%EF%BC%89"><span class="toc-number">4.1.2.</span> <span class="toc-text">3.1.2 Despill（去溢色）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-3-%E5%89%8D%E5%90%8E%E6%99%AF%E5%8F%8A%E5%88%87%E7%89%87"><span class="toc-number">4.1.3.</span> <span class="toc-text">3.1.3 前后景及切片</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-4-%E5%85%89%E5%BD%B1%E8%9E%8D%E5%90%88"><span class="toc-number">4.1.4.</span> <span class="toc-text">3.1.4 光影融合</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E9%95%9C%E5%A4%B4%E5%8F%8A%E8%BE%93%E5%85%A5%E6%B5%81"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 镜头及输入流</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-1-%E9%95%9C%E5%A4%B4%E4%BD%8D%E7%BD%AE%E7%BB%91%E5%AE%9A"><span class="toc-number">4.2.1.</span> <span class="toc-text">3.2.1 镜头位置绑定</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-2-%E9%95%9C%E5%A4%B4%E7%95%B8%E5%8F%98%E6%A0%A1%E5%87%86"><span class="toc-number">4.2.2.</span> <span class="toc-text">3.2.2 镜头畸变校准</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-3-%E4%B8%93%E4%B8%9A%E9%87%87%E9%9B%86%E5%8D%A1"><span class="toc-number">4.2.3.</span> <span class="toc-text">3.2.3 专业采集卡</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E7%BC%BA%E9%99%B7%E4%B8%8E%E6%96%B9%E5%90%91"><span class="toc-number">5.</span> <span class="toc-text">4 缺陷与方向</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="toc-number">5.1.</span> <span class="toc-text">4.1 问题分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-1-%E7%9B%B8%E6%9C%BA%E8%AF%AF%E5%B7%AE"><span class="toc-number">5.1.1.</span> <span class="toc-text">4.1.1 相机误差</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-2-%E7%BB%BF%E5%B9%95%E7%8E%AF%E5%A2%83%E9%97%AE%E9%A2%98"><span class="toc-number">5.1.2.</span> <span class="toc-text">4.1.2 绿幕环境问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-3-%E6%8A%A0%E5%9B%BE%E7%AE%97%E6%B3%95%E9%9A%BE%E7%82%B9"><span class="toc-number">5.1.3.</span> <span class="toc-text">4.1.3 抠图算法难点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-4-%E5%85%89%E5%BD%B1%E5%90%88%E6%88%90%E9%97%AE%E9%A2%98"><span class="toc-number">5.1.4.</span> <span class="toc-text">4.1.4 光影合成问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-5-%E8%99%9A%E5%AE%9E%E7%A9%BA%E9%97%B4%E5%AF%B9%E5%BA%94%E9%9A%BE"><span class="toc-number">5.1.5.</span> <span class="toc-text">4.1.5 虚实空间对应难</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E7%9B%B8%E5%85%B3Research"><span class="toc-number">5.2.</span> <span class="toc-text">4.2 相关Research</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-1-%E8%83%8C%E6%99%AF%E5%88%86%E5%89%B2"><span class="toc-number">5.2.1.</span> <span class="toc-text">4.2.1 背景分割</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-2-%E6%8A%A0%E5%9B%BE%E5%92%8C%E5%8E%BB%E6%BA%A2%E8%89%B2"><span class="toc-number">5.2.2.</span> <span class="toc-text">4.2.2 抠图和去溢色</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-3-%E5%8D%95%E7%9B%AE%E7%9B%B8%E6%9C%BA%E5%A7%BF%E6%80%81%E8%AF%86%E5%88%AB"><span class="toc-number">5.2.3.</span> <span class="toc-text">4.2.3 单目相机姿态识别</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E6%95%B4%E4%BD%93%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">5.3.</span> <span class="toc-text">4.3 整体解决方案</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-1-Virtual-Stage"><span class="toc-number">5.3.1.</span> <span class="toc-text">4.3.1 Virtual Stage</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-2-%E8%A7%86%E9%A2%91%E7%AE%97%E6%B3%95%E6%8A%A0%E5%9B%BE"><span class="toc-number">5.3.2.</span> <span class="toc-text">4.3.2 视频算法抠图</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%BC%95%E7%94%A8"><span class="toc-number">5.4.</span> <span class="toc-text">5 引用</span></a></li></ol></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 16
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/15</span>
+            <a class="archive-post-title" href="/2023/12/15/Dcc-Coords/">一图对比众3D引擎的坐标系</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span>
+            <a class="archive-post-title" href="/2023/07/08/ML-Deformer/">基于机器学习的物理变形器</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span>
+            <a class="archive-post-title" href="/2023/07/02/Dynamic-Bones/">基于动力学的骨骼动画技术综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/Simulation-Dynamics-Engine/">仿真及动力学系统综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span>
+            <a class="archive-post-title" href="/2023/05/21/Build-WebRTC-For-MSVC/">编译可以在MSVC中使用的WebRTC库</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/21</span>
+            <a class="archive-post-title" href="/2023/02/21/Collaborative-Engine/">浅谈端云协同渲染</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span>
+            <a class="archive-post-title" href="/2022/12/29/Mixed-Virtual-Production/">混合虚拟制片</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span>
+            <a class="archive-post-title" href="/2022/10/08/C2BP-Params/">C++生成蓝图的参数类型记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/29</span>
+            <a class="archive-post-title" href="/2022/06/29/Schlick-Approximate/">Schilick的近似方法</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span>
+            <a class="archive-post-title" href="/2022/03/18/Illumination/">光通量、光强和照度</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/13</span>
+            <a class="archive-post-title" href="/2021/12/13/DS-VS-DL/">延迟渲染Vs延迟光照</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/17</span>
+            <a class="archive-post-title" href="/2021/04/17/Importance-Sampling/">重要性采样</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span>
+            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span>
+            <a class="archive-post-title" href="/2021/04/02/Cook-Torrance-BRDF/">Cook-Torrance的BRDF</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/29</span>
+            <a class="archive-post-title" href="/2021/03/29/Learn-Rendering-Function/">理解渲染方程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/22</span>
+            <a class="archive-post-title" href="/2021/03/22/Learn-Radiometry/">辐射度量学笔记</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://graphicyan.github.io",
+        root: siteMetaRoot,
+        author: "Yan Zhang"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+    </body>
+</html>

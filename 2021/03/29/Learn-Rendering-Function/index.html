@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Yan Zhang">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Yan Zhang">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="">
+    <meta name="description" content="渲染方程知识在反射方程的基础之上添加了一个自发光项(Emission term)，从而使得反射方程更加的general：其中为自发光项，反射方程中的用，代替。 (tips：所有光线方向均指向外)接下来从一个点光源和单个物体的场景开始理解渲染方程：(点光源对一个点来说自然只有一个方向有入射光，所以这里没有了积分)多个点光源一个物体的情况：将这些所有的点光源的贡献全部求和即可，那么如果点光源变成了面光">
+<meta property="og:type" content="article">
+<meta property="og:title" content="理解渲染方程">
+<meta property="og:url" content="https://graphicyan.github.io/2021/03/29/Learn-Rendering-Function/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="渲染方程知识在反射方程的基础之上添加了一个自发光项(Emission term)，从而使得反射方程更加的general：其中为自发光项，反射方程中的用，代替。 (tips：所有光线方向均指向外)接下来从一个点光源和单个物体的场景开始理解渲染方程：(点光源对一个点来说自然只有一个方向有入射光，所以这里没有了积分)多个点光源一个物体的情况：将这些所有的点光源的贡献全部求和即可，那么如果点光源变成了面光">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_000.svg#from=paste&height=60&id=u5053a189&margin=%5Bobject%20Object%5D&originHeight=60&originWidth=675&originalType=url&status=done&style=none&taskId=uf97a40c6-c7d2-4760-acd7-1ffa0f08202&width=675">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_001.svg#from=paste&height=26&id=ud4d2b6f5&margin=%5Bobject%20Object%5D&originHeight=26&originWidth=82&originalType=url&status=done&style=none&taskId=u528090d5-3a7e-4c04-abd6-2b740219b9d&width=82">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_002.svg#from=paste&height=20&id=ucb6907f8&margin=%5Bobject%20Object%5D&originHeight=20&originWidth=39&originalType=url&status=done&style=none&taskId=u51575161-1e50-4938-a5db-ba1feec36cb&width=39">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_003.svg#from=paste&height=18&id=uc0cadec9&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=48&originalType=url&status=done&style=none&taskId=ua6266ff7-263b-4dec-8135-0cf9251c6bc&width=48">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_004.jpg#from=paste&height=657&id=u035b5508&margin=%5Bobject%20Object%5D&originHeight=657&originWidth=930&originalType=url&status=done&style=none&taskId=u30f561ef-7efa-432c-ab01-7de9a2ca02a&width=930">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_005.jpeg#from=paste&height=494&id=ued2b1060&margin=%5Bobject%20Object%5D&originHeight=494&originWidth=720&originalType=url&status=done&style=none&taskId=u65dccea6-a3be-4897-b10f-30a732616e6&width=720">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_006.jpeg#from=paste&height=488&id=u2fa50f4f&margin=%5Bobject%20Object%5D&originHeight=488&originWidth=720&originalType=url&status=done&style=none&taskId=uf0fb89f3-2567-4956-8407-86fbbce3c1b&width=720">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_007.jpeg#from=paste&height=664&id=u7a7e8f88&margin=%5Bobject%20Object%5D&originHeight=664&originWidth=1002&originalType=url&status=done&style=none&taskId=u39228808-6f88-4c21-80bc-b82ebe8acf6&width=1002">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_008.jpeg#from=paste&height=692&id=u7adae7bf&margin=%5Bobject%20Object%5D&originHeight=692&originWidth=949&originalType=url&status=done&style=none&taskId=u7c659315-72ac-43a5-8574-25693656f9f&width=949">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_009.jpeg#from=paste&height=600&id=uee940472&margin=%5Bobject%20Object%5D&originHeight=600&originWidth=905&originalType=url&status=done&style=none&taskId=u1f40b2bc-9fd5-4216-a1c1-eb07f9b1545&width=905">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_010.svg#from=paste&height=44&id=ue983ecb0&margin=%5Bobject%20Object%5D&originHeight=44&originWidth=675&originalType=url&status=done&style=none&taskId=u644ca86e-1aae-4f3c-953a-e8f5477d111&width=675">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_011.svg#from=paste&height=119&id=u5502b580&margin=%5Bobject%20Object%5D&originHeight=119&originWidth=675&originalType=url&status=done&style=none&taskId=u010f3605-0794-461d-b971-1342a9d9461&width=675">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_012.svg#from=paste&height=20&id=ud055ec3a&margin=%5Bobject%20Object%5D&originHeight=20&originWidth=11&originalType=url&status=done&style=none&taskId=uc64ea126-eb03-4811-807a-4c82577bb67&width=11">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_013.svg#from=paste&height=29&id=u98694ab0&margin=%5Bobject%20Object%5D&originHeight=29&originWidth=92&originalType=url&status=done&style=none&taskId=u13eae111-f881-4552-9876-a5bd5e632a3&width=92">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_014.svg#from=paste&height=68&id=u7414a4bf&margin=%5Bobject%20Object%5D&originHeight=68&originWidth=675&originalType=url&status=done&style=none&taskId=u521bfb76-3650-4816-a8df-0ff0e2062dd&width=675">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_015.jpeg#from=paste&height=506&id=u0e37ee21&margin=%5Bobject%20Object%5D&originHeight=506&originWidth=720&originalType=url&status=done&style=none&taskId=u051abbe1-40ea-4f86-91f1-d57a4da76d3&width=720">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_016.svg#from=paste&height=24&id=u2a229b90&margin=%5Bobject%20Object%5D&originHeight=24&originWidth=44&originalType=url&status=done&style=none&taskId=u6cbae9e2-9365-42e0-9d54-79173ce9ec3&width=44">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_017.svg#from=paste&height=24&id=u7f5a3bc4&margin=%5Bobject%20Object%5D&originHeight=24&originWidth=44&originalType=url&status=done&style=none&taskId=u38613fdf-8b91-4ed8-adbc-90092b16d9a&width=44">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_018.png#from=paste&height=539&id=uf3688d11&margin=%5Bobject%20Object%5D&originHeight=539&originWidth=720&originalType=url&status=done&style=none&taskId=uf6770bbf-0f0c-4f6c-ae0f-1bf1bf6a7e3&width=720">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_019.jpeg#from=paste&height=690&id=udbb8cc11&margin=%5Bobject%20Object%5D&originHeight=690&originWidth=970&originalType=url&status=done&style=none&taskId=u4c53f7c3-47a8-4543-b328-d0d2ea89b42&width=970">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_020.jpeg#from=paste&height=738&id=uf321254c&margin=%5Bobject%20Object%5D&originHeight=738&originWidth=985&originalType=url&status=done&style=none&taskId=ubd722515-08f5-43ad-9fe8-dab342c7e08&width=985">
+<meta property="article:published_time" content="2021-03-29T06:23:29.000Z">
+<meta property="article:modified_time" content="2025-07-18T03:55:52.137Z">
+<meta property="article:author" content="Yan Zhang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://graphicyan.github.io/assets/post_images/Learn-Rendering-Function/image_000.svg#from=paste&height=60&id=u5053a189&margin=%5Bobject%20Object%5D&originHeight=60&originWidth=675&originalType=url&status=done&style=none&taskId=uf97a40c6-c7d2-4760-acd7-1ffa0f08202&width=675">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/yan.jpg">
+    <title>理解渲染方程 · Yan&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Yan's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Yan&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">理解渲染方程</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                理解渲染方程
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count word-count">947</span>Reading time: <span class="post-count reading-time">3 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2021/03/29</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p>渲染方程知识在反射方程的基础之上添加了一个自发光项(Emission term)，从而使得反射方程更加的general：<br /><img src="/assets/post_images/Learn-Rendering-Function/image_000.svg#from=paste&height=60&id=u5053a189&margin=%5Bobject%20Object%5D&originHeight=60&originWidth=675&originalType=url&status=done&style=none&taskId=uf97a40c6-c7d2-4760-acd7-1ffa0f08202&width=675"><br />其中<img src="/assets/post_images/Learn-Rendering-Function/image_001.svg#from=paste&height=26&id=ud4d2b6f5&margin=%5Bobject%20Object%5D&originHeight=26&originWidth=82&originalType=url&status=done&style=none&taskId=u528090d5-3a7e-4c04-abd6-2b740219b9d&width=82">为自发光项，反射方程中的<img src="/assets/post_images/Learn-Rendering-Function/image_002.svg#from=paste&height=20&id=ucb6907f8&margin=%5Bobject%20Object%5D&originHeight=20&originWidth=39&originalType=url&status=done&style=none&taskId=u51575161-1e50-4938-a5db-ba1feec36cb&width=39">用，<img src="/assets/post_images/Learn-Rendering-Function/image_003.svg#from=paste&height=18&id=uc0cadec9&margin=%5Bobject%20Object%5D&originHeight=18&originWidth=48&originalType=url&status=done&style=none&taskId=ua6266ff7-263b-4dec-8135-0cf9251c6bc&width=48">代替。 (tips：所有光线方向均指向外)<br />接下来从一个点光源和单个物体的场景开始理解渲染方程：<br /><img src="/assets/post_images/Learn-Rendering-Function/image_004.jpg#from=paste&height=657&id=u035b5508&margin=%5Bobject%20Object%5D&originHeight=657&originWidth=930&originalType=url&status=done&style=none&taskId=u30f561ef-7efa-432c-ab01-7de9a2ca02a&width=930"><br />(点光源对一个点来说自然只有一个方向有入射光，所以这里没有了积分)<br />多个点光源一个物体的情况：<br /><img src="/assets/post_images/Learn-Rendering-Function/image_005.jpeg#from=paste&height=494&id=ued2b1060&margin=%5Bobject%20Object%5D&originHeight=494&originWidth=720&originalType=url&status=done&style=none&taskId=u65dccea6-a3be-4897-b10f-30a732616e6&width=720"><br />将这些所有的点光源的贡献全部求和即可，那么如果点光源变成了面光源呢？如下图所示：<br /><img src="/assets/post_images/Learn-Rendering-Function/image_006.jpeg#from=paste&height=488&id=u2fa50f4f&margin=%5Bobject%20Object%5D&originHeight=488&originWidth=720&originalType=url&status=done&style=none&taskId=uf0fb89f3-2567-4956-8407-86fbbce3c1b&width=720"><br />其实面光源就相当于无穷多个点光源的集合，只需要对 面光源所在的立体角范围进行积分，并且能够确定不同立体角方向的面光源的入射光radiance即可。<br />那么更进一步的，再在场景当中加入其它物体，使得物体之间发生光线交互之后是什么情况呢：<br /><img src="/assets/post_images/Learn-Rendering-Function/image_007.jpeg#from=paste&height=664&id=u7a7e8f88&margin=%5Bobject%20Object%5D&originHeight=664&originWidth=1002&originalType=url&status=done&style=none&taskId=u39228808-6f88-4c21-80bc-b82ebe8acf6&width=1002"><br />如上图所示，可以把其它物体同样考虑成面光源，对其所占立体角进行积分即可，只不过对其它物体的立体角积分不像是面光源所有入射方向都有radiance，物体的立体角可能只有个别几个方向有入射的radiance(即多次物体间光线反射之后恰好照射到着色点x)，其它方向没有，但本质上都可以视作是面光源。<br />观察一下图中的渲染方程可以发现除了两个radiance，其它所有项都是知道的，可以将上式进一步写成如下图下方所示的式子：<br /><img src="/assets/post_images/Learn-Rendering-Function/image_008.jpeg#from=paste&height=692&id=u7adae7bf&margin=%5Bobject%20Object%5D&originHeight=692&originWidth=949&originalType=url&status=done&style=none&taskId=u7c659315-72ac-43a5-8574-25693656f9f&width=949"><br />其中各项与原渲染方程中一一对应，(这里其实是有数学严格推导的，不过我们只是为了接下来构建直观的物理解释，对于这些推导不必在意，默认成立即可)，再接着，可以把该式子离散化写为线性代数的形式：<br /><img src="/assets/post_images/Learn-Rendering-Function/image_009.jpeg#from=paste&height=600&id=uee940472&margin=%5Bobject%20Object%5D&originHeight=600&originWidth=905&originalType=url&status=done&style=none&taskId=u1f40b2bc-9fd5-4216-a1c1-eb07f9b1545&width=905"><br />呼，经过两步我们不是很清楚但其实是正确的数学推导之后，得到了这样一个式子：<br /><img src="/assets/post_images/Learn-Rendering-Function/image_010.svg#from=paste&height=44&id=ue983ecb0&margin=%5Bobject%20Object%5D&originHeight=44&originWidth=675&originalType=url&status=done&style=none&taskId=u644ca86e-1aae-4f3c-953a-e8f5477d111&width=675"><br />其中L其实就是想要求得的反射光，E是自发光其实就是光源的发光项，K可以理解为对光线进行反射的一种算子操作(因为它由BRDF化来的)。那么利用线性代数的知识很容易就可以推导出L的结果如下：<br /><img src="/assets/post_images/Learn-Rendering-Function/image_011.svg#from=paste&height=119&id=u5502b580&margin=%5Bobject%20Object%5D&originHeight=119&originWidth=675&originalType=url&status=done&style=none&taskId=u010f3605-0794-461d-b971-1342a9d9461&width=675"><br />其中<img src="/assets/post_images/Learn-Rendering-Function/image_012.svg#from=paste&height=20&id=ud055ec3a&margin=%5Bobject%20Object%5D&originHeight=20&originWidth=11&originalType=url&status=done&style=none&taskId=uc64ea126-eb03-4811-807a-4c82577bb67&width=11">为单位矩阵，再接着对<img src="/assets/post_images/Learn-Rendering-Function/image_013.svg#from=paste&height=29&id=u98694ab0&margin=%5Bobject%20Object%5D&originHeight=29&originWidth=92&originalType=url&status=done&style=none&taskId=u13eae111-f881-4552-9876-a5bd5e632a3&width=92">使用广义二项式定理得到：<br /><img src="/assets/post_images/Learn-Rendering-Function/image_014.svg#from=paste&height=68&id=u7414a4bf&margin=%5Bobject%20Object%5D&originHeight=68&originWidth=675&originalType=url&status=done&style=none&taskId=u521bfb76-3650-4816-a8df-0ff0e2062dd&width=675"><br />仔细观察这个式子，注意E是光源所发出的光，K为反射算子，这样一个式子的物理含义如下图所示：<br /><img src="/assets/post_images/Learn-Rendering-Function/image_015.jpeg#from=paste&height=506&id=u0e37ee21&margin=%5Bobject%20Object%5D&originHeight=506&originWidth=720&originalType=url&status=done&style=none&taskId=u051abbe1-40ea-4f86-91f1-d57a4da76d3&width=720"><br />E为光源发出的光，KE则代表对光源反射一次的结果，即直接光照，那么前两项之和就是光栅化当中着色所考虑的结果，对于全局光照来说，还考虑了<img src="/assets/post_images/Learn-Rendering-Function/image_016.svg#from=paste&height=24&id=u2a229b90&margin=%5Bobject%20Object%5D&originHeight=24&originWidth=44&originalType=url&status=done&style=none&taskId=u6cbae9e2-9365-42e0-9d54-79173ce9ec3&width=44">，即一次弹射的间接照明，<img src="/assets/post_images/Learn-Rendering-Function/image_017.svg#from=paste&height=24&id=u7f5a3bc4&margin=%5Bobject%20Object%5D&originHeight=24&originWidth=44&originalType=url&status=done&style=none&taskId=u38613fdf-8b91-4ed8-adbc-90092b16d9a&width=44">就是两次弹射的间接照明，依次类推。<br />这样来看整个结果是不是就很清晰了，就是光源发光加上直接光照与多次间接光照的结果！而这一切都是从渲染方程推导而来的，因此这也正是渲染方程的物理意义！<br />最后以几张基于物理渲染的图片作为本篇文章的结束 一次反射直接光照：<br /><img src="/assets/post_images/Learn-Rendering-Function/image_018.png#from=paste&height=539&id=uf3688d11&margin=%5Bobject%20Object%5D&originHeight=539&originWidth=720&originalType=url&status=done&style=none&taskId=uf6770bbf-0f0c-4f6c-ae0f-1bf1bf6a7e3&width=720"><br />两次反射，考虑到一次弹射的间接光照：<br /><img src="/assets/post_images/Learn-Rendering-Function/image_019.jpeg#from=paste&height=690&id=udbb8cc11&margin=%5Bobject%20Object%5D&originHeight=690&originWidth=970&originalType=url&status=done&style=none&taskId=u4c53f7c3-47a8-4543-b328-d0d2ea89b42&width=970"><br />3次反射，考虑到两次弹射的间接光照：<br /><img src="/assets/post_images/Learn-Rendering-Function/image_020.jpeg#from=paste&height=738&id=uf321254c&margin=%5Bobject%20Object%5D&originHeight=738&originWidth=985&originalType=url&status=done&style=none&taskId=ubd722515-08f5-43ad-9fe8-dab342c7e08&width=985"><br />(考虑次数越多越接近真实图片效果,趋近收敛)</p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>Author：<a href="https://graphicyan.github.io">Yan Zhang</a>
+            <p>Link：<a href="https://graphicyan.github.io/2021/03/29/Learn-Rendering-Function/">https://graphicyan.github.io/2021/03/29/Learn-Rendering-Function/</a>
+            <p>Publish date：<a href="https://graphicyan.github.io/2021/03/29/Learn-Rendering-Function/">March 29th 2021, 2:23:29 pm</a>
+            <p>Update date：<a href="https://graphicyan.github.io/2021/03/29/Learn-Rendering-Function/">July 18th 2025, 11:55:52 am</a>
+            <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2021/04/02/Cook-Torrance-BRDF/" title="Cook-Torrance的BRDF">
+                    <div class="nextTitle">Cook-Torrance的BRDF</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2021/03/22/Learn-Radiometry/" title="辐射度量学笔记">
+                    <div class="prevTitle">辐射度量学笔记</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:yanzhang.cg@gmail.com" class="iconfont-archer email" title="email" ></a>
+                <a href="https://github.com/GraphicYan" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/wechat.png" />
+                </span>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 16
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/15</span>
+            <a class="archive-post-title" href="/2023/12/15/Dcc-Coords/">一图对比众3D引擎的坐标系</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span>
+            <a class="archive-post-title" href="/2023/07/08/ML-Deformer/">基于机器学习的物理变形器</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span>
+            <a class="archive-post-title" href="/2023/07/02/Dynamic-Bones/">基于动力学的骨骼动画技术综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/Simulation-Dynamics-Engine/">仿真及动力学系统综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span>
+            <a class="archive-post-title" href="/2023/05/21/Build-WebRTC-For-MSVC/">编译可以在MSVC中使用的WebRTC库</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/21</span>
+            <a class="archive-post-title" href="/2023/02/21/Collaborative-Engine/">浅谈端云协同渲染</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span>
+            <a class="archive-post-title" href="/2022/12/29/Mixed-Virtual-Production/">混合虚拟制片</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span>
+            <a class="archive-post-title" href="/2022/10/08/C2BP-Params/">C++生成蓝图的参数类型记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/29</span>
+            <a class="archive-post-title" href="/2022/06/29/Schlick-Approximate/">Schilick的近似方法</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span>
+            <a class="archive-post-title" href="/2022/03/18/Illumination/">光通量、光强和照度</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/13</span>
+            <a class="archive-post-title" href="/2021/12/13/DS-VS-DL/">延迟渲染Vs延迟光照</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/17</span>
+            <a class="archive-post-title" href="/2021/04/17/Importance-Sampling/">重要性采样</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span>
+            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span>
+            <a class="archive-post-title" href="/2021/04/02/Cook-Torrance-BRDF/">Cook-Torrance的BRDF</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/29</span>
+            <a class="archive-post-title" href="/2021/03/29/Learn-Rendering-Function/">理解渲染方程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/22</span>
+            <a class="archive-post-title" href="/2021/03/22/Learn-Radiometry/">辐射度量学笔记</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://graphicyan.github.io",
+        root: siteMetaRoot,
+        author: "Yan Zhang"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+    </body>
+</html>

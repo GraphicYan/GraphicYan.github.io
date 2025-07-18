@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Yan Zhang">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Yan Zhang">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="">
+    <meta name="description" content="写在前面相对于移动端，在Windows下使用WebRTC库确实困难些。在移动端（iOS、Andorid），我们可以直接从Google提供的Pod库中拉取编译好的WebRTC库，而在Windows端则需要我们自己编译WebRTC库，并导出WebRTC头文件。这几天手头云渲染推流的工作忙的差不多了，今天就花点时间整理一下这方面的知识，在windows上编译WebRTC静态库，并在MSVC编译器（Vis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="编译可以在MSVC中使用的WebRTC库">
+<meta property="og:url" content="https://graphicyan.github.io/2023/05/21/Build-WebRTC-For-MSVC/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="写在前面相对于移动端，在Windows下使用WebRTC库确实困难些。在移动端（iOS、Andorid），我们可以直接从Google提供的Pod库中拉取编译好的WebRTC库，而在Windows端则需要我们自己编译WebRTC库，并导出WebRTC头文件。这几天手头云渲染推流的工作忙的差不多了，今天就花点时间整理一下这方面的知识，在windows上编译WebRTC静态库，并在MSVC编译器（Vis">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Build-WebRTC-For-MSVC/image_013.png#clientId=uc50a42e0-7134-4&from=paste&id=uace681eb&originHeight=721&originWidth=1262&originalType=url&ratio=1.25&rotation=0&showTitle=false&status=done&style=none&taskId=u95610255-8df4-4f5d-9970-4e0910dc037&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Build-WebRTC-For-MSVC/image_014.png#clientId=uc50a42e0-7134-4&from=paste&id=u97525043&originHeight=38&originWidth=34&originalType=url&ratio=1.25&rotation=0&showTitle=false&status=done&style=none&taskId=uf187e82f-4abc-4298-afd4-459f2cd77ff&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Build-WebRTC-For-MSVC/image_015.png#clientId=uc50a42e0-7134-4&from=paste&id=u9d3008b8&originHeight=827&originWidth=1064&originalType=url&ratio=1.25&rotation=0&showTitle=false&status=done&style=none&taskId=u62a1205a-0807-4fbb-9f86-18fb56e5330&title=">
+<meta property="article:published_time" content="2023-05-21T14:33:15.000Z">
+<meta property="article:modified_time" content="2025-07-18T03:55:52.133Z">
+<meta property="article:author" content="Yan Zhang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://graphicyan.github.io/assets/post_images/Build-WebRTC-For-MSVC/image_013.png#clientId=uc50a42e0-7134-4&from=paste&id=uace681eb&originHeight=721&originWidth=1262&originalType=url&ratio=1.25&rotation=0&showTitle=false&status=done&style=none&taskId=u95610255-8df4-4f5d-9970-4e0910dc037&title=">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/yan.jpg">
+    <title>编译可以在MSVC中使用的WebRTC库 · Yan&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Yan's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Yan&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">编译可以在MSVC中使用的WebRTC库</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                编译可以在MSVC中使用的WebRTC库
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count word-count">3.8k</span>Reading time: <span class="post-count reading-time">17 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2023/05/21</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><p>相对于移动端，在Windows下使用WebRTC库确实困难些。在移动端（iOS、Andorid），我们可以直接从Google提供的Pod库中拉取编译好的WebRTC库，而在Windows端则需要我们自己编译WebRTC库，并导出WebRTC头文件。<br />这几天手头云渲染推流的工作忙的差不多了，今天就花点时间整理一下这方面的知识，在windows上编译WebRTC静态库，并在MSVC编译器（Visual Studio）里使用它。<br /><br>由于WebRTC是google在维护的开源网络库，其编译和代码都需要用google对应的ninja、gn和源码管理工具。源码大家可以自行google下载这里就不写了。 ninja相当于一个cmake文件，它将生成用于gn gen编译的模板。 在gn编译时，编译参数需要注意，尤其是其中的 <strong>openSSL库</strong> ，如果你要开发的工程中的已经使用了其他版本的openSSL库（大概率），那你一定不要忘了将编译参数以及ninja文件中对应的<strong>boringSSL</strong>相关的选项换成你的openSSL的。 因为google用的是自己的bringSSL来代替openSSL，说是基于openSSL修改了一些东西，但它的引入会导致与原生openSSL的冲突。</p>
+<p><a name="pqW4l"></a></p>
+<h3 id="编译参数"><a href="#编译参数" class="headerlink" title="编译参数"></a>编译参数</h3><p><a name="ehXoW"></a></p>
+<p>以下先从ninja编译时的参数模板展开, 我们以使用UE里的openSSL库代替为例：</p>
+<p><a name="WzSnr"></a></p>
+<h4 id="Use-UE-openSSL"><a href="#Use-UE-openSSL" class="headerlink" title="Use UE openSSL"></a>Use UE openSSL</h4><p><strong>Release</strong><br /> gn gen out&#x2F;release_x64_ssl_ue –target&#x3D;x64 –ide&#x3D;vs2019 –sln&#x3D;webrtc –args&#x3D;”use_lld&#x3D;false is_debug&#x3D;false is_clang&#x3D;false  rtc_builtin_ssl_root_certificates &#x3D; false rtc_build_ssl&#x3D;false  rtc_ssl_root&#x3D;&quot;D:\UnrealEngine\UnrealEngine-5.1.1-release\Engine\Source\ThirdParty\OpenSSL\1.1.1n\include\Win64\VS2015&quot;     rtc_build_tools&#x3D;false rtc_include_tests&#x3D;false rtc_build_examples&#x3D;false use_rtti&#x3D;true rtc_include_internal_audio_device&#x3D;false”  <br /><strong>Debug</strong><br /> gn gen out&#x2F;debug_x64_ssl_ue –target&#x3D;x64 –ide&#x3D;vs2019 –sln&#x3D;webrtc –args&#x3D;”use_lld&#x3D;false is_debug&#x3D;true is_clang&#x3D;false  rtc_builtin_ssl_root_certificates &#x3D; false rtc_build_ssl&#x3D;false  rtc_ssl_root&#x3D;&quot;D:\UnrealEngine\UnrealEngine-5.1.1-release\Engine\Source\ThirdParty\OpenSSL\1.1.1n\include\Win64\VS2015&quot;   rtc_build_tools&#x3D;false rtc_include_tests&#x3D;false rtc_build_examples&#x3D;false use_rtti&#x3D;true rtc_include_internal_audio_device&#x3D;false”  </p>
+<p><a name="id2NM"></a></p>
+<h3 id="修改生成的ninja"><a href="#修改生成的ninja" class="headerlink" title="修改生成的ninja"></a>修改生成的ninja</h3><p>匹配表达式： [a-z&#x2F;_]<em>boringssl[a-z&#x2F;_.0-9-]</em><br />将 Include路径替换：<br />D$:&#x2F;YOUR_OPENSSL_PATH&#x2F;include<br />将Lib路径替换：<br />D$:&#x2F;YOUR_OPENSSL_PATH&#x2F;lib&#x2F;libssl.lib D$:&#x2F;YOUR_OPENSSL_PATH&#x2F;lib&#x2F;libcrypto.lib</p>
+<p><a name="pwFl8"></a></p>
+<h1 id="webrtc编译，不使用内置boringssl，使用openssl的"><a href="#webrtc编译，不使用内置boringssl，使用openssl的" class="headerlink" title="webrtc编译，不使用内置boringssl，使用openssl的"></a><a target="_blank" rel="noopener" href="https://www.cnblogs.com/chai51/p/16324943.html">webrtc编译，不使用内置boringssl，使用openssl的</a></h1><p><a name="Un6TG"></a></p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在项目开发过程中，会遇到使用https、TLS、DTLS等场景，这些第三方库一般会使用openssl作为加密套件。例如，qt中加密套件就会使用openssl，但是webrtc会默认使用boringssl；因为boringssl是从openssl创建的分支，两个库同时使用会出现重定义。<br><a name="FV0e4"></a></p>
+<h1 id="一-验证通过的版本"><a href="#一-验证通过的版本" class="headerlink" title="一.验证通过的版本"></a>一.验证通过的版本</h1><p>webrtc版本为m96<br />vs2019<br><a name="IK36i"></a></p>
+<h1 id="二-生成sln工程"><a href="#二-生成sln工程" class="headerlink" title="二.生成sln工程"></a>二.生成sln工程</h1><p>gn gen out&#x2F;Release –ide&#x3D;vs2019 –args&#x3D;”use_custom_libcxx&#x3D;false is_debug&#x3D;false target_cpu&#x3D;&quot;x64&quot; is_clang&#x3D;true proprietary_codecs&#x3D;true treat_warnings_as_errors&#x3D;false rtc_include_tests&#x3D;false rtc_enable_protobuf&#x3D;false rtc_use_h264&#x3D;true use_rtti&#x3D;true rtc_build_ssl&#x3D;false rtc_ssl_root&#x3D;&quot;D:&#x2F;Qt&#x2F;Tools&#x2F;OpenSSL&#x2F;Win_x64&#x2F;include&quot;“<br><a name="YHbDN"></a></p>
+<h1 id="三-修改工程文件"><a href="#三-修改工程文件" class="headerlink" title="三.修改工程文件"></a>三.修改工程文件</h1><p>编辑 <strong>out&#x2F;Release&#x2F;obj&#x2F;webrtc.ninja</strong><br />删除正则表达匹配的内容 [a-z&#x2F;_]<em>boringssl[a-z&#x2F;_.0-9-]</em><br />编辑 <strong>out&#x2F;Release&#x2F;obj&#x2F;third_party&#x2F;libsrtp&#x2F;libsrtp.ninja</strong><br />匹配 [a-z&#x2F;_]*boringssl[a-z&#x2F;_.0-9-]*为分别将<br /><strong>include_dirs</strong>匹配替换为 <strong>-ID$:&#x2F;Qt&#x2F;Tools&#x2F;OpenSSL&#x2F;Win_x64&#x2F;include</strong><br /><strong>build</strong>匹配替换为 <strong>D$:&#x2F;Qt&#x2F;Tools&#x2F;OpenSSL&#x2F;Win_x64&#x2F;lib&#x2F;libssl.lib</strong><br><a name="s70xu"></a></p>
+<h1 id="四-开始编译"><a href="#四-开始编译" class="headerlink" title="四.开始编译"></a>四.开始编译</h1><p>双击打开<strong>out&#x2F;Release&#x2F;all.sln</strong><br />加载完成之后，在<strong>vs2019</strong>中找到<strong>src&#x2F;webrtc</strong>项目进行编译，这个过程比较漫长<br />编译完成后会在<strong>out&#x2F;Release&#x2F;obj&#x2F;<strong>目录生成</strong>webrtc.lib</strong>文件<br><a name="ZYN5I"></a></p>
+<h2 id="安装开发环境"><a href="#安装开发环境" class="headerlink" title="安装开发环境"></a>安装开发环境</h2><p>在Windows下开发应用程序最常用的开发工具还是Visual Studio，你可以使用VS2019，也可以使用VS2022，目前我还是建议大家先用 VS2019，再等个半年、一年的换VS2022比较合适。VS2019的下载地址<a target="_blank" href="https://visualstudio.microsoft.com/zh-hans/thank-you-downloading-visual-studio/?sku=community&rel=16&utm_medium=microsoft&utm_campaign=download+from+relnotes&utm_content=vs2019ga+button">在这里</a>，将 VS Installer下载好后，在CMD窗口中执行下面的命令即可。</p>
+<p>| &#96;&#96;&#96;<br>$ PATH_TO_INSTALLER.EXE ^<br>–add Microsoft.VisualStudio.Workload.NativeDesktop ^<br>–add Microsoft.VisualStudio.Component.VC.ATLMFC ^<br>–includeRecommended</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> |</span><br><span class="line">| --- |</span><br><span class="line"></span><br><span class="line">当然，正常情况下你在配置WebRTC编译环境时就应该已经将VS安装好了。</span><br><span class="line">&lt;a name=&quot;trXHD&quot;&gt;&lt;/a&gt;</span><br><span class="line">## 编译WebRTC</span><br><span class="line">开发环境安装好后，下面我们就该编译WebRTC源码了。WebRTC源码的下载与编译请看[这篇文章](https://avdancedu.com/2bafd6cf/)。&lt;br /&gt;需要注意的是，我们在新项目中引入的WebRTC库，不能直接用下面的命令进行编译：</span><br><span class="line"></span><br><span class="line">| ```</span><br><span class="line">gn gen out/Default</span><br><span class="line">ninja -C out/Default</span><br></pre></td></tr></table></figure>
+<p> |<br>| — |</p>
+<p>而必须明确指明编译出的WebRTC是<strong>Debug</strong>版本，还是<strong>Release</strong>版本；是<strong>x86</strong>版本还是<strong>x64</strong>版本……<br />因此，应该使用下面的命令编译WebRTC:</p>
+<p>| &#96;&#96;&#96;<br>gn gen –target&#x3D;x64 –ide&#x3D;vs2019 –args&#x3D;”is_debug&#x3D;true rtc_enable_protobuf&#x3D;false is_clang&#x3D;false target_cpu&#x3D;&quot;x64&quot;  enable_iterator_debugging&#x3D;true  use_custom_libcxx&#x3D;false symbol_level&#x3D;0 rtc_include_tests&#x3D;false” out&#x2F;debug_x64<br>ninja - C out&#x2F;debug_x64</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"> |</span><br><span class="line">| --- |</span><br><span class="line"></span><br><span class="line">上述 **gn** 中的几个参数含义如下：</span><br><span class="line"></span><br><span class="line">- –target，顾名思义，生成x64版本的WebRTC库</span><br><span class="line">- –ide，生成VS工程文件</span><br><span class="line">- –args，编译时的一些配置参数</span><br><span class="line">   - is_debug，为true编译出Debug版本；为false编译出Release版本</span><br><span class="line">   - rtc_enable_protobuf，是否使用protobuf，使用可将其设置为true</span><br><span class="line">   - use_custom_libcxx，WebRTC默认使用的是libc++库，而我们在Windows上使用的是libstdc++库，所以需要将其设置为false</span><br><span class="line">   - symbol_level，编译出的WebRTC库是否带符号表，这个数据量很大，会影响运行速度，所以一般设置为0，表示编译出的WebRTC不带符号表</span><br><span class="line">   - rtc_include_tests，编译WebRTC时是否编译测试用例，如果为false则不编译，这样可以大大加快WebRTC的编译速度</span><br><span class="line"></span><br><span class="line">执行上面的命令时，会花一些时间，因此我们需要让**子弹飞一会儿**……</span><br><span class="line">&lt;a name=&quot;saCHd&quot;&gt;&lt;/a&gt;</span><br><span class="line">## 构建自己的应用程序</span><br><span class="line">如果顺利的话，你现在应该已经将WebRTC库编译好了。接下来我们来创建自己的应用程序。&lt;br /&gt;为了方便，你可以将WebRTC examples中的peerconnection_client代码拿出来构建一个新的工程，之后再将前面编译好的WebRTC库引入进来，**如果它可以正常运行就达到了我们的目标**。&lt;br /&gt;为了达到这个目标，首先我们先使用VS创建一个空项目，步骤如下：</span><br><span class="line"></span><br><span class="line">- 第一步，打开Visual Studio，**创建新项目**&lt;br /&gt;![](assets/post_images/Build-WebRTC-For-MSVC/image_000.png#clientId=uc50a42e0-7134-4&amp;from=paste&amp;id=u15e3fe10&amp;originHeight=850&amp;originWidth=1280&amp;originalType=url&amp;ratio=1.25&amp;rotation=0&amp;showTitle=false&amp;status=done&amp;style=none&amp;taskId=u16c9fe99-fc1f-4c49-b394-b30dd4bd227&amp;title=)</span><br><span class="line">- 第二步，使用Windows桌面向导创建Windows空项目&lt;br /&gt;![](assets/post_images/Build-WebRTC-For-MSVC/image_001.png#clientId=uc50a42e0-7134-4&amp;from=paste&amp;id=u92964c57&amp;originHeight=850&amp;originWidth=1280&amp;originalType=url&amp;ratio=1.25&amp;rotation=0&amp;showTitle=false&amp;status=done&amp;style=none&amp;taskId=uc172fa8b-f789-418d-bf0c-ee49a4aec72&amp;title=)</span><br><span class="line">- 第三步，填写项目名称，并将项目与解决方案放在同一目录下&lt;br /&gt;![](assets/post_images/Build-WebRTC-For-MSVC/image_002.png#clientId=uc50a42e0-7134-4&amp;from=paste&amp;id=u90f400be&amp;originHeight=850&amp;originWidth=1280&amp;originalType=url&amp;ratio=1.25&amp;rotation=0&amp;showTitle=false&amp;status=done&amp;style=none&amp;taskId=ud0c46526-8e11-4aee-88d4-11e9b36ea86&amp;title=)</span><br><span class="line">- 第四步，选择应用程序类型为**桌面应用程序**&lt;br /&gt;![](assets/post_images/Build-WebRTC-For-MSVC/image_003.png#clientId=uc50a42e0-7134-4&amp;from=paste&amp;id=u712d9e39&amp;originHeight=664&amp;originWidth=625&amp;originalType=url&amp;ratio=1.25&amp;rotation=0&amp;showTitle=false&amp;status=done&amp;style=none&amp;taskId=u6e90d6b6-aed4-47fb-bf45-08a083bc152&amp;title=)</span><br><span class="line">- 第五步，同时勾选**空项目**&lt;br /&gt;![](assets/post_images/Build-WebRTC-For-MSVC/image_004.png#clientId=uc50a42e0-7134-4&amp;from=paste&amp;id=ud4067588&amp;originHeight=604&amp;originWidth=625&amp;originalType=url&amp;ratio=1.25&amp;rotation=0&amp;showTitle=false&amp;status=done&amp;style=none&amp;taskId=u846faa51-4a4a-40cb-a8cb-05769cb995d&amp;title=)</span><br><span class="line"></span><br><span class="line">至此，我们就构建出了一个VS**空项目**，它里边没有任何文件，如下图所示：&lt;br /&gt;![](assets/post_images/Build-WebRTC-For-MSVC/image_005.png#clientId=uc50a42e0-7134-4&amp;from=paste&amp;id=ub37f8531&amp;originHeight=1231&amp;originWidth=1533&amp;originalType=url&amp;ratio=1.25&amp;rotation=0&amp;showTitle=false&amp;status=done&amp;style=none&amp;taskId=u93b8f521-9e88-44e7-8b6e-87ce340413b&amp;title=)&lt;br /&gt;空项目创建好后，紧接着我们来移植peerconnection_client代码到新项目中，步骤如下：</span><br><span class="line"></span><br><span class="line">- 第一步，从WebRTC源码中拷贝peerconnection_client中的代码到新项目的目录中，在我这里是&lt;br /&gt;将C:\webrtc\webrtc-checkout\src\exmaples\peerconnection\client目录中的代码拷贝到C:\Users\lichao\sourceMyWebRTCDemo目录下。如下图所示：![](assets/post_images/Build-WebRTC-For-MSVC/image_006.png#clientId=uc50a42e0-7134-4&amp;from=paste&amp;id=u5d282e59&amp;originHeight=793&amp;originWidth=1408&amp;originalType=url&amp;ratio=1.25&amp;rotation=0&amp;showTitle=false&amp;status=done&amp;style=none&amp;taskId=u6571eb6b-eea7-41db-86a7-4488ecce0ef&amp;title=)![](assets/post_images/Build-WebRTC-For-MSVC/image_007.png#clientId=uc50a42e0-7134-4&amp;from=paste&amp;id=u9784e0d1&amp;originHeight=793&amp;originWidth=1408&amp;originalType=url&amp;ratio=1.25&amp;rotation=0&amp;showTitle=false&amp;status=done&amp;style=none&amp;taskId=uad87597d-c560-4f39-ae90-dfb03f17433&amp;title=)</span><br><span class="line">- 第二步，将新项目中的代码**拖**到VS项目中&lt;br /&gt;![](assets/post_images/Build-WebRTC-For-MSVC/image_008.png#clientId=uc50a42e0-7134-4&amp;from=paste&amp;id=u78382652&amp;originHeight=1231&amp;originWidth=1533&amp;originalType=url&amp;ratio=1.25&amp;rotation=0&amp;showTitle=false&amp;status=done&amp;style=none&amp;taskId=ucf63e6a1-caba-4ca3-898f-c30715e8ef1&amp;title=)</span><br><span class="line"></span><br><span class="line">通过以上步骤我们就将peerconnection_client中的代码移植好了。接下来咱们来看**重头戏**，如何在项目中引入WebRTC库。</span><br><span class="line">&lt;a name=&quot;M3KPg&quot;&gt;&lt;/a&gt;</span><br><span class="line">## 引入WebRTC库</span><br><span class="line">通常我们引入一个外部库只需要两步，**引入库文件和其头文件**。不过，对于WebRTC，更准确的说对于peerconnection_client而言，它需要的不仅仅是WebRTC库，还需要将WebRTC依赖的第三方库加进来，这是大家觉得在Windows下使用WebRTC库比较麻烦的原因。&lt;br /&gt;下面咱们就来看一下如何引入WebRTC库吧！</span><br><span class="line">&lt;a name=&quot;HxmeY&quot;&gt;&lt;/a&gt;</span><br><span class="line">### 添加依赖的头文件</span><br><span class="line">我们若想将WebRTC头文件引入到项目中，可以通过下面两种方法引入：</span><br><span class="line"></span><br><span class="line">- 方法一，在VS中将WebRTC源码路径添加到**附加包含目录**中。比如我这里将WebRTC源码下载到了C:\webrtc\webrtc-checkout\src目录下，我只需将该路径添加到:中即可，如下图所示：&lt;br /&gt;![](assets/post_images/Build-WebRTC-For-MSVC/image_009.png#clientId=uc50a42e0-7134-4&amp;from=paste&amp;id=u47815b54&amp;originHeight=721&amp;originWidth=1262&amp;originalType=url&amp;ratio=1.25&amp;rotation=0&amp;showTitle=false&amp;status=done&amp;style=none&amp;taskId=uff0896ff-44b2-4d72-a1e8-f9a898f5c60&amp;title=)**这种方法的好处是简单方便，坏处是不便于我们将库文件发布给别人使用。**</span><br><span class="line">| ```</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+<p> | &#96;&#96;&#96;<br>项目 -&gt; 属性 -&gt; C&#x2F;C++ -&gt; 常规 -&gt; 附加包含目录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> |</span><br><span class="line">| --- | --- |</span><br><span class="line"></span><br><span class="line">- 方法二，我们可以通过[这个脚本](https://avdancevod.oss-cn-beijing.aliyuncs.com/image/article/import_webrtc/extrac_webrtc_headers.bat)将WebRTC中的头文件提取出来。之后与**方法一**一样，将头文件路径添加到**附加包含目录**中即可。需要注意的是，这个脚本下载后，要将其放到WebRTC源码目录**src**的同级目录中，如下图所示：&lt;br /&gt;![](assets/post_images/Build-WebRTC-For-MSVC/image_010.png#clientId=uc50a42e0-7134-4&amp;from=paste&amp;id=uc90969e8&amp;originHeight=761&amp;originWidth=1012&amp;originalType=url&amp;ratio=1.25&amp;rotation=0&amp;showTitle=false&amp;status=done&amp;style=none&amp;taskId=u8a152f70-c48c-4817-bf82-37e371b291f&amp;title=)之后打开Windows控制台，并进入到**src**的同级目录中，在CMD窗口中执行extract_webrtc_headers.bat脚本，这样就可以将WebRTC头文件提取出来了，如下图所示：&lt;br /&gt;![](assets/post_images/Build-WebRTC-For-MSVC/image_011.png#clientId=uc50a42e0-7134-4&amp;from=paste&amp;id=ua8fad183&amp;originHeight=590&amp;originWidth=994&amp;originalType=url&amp;ratio=1.25&amp;rotation=0&amp;showTitle=false&amp;status=done&amp;style=none&amp;taskId=uf190ae24-0fd4-48cb-adc6-b5af32b011f&amp;title=)**这种方法的优点是方便其他人使用，缺点是抽取头文件需要花一些时间。**</span><br><span class="line"></span><br><span class="line">除了添加上面的头文件路径外，我们还需要将下面几个路径添加到**附加包含项目**中：</span><br><span class="line"></span><br><span class="line">| ```</span><br><span class="line">C:\webrtc\webrtc-checkout\src\third_party\jsoncpp\generated</span><br><span class="line">C:\webrtc\webrtc-checkout\src\third_party\jsoncpp\source\include</span><br><span class="line">C:\webrtc\webrtc-checkout\src\third_party\libyuv\include</span><br><span class="line">C:\webrtc\webrtc-checkout\src\third_party\abseil-cpp</span><br></pre></td></tr></table></figure>
+<p> |<br>| — |</p>
+<p><a name="wRmGh"></a></p>
+<h3 id="添加依赖的库"><a href="#添加依赖的库" class="headerlink" title="添加依赖的库"></a>添加依赖的库</h3><p>头文件添加好后，接下来咱们来添加WebRTC库文件。WebRTC编译好后，你可以在WebRTC源码目录<strong>src</strong>的<strong>out&#x2F;debug_x64&#x2F;obj</strong>目录下找到<strong>WebRTC.lib</strong>文件，这就是编译好的WebRTC库。<br />我们将它添加到VS中的<strong>附加库目录</strong>中，具体操作如下：</p>
+<p>| &#96;&#96;&#96;<br>右键项目 -&gt; 属性 -&gt; 链接器 -&gt; 常规 -&gt; 附加库目录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"> |</span><br><span class="line">| --- |</span><br><span class="line"></span><br><span class="line">WebRTC库文件路径添加好后，如下图所示：&lt;br /&gt;![](assets/post_images/Build-WebRTC-For-MSVC/image_012.png#clientId=uc50a42e0-7134-4&amp;from=paste&amp;id=u52b31581&amp;originHeight=721&amp;originWidth=1262&amp;originalType=url&amp;ratio=1.25&amp;rotation=0&amp;showTitle=false&amp;status=done&amp;style=none&amp;taskId=ufcd0c813-1cf5-4fc2-84da-9ecefddc4b1&amp;title=)&lt;br /&gt;接着咱们添加具体的的依赖库，添加依赖库的位置在:</span><br><span class="line"></span><br><span class="line">| ```</span><br><span class="line">右键项目 -&gt; 属性 -&gt; 链接器 -&gt; 输入 -&gt; 附加依赖项</span><br></pre></td></tr></table></figure>
+<p> |<br>| — |</p>
+<p>如下图所示：<br /><img src="/assets/post_images/Build-WebRTC-For-MSVC/image_013.png#clientId=uc50a42e0-7134-4&from=paste&id=uace681eb&originHeight=721&originWidth=1262&originalType=url&ratio=1.25&rotation=0&showTitle=false&status=done&style=none&taskId=u95610255-8df4-4f5d-9970-4e0910dc037&title="><br />具体都依赖哪些依赖项呢？这里我以 <strong>M93(4577)</strong> 为例，对于这个版本的peerconnection_client来说，它需要下面的依赖库：</p>
+<ul>
+<li>WebRTC相关的库包括：<br>| &#96;&#96;&#96;<br>third_party&#x2F;abseil-cpp&#x2F;absl&#x2F;flags&#x2F;marshalling&#x2F;marshalling.obj<br>third_party&#x2F;abseil-cpp&#x2F;absl&#x2F;flags&#x2F;program_name&#x2F;program_name.obj<br>third_party&#x2F;abseil-cpp&#x2F;absl&#x2F;flags&#x2F;flag&#x2F;flag.obj<br>third_party&#x2F;abseil-cpp&#x2F;absl&#x2F;flags&#x2F;flag_internal&#x2F;flag.obj<br>third_party&#x2F;abseil-cpp&#x2F;absl&#x2F;flags&#x2F;commandlineflag&#x2F;commandlineflag.obj<br>third_party&#x2F;abseil-cpp&#x2F;absl&#x2F;flags&#x2F;commandlineflag_internal&#x2F;commandlineflag.obj<br>third_party&#x2F;abseil-cpp&#x2F;absl&#x2F;flags&#x2F;private_handle_accessor&#x2F;private_handle_accessor.obj<br>third_party&#x2F;abseil-cpp&#x2F;absl&#x2F;flags&#x2F;reflection&#x2F;reflection.obj<br>third_party&#x2F;abseil-cpp&#x2F;absl&#x2F;flags&#x2F;parse&#x2F;parse.obj<br>third_party&#x2F;abseil-cpp&#x2F;absl&#x2F;flags&#x2F;usage&#x2F;usage.obj<br>third_party&#x2F;abseil-cpp&#x2F;absl&#x2F;flags&#x2F;usage_internal&#x2F;usage.obj<br>third_party&#x2F;abseil-cpp&#x2F;absl&#x2F;flags&#x2F;config&#x2F;usage_config.obj<br>third_party&#x2F;jsoncpp&#x2F;jsoncpp&#x2F;json_reader.obj<br>third_party&#x2F;jsoncpp&#x2F;jsoncpp&#x2F;json_value.obj<br>third_party&#x2F;jsoncpp&#x2F;jsoncpp&#x2F;json_writer.obj<br>test&#x2F;field_trial&#x2F;field_trial.obj<br>test&#x2F;video_test_common&#x2F;test_video_capturer.obj<br>test&#x2F;platform_video_capturer&#x2F;vcm_capturer.obj<br>rtc_base&#x2F;rtc_json&#x2F;json.obj<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"> |</span><br><span class="line">| --- |</span><br><span class="line"></span><br><span class="line">- 系统相关的库包括：</span><br><span class="line">| ```</span><br><span class="line">advapi32.lib</span><br><span class="line">comdlg32.lib</span><br><span class="line">dbghelp.lib</span><br><span class="line">dnsapi.lib</span><br><span class="line">gdi32.lib</span><br><span class="line">msimg32.lib</span><br><span class="line">odbc32.lib</span><br><span class="line">odbccp32.lib</span><br><span class="line">oleaut32.lib</span><br><span class="line">shell32.lib</span><br><span class="line">shlwapi.lib</span><br><span class="line">user32.lib</span><br><span class="line">usp10.lib</span><br><span class="line">uuid.lib</span><br><span class="line">version.lib</span><br><span class="line">wininet.lib</span><br><span class="line">winmm.lib</span><br><span class="line">winspool.lib</span><br><span class="line">ws2_32.lib</span><br><span class="line">delayimp.lib</span><br><span class="line">kernel32.lib</span><br><span class="line">ole32.lib</span><br><span class="line">crypt32.lib</span><br><span class="line">iphlpapi.lib</span><br><span class="line">secur32.lib</span><br><span class="line">dmoguids.lib</span><br><span class="line">wmcodecdspuuid.lib</span><br><span class="line">amstrmid.lib</span><br><span class="line">msdmo.lib</span><br><span class="line">strmiids.lib</span><br></pre></td></tr></table></figure>
+ |<br>| — |</li>
+</ul>
+<p><a name="wvabH"></a></p>
+<h3 id="添加宏"><a href="#添加宏" class="headerlink" title="添加宏"></a>添加宏</h3><p>除了上面讲的需要引入头文件和WebRTC库之外，还需要添加下面这些宏。这些宏的具体含义我有不介绍了，有兴趣的同学可以自己在网上搜索一下。</p>
+<p>| &#96;&#96;&#96;<br>USE_AURA&#x3D;1<br>_HAS_NODISCARD<br>_HAS_EXCEPTIONS&#x3D;0<br>__STD_C<br>_CRT_RAND_S<br>_CRT_SECURE_NO_DEPRECATE<br>_SCL_SECURE_NO_DEPRECATE<br>_ATL_NO_OPENGL<br>_WINDOWS<br>CERT_CHAIN_PARA_HAS_EXTRA_FIELDS<br>PSAPI_VERSION&#x3D;2<br>WIN32<br>_SECURE_ATL<br>WINAPI_FAMILY&#x3D;WINAPI_FAMILY_DESKTOP_APP<br>WIN32_LEAN_AND_MEAN<br>NOMINMAX<br>_UNICODE<br>UNICODE<br>NTDDI_VERSION&#x3D;NTDDI_WIN10_VB<br>_WIN32_WINNT&#x3D;0x0A00<br>WINVER&#x3D;0x0A00<br>_DEBUG<br>DYNAMIC_ANNOTATIONS_ENABLED&#x3D;1<br>WEBRTC_ENABLE_PROTOBUF&#x3D;0<br>WEBRTC_INCLUDE_INTERNAL_AUDIO_DEVICE<br>RTC_ENABLE_VP9<br>WEBRTC_HAVE_SCTP<br>WEBRTC_ENABLE_AVX2<br>RTC_ENABLE_WIN_WGC<br>WEBRTC_NON_STATIC_TRACE_EVENT_HANDLERS&#x3D;0<br>WEBRTC_WIN<br>ABSL_ALLOCATOR_NOTHROW&#x3D;1<br>_ENABLE_EXTENDED_ALIGNED_STORAGE<br>ABSL_FLAGS_STRIP_NAMES&#x3D;0<br>HAVE_WEBRTC_VIDEO</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> |</span><br><span class="line">| --- |</span><br><span class="line"></span><br><span class="line">添加方法如下:</span><br><span class="line"></span><br><span class="line">- 首先在 VS 中执行下面的操作，</span><br><span class="line">| ```</span><br><span class="line">右键项目 -&gt; 属性 -&gt; C/C++ -&gt; 预处理器</span><br></pre></td></tr></table></figure>
+<p> |<br>| — |</p>
+<ul>
+<li>之后将上面的宏添加到<strong>预处理器</strong>中即可。<br><a name="frx1s"></a></li>
+</ul>
+<h2 id="编译运行"><a href="#编译运行" class="headerlink" title="编译运行"></a>编译运行</h2><p>到此为止，我们就将peerconnection_client的代码移植好了，直接点<img src="/assets/post_images/Build-WebRTC-For-MSVC/image_014.png#clientId=uc50a42e0-7134-4&from=paste&id=u97525043&originHeight=38&originWidth=34&originalType=url&ratio=1.25&rotation=0&showTitle=false&status=done&style=none&taskId=uf187e82f-4abc-4298-afd4-459f2cd77ff&title=">测试一下吧！<br />此时，编译器有可能报4996的错误，解决该问题办法很简单，只要在</p>
+<p>| &#96;&#96;&#96;<br>右键项目项 -&gt; 属性 -&gt; C&#x2F;C++ -&gt; 高级 -&gt; 禁用特定警告</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"> |</span><br><span class="line">| --- |</span><br><span class="line"></span><br><span class="line">中将 **4996** 添加进去即可。除此之外，还有可能遇到 **/MDd** 错误，解决它可以通过在</span><br><span class="line"></span><br><span class="line">| ```</span><br><span class="line">右键项目项 -&gt; 属性 -&gt; C/C++ -&gt; 代码生成 -&gt; 运行库</span><br></pre></td></tr></table></figure>
+<p> |<br>| — |</p>
+<p>中将 <strong>&#x2F;MDd</strong> 改为 <strong>&#x2F;MTd</strong> 即可。<br />如果一切顺利，peerconnection_client的连接窗口就展示在你面前了，如下图所示。<br /><img src="/assets/post_images/Build-WebRTC-For-MSVC/image_015.png#clientId=uc50a42e0-7134-4&from=paste&id=u9d3008b8&originHeight=827&originWidth=1064&originalType=url&ratio=1.25&rotation=0&showTitle=false&status=done&style=none&taskId=u62a1205a-0807-4fbb-9f86-18fb56e5330&title="><br />此时，你需要先将peerconnection_server程序运行起来，让它侦听 <strong>8888</strong> 端口；之后在peerconnection_client的连接界面中输入 <strong>127.0.0.1</strong>，点击<strong>连接</strong>，如果能进入列表界面就表明OK了。</p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>Author：<a href="https://graphicyan.github.io">Yan Zhang</a>
+            <p>Link：<a href="https://graphicyan.github.io/2023/05/21/Build-WebRTC-For-MSVC/">https://graphicyan.github.io/2023/05/21/Build-WebRTC-For-MSVC/</a>
+            <p>Publish date：<a href="https://graphicyan.github.io/2023/05/21/Build-WebRTC-For-MSVC/">May 21st 2023, 10:33:15 pm</a>
+            <p>Update date：<a href="https://graphicyan.github.io/2023/05/21/Build-WebRTC-For-MSVC/">July 18th 2025, 11:55:52 am</a>
+            <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/06/04/Simulation-Dynamics-Engine/" title="仿真及动力学系统综述">
+                    <div class="nextTitle">仿真及动力学系统综述</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2023/02/21/Collaborative-Engine/" title="浅谈端云协同渲染">
+                    <div class="prevTitle">浅谈端云协同渲染</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:yanzhang.cg@gmail.com" class="iconfont-archer email" title="email" ></a>
+                <a href="https://github.com/GraphicYan" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/wechat.png" />
+                </span>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E5%89%8D%E9%9D%A2"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%96%E8%AF%91%E5%8F%82%E6%95%B0"><span class="toc-number">2.</span> <span class="toc-text">编译参数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Use-UE-openSSL"><span class="toc-number">2.1.</span> <span class="toc-text">Use UE openSSL</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E7%94%9F%E6%88%90%E7%9A%84ninja"><span class="toc-number">3.</span> <span class="toc-text">修改生成的ninja</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#webrtc%E7%BC%96%E8%AF%91%EF%BC%8C%E4%B8%8D%E4%BD%BF%E7%94%A8%E5%86%85%E7%BD%AEboringssl%EF%BC%8C%E4%BD%BF%E7%94%A8openssl%E7%9A%84"><span class="toc-number"></span> <span class="toc-text">webrtc编译，不使用内置boringssl，使用openssl的</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number"></span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80-%E9%AA%8C%E8%AF%81%E9%80%9A%E8%BF%87%E7%9A%84%E7%89%88%E6%9C%AC"><span class="toc-number"></span> <span class="toc-text">一.验证通过的版本</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C-%E7%94%9F%E6%88%90sln%E5%B7%A5%E7%A8%8B"><span class="toc-number"></span> <span class="toc-text">二.生成sln工程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89-%E4%BF%AE%E6%94%B9%E5%B7%A5%E7%A8%8B%E6%96%87%E4%BB%B6"><span class="toc-number"></span> <span class="toc-text">三.修改工程文件</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B-%E5%BC%80%E5%A7%8B%E7%BC%96%E8%AF%91"><span class="toc-number"></span> <span class="toc-text">四.开始编译</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83"><span class="toc-number"></span> <span class="toc-text">安装开发环境</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E4%BE%9D%E8%B5%96%E7%9A%84%E5%BA%93"><span class="toc-number">1.</span> <span class="toc-text">添加依赖的库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E5%AE%8F"><span class="toc-number">2.</span> <span class="toc-text">添加宏</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E8%AF%91%E8%BF%90%E8%A1%8C"><span class="toc-number"></span> <span class="toc-text">编译运行</span></a>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 16
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/15</span>
+            <a class="archive-post-title" href="/2023/12/15/Dcc-Coords/">一图对比众3D引擎的坐标系</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span>
+            <a class="archive-post-title" href="/2023/07/08/ML-Deformer/">基于机器学习的物理变形器</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span>
+            <a class="archive-post-title" href="/2023/07/02/Dynamic-Bones/">基于动力学的骨骼动画技术综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/Simulation-Dynamics-Engine/">仿真及动力学系统综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span>
+            <a class="archive-post-title" href="/2023/05/21/Build-WebRTC-For-MSVC/">编译可以在MSVC中使用的WebRTC库</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/21</span>
+            <a class="archive-post-title" href="/2023/02/21/Collaborative-Engine/">浅谈端云协同渲染</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span>
+            <a class="archive-post-title" href="/2022/12/29/Mixed-Virtual-Production/">混合虚拟制片</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span>
+            <a class="archive-post-title" href="/2022/10/08/C2BP-Params/">C++生成蓝图的参数类型记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/29</span>
+            <a class="archive-post-title" href="/2022/06/29/Schlick-Approximate/">Schilick的近似方法</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span>
+            <a class="archive-post-title" href="/2022/03/18/Illumination/">光通量、光强和照度</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/13</span>
+            <a class="archive-post-title" href="/2021/12/13/DS-VS-DL/">延迟渲染Vs延迟光照</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/17</span>
+            <a class="archive-post-title" href="/2021/04/17/Importance-Sampling/">重要性采样</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span>
+            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span>
+            <a class="archive-post-title" href="/2021/04/02/Cook-Torrance-BRDF/">Cook-Torrance的BRDF</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/29</span>
+            <a class="archive-post-title" href="/2021/03/29/Learn-Rendering-Function/">理解渲染方程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/22</span>
+            <a class="archive-post-title" href="/2021/03/22/Learn-Radiometry/">辐射度量学笔记</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://graphicyan.github.io",
+        root: siteMetaRoot,
+        author: "Yan Zhang"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+    </body>
+</html>

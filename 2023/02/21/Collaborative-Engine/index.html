@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Yan Zhang">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Yan Zhang">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="">
+    <meta name="description" content="原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&amp;#121;&amp;#x61;&amp;#x6e;&amp;#122;&amp;#x68;&amp;#x61;&amp;#x6e;&amp;#x67;&amp;#46;&amp;#x63;&amp;#103;&amp;#x40;&amp;#x67;&amp;#109;&amp;#97;&amp;#105;&amp;#x6c;&amp;#46;&amp;#99;&amp;#x6f;&amp;#x6d; 或 https:&#x2F;&#x2F;graphicyan.github.io&#x2F;）  从云游戏到">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅谈端云协同渲染">
+<meta property="og:url" content="https://graphicyan.github.io/2023/02/21/Collaborative-Engine/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&amp;#121;&amp;#x61;&amp;#x6e;&amp;#122;&amp;#x68;&amp;#x61;&amp;#x6e;&amp;#x67;&amp;#46;&amp;#x63;&amp;#103;&amp;#x40;&amp;#x67;&amp;#109;&amp;#97;&amp;#105;&amp;#x6c;&amp;#46;&amp;#99;&amp;#x6f;&amp;#x6d; 或 https:&#x2F;&#x2F;graphicyan.github.io&#x2F;）  从云游戏到">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_000.png#clientId=u602bfa2e-1565-4&from=paste&height=635&id=u64eb5e77&originHeight=889&originWidth=1406&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=482148&status=done&style=none&taskId=u5e13ed22-eabe-4e7a-ae85-0cf48979b3e&title=&width=1004.2857313885984">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_001.png#clientId=u602bfa2e-1565-4&from=paste&height=460&id=u02077730&originHeight=664&originWidth=719&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=167659&status=done&style=none&taskId=ub7c33325-5996-4722-bd1b-d9f65dfd621&title=&width=498">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_002.png#clientId=u602bfa2e-1565-4&from=paste&height=485&id=u2fcaef81&originHeight=799&originWidth=823&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=234901&status=done&style=none&taskId=u1a2a19a8-04c2-4971-aa66-824ba165837&title=&width=500">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_003.png#clientId=u602bfa2e-1565-4&from=paste&height=163&id=u3abfb9e2&originHeight=399&originWidth=1222&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=203056&status=done&style=none&taskId=u7235202c-3547-4df5-aadf-3440b5cffd8&title=&width=500">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_004.png?x-oss-process=image/resize,w_848,limit_0#from=url&id=XEUvw&originHeight=1150&originWidth=848&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&status=done&style=none&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_005.jpeg?x-oss-process=image/resize,w_1049,limit_0/interlace,1#from=url&id=XzYD9&originHeight=722&originWidth=1049&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=true&status=done&style=none&title=%E6%88%90%E7%86%9F%E7%9A%84%E5%AE%9E%E6%97%B6%E9%80%9A%E4%BF%A1%E5%85%B7%E5%A4%87%E7%9A%84%E8%83%BD%E5%8A%9B">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_006.jpeg?x-oss-process=image/resize,w_1049,limit_0/interlace,1#from=url&id=YfsGs&originHeight=982&originWidth=1049&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=true&status=done&style=none&title=webrtc%E6%9E%B6%E6%9E%84%E5%9B%BE">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_007.jpeg#from=url&id=Od2sY&originHeight=422&originWidth=1104&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=true&status=done&style=none&title=VS%E8%87%AA%E7%A0%94">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_008.png?x-oss-process=image/resize,w_1049,limit_0#from=url&id=egyIn&originHeight=403&originWidth=1049&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&status=done&style=none&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_009.png#clientId=u6c985579-b31a-4&from=paste&height=346&id=u9e79b35d&originHeight=484&originWidth=1096&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=true&size=134356&status=done&style=none&taskId=u740a3788-e34f-495c-a72c-4573e4a61f4&title=Delta%20Encoding&width=782.8571561891208">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_010.png#clientId=u6c985579-b31a-4&from=paste&height=615&id=udc6bbd07&originHeight=879&originWidth=908&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=1154804&status=done&style=none&taskId=u7244bc89-0a0c-45e9-bea7-99a0fcb2476&title=&width=635">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_011.png#clientId=u6c985579-b31a-4&from=paste&height=307&id=u27583dfc&originHeight=430&originWidth=861&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=613435&status=done&style=none&taskId=u5433f83a-3bbf-45e1-bcb9-50d1267acf5&title=&width=615.0000104733878">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_012.png#clientId=u6c985579-b31a-4&from=paste&height=321&id=u20f03a62&originHeight=450&originWidth=1121&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=true&size=122778&status=done&style=none&taskId=ua047e6cc-ce19-426a-9625-180863a1525&title=Client-Side%20I-Frame%20Rendering&width=800.714299350369">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_013.png#clientId=u6c985579-b31a-4&from=paste&height=55&id=u89247432&originHeight=77&originWidth=348&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=15287&status=done&style=none&taskId=ua4b558d6-b380-4c1f-93f5-271383ab0f7&title=&width=248.57143280457484">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_014.png#clientId=u6c985579-b31a-4&from=paste&height=1301&id=uad26227d&originHeight=1821&originWidth=2085&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=1773956&status=done&style=none&taskId=u4a4eac5d-7d87-4ff0-8213-1cfe234793a&title=&width=1489.2857396480993">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_015.png#clientId=u31aa8cf2-a761-4&from=paste&height=306&id=u232887b9&originHeight=589&originWidth=1576&originalType=binary&ratio=1.9250000715255737&rotation=0&showTitle=true&size=434252&status=done&style=none&taskId=u1af1f252-7bd9-4f98-931a-8a271c769e9&title=%5BA%20Distributed,%20Decoupled%20System%20for%20Losslessly%0D%20Streaming%20Dynamic%20Light%20Probes%20to%20Thin%20Clients%5D&width=818.701268281518">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_016.png#clientId=u31aa8cf2-a761-4&from=paste&height=1122&id=XEiVy&originHeight=2160&originWidth=3840&originalType=binary&ratio=1.9250000715255737&rotation=0&showTitle=true&size=5925382&status=done&style=none&taskId=u7e7d609a-aaef-4273-81a3-27a599f15d5&title=%5BHybrid%20Rendering%20for%20Real-Time%20Ray%20Tracing%5D&width=1995">
+<meta property="article:published_time" content="2023-02-21T04:33:15.000Z">
+<meta property="article:modified_time" content="2025-07-18T03:55:52.134Z">
+<meta property="article:author" content="Yan Zhang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://graphicyan.github.io/assets/post_images/Collaborative-Engine/image_000.png#clientId=u602bfa2e-1565-4&from=paste&height=635&id=u64eb5e77&originHeight=889&originWidth=1406&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=482148&status=done&style=none&taskId=u5e13ed22-eabe-4e7a-ae85-0cf48979b3e&title=&width=1004.2857313885984">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/yan.jpg">
+    <title>浅谈端云协同渲染 · Yan&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Yan's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Yan&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">浅谈端云协同渲染</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                浅谈端云协同渲染
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count word-count">1.2k</span>Reading time: <span class="post-count reading-time">4 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2023/02/21</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <h2 id="原创性声明"><a href="#原创性声明" class="headerlink" title="原创性声明"></a>原创性声明</h2><p>本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（<a href="mailto:&#121;&#x61;&#x6e;&#122;&#x68;&#x61;&#x6e;&#x67;&#46;&#x63;&#103;&#x40;&#x67;&#109;&#97;&#105;&#x6c;&#46;&#99;&#x6f;&#x6d;">&#121;&#x61;&#x6e;&#122;&#x68;&#x61;&#x6e;&#x67;&#46;&#x63;&#103;&#x40;&#x67;&#109;&#97;&#105;&#x6c;&#46;&#99;&#x6f;&#x6d;</a> 或 <a href="https://graphicyan.github.io/%EF%BC%89">https://graphicyan.github.io/）</a></p>
+<p><a name="KVfi6"></a></p>
+<h3 id="从云游戏到混合渲染"><a href="#从云游戏到混合渲染" class="headerlink" title="从云游戏到混合渲染"></a>从云游戏到混合渲染</h3><p><a name="sCIFE"></a></p>
+<h4 id="云游戏（Cloud-Game）"><a href="#云游戏（Cloud-Game）" class="headerlink" title="云游戏（Cloud Game）"></a>云游戏（Cloud Game）</h4><p><a name="CVocR"></a></p>
+<h5 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h5><ul>
+<li>发送用户输入，从端到云。</li>
+<li>渲染完整帧，云。</li>
+<li>将画面以视频流传回，从云到端。<br><a name="aL2co"></a></li>
+</ul>
+<h5 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h5><ul>
+<li>适用于异构、低级别的终端设备。</li>
+<li>围绕高效的视频压缩及传输技术构造技术生态。</li>
+<li>延迟（~100ms），视频类应用尚可接受、交互式对抗类游戏会难以忍受。</li>
+<li>传输带宽限制，对压缩算法的挑战。<br><a name="nlhm9"></a></li>
+</ul>
+<h4 id="混合渲染（Hybrid-Rendering）"><a href="#混合渲染（Hybrid-Rendering）" class="headerlink" title="混合渲染（Hybrid Rendering）"></a>混合渲染（Hybrid Rendering）</h4><p><a name="MI7jy"></a></p>
+<h5 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h5><ul>
+<li>端侧以实时计算的Raster及ComputeShader为主，保证基本的输出。</li>
+<li>辅以云侧的Raytrace、GI、AO、Translucency等算法，增强端侧效果。<br><a name="wLYhi"></a></li>
+</ul>
+<h5 id="特点-1"><a href="#特点-1" class="headerlink" title="特点"></a>特点</h5><ul>
+<li>算力适合地分布在云、端侧，协同两侧资源计算，混合计算结果。</li>
+<li>策略丰富、增强效果、传输数据具有定制化（可优化空间）。</li>
+<li>数据量相比云游戏方案，一般来说更小。</li>
+<li>技术选型风险、工业化程度低。<br><a name="TItIC"></a></li>
+</ul>
+<h3 id="云游戏"><a href="#云游戏" class="headerlink" title="云游戏"></a>云游戏</h3><p>把算力放在云端，看似简单，想要在端侧、云侧通信并实时处理逻辑、用户输入、渲染、捕获、编码、打包、传输、解码、显示，仍然由诸多难点和不确定性。<br><a name="ZdPFh"></a></p>
+<h4 id="Framework-for-Cloud-Gaming"><a href="#Framework-for-Cloud-Gaming" class="headerlink" title="Framework for Cloud Gaming"></a>Framework for Cloud Gaming</h4><p><img src="/assets/post_images/Collaborative-Engine/image_000.png#clientId=u602bfa2e-1565-4&from=paste&height=635&id=u64eb5e77&originHeight=889&originWidth=1406&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=482148&status=done&style=none&taskId=u5e13ed22-eabe-4e7a-ae85-0cf48979b3e&title=&width=1004.2857313885984" alt="image.png"><br /><img src="/assets/post_images/Collaborative-Engine/image_001.png#clientId=u602bfa2e-1565-4&from=paste&height=460&id=u02077730&originHeight=664&originWidth=719&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=167659&status=done&style=none&taskId=ub7c33325-5996-4722-bd1b-d9f65dfd621&title=&width=498" alt="image.png"><br /><img src="/assets/post_images/Collaborative-Engine/image_002.png#clientId=u602bfa2e-1565-4&from=paste&height=485&id=u2fcaef81&originHeight=799&originWidth=823&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=234901&status=done&style=none&taskId=u1a2a19a8-04c2-4971-aa66-824ba165837&title=&width=500" alt="image.png"><br><a name="DqIco"></a></p>
+<h5 id="延迟"><a href="#延迟" class="headerlink" title="延迟"></a>延迟</h5><p><img src="/assets/post_images/Collaborative-Engine/image_003.png#clientId=u602bfa2e-1565-4&from=paste&height=163&id=u3abfb9e2&originHeight=399&originWidth=1222&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=203056&status=done&style=none&taskId=u7235202c-3547-4df5-aadf-3440b5cffd8&title=&width=500" alt="image.png"><br><a name="DOqdj"></a></p>
+<h4 id="技术分类"><a href="#技术分类" class="headerlink" title="技术分类"></a>技术分类</h4><p><a name="xFEab"></a></p>
+<h5 id="平台技术"><a href="#平台技术" class="headerlink" title="平台技术"></a>平台技术</h5><ul>
+<li><strong>系统集成</strong>：组建云游戏（计算）的基础平台。</li>
+<li><strong>服务质量分析（QoS）：</strong>主要集中在两种指标，<strong>能量开销（</strong>电池<strong>）</strong> 和 <strong>网络指标（</strong>延迟<strong>）。</strong></li>
+<li><strong>体验质量分析（QoE）：</strong>用户的主观评分，本质上乏味且贵，大多数尝试分析QoS和QoE的关系来反推QoE。<br><a name="lwW46"></a></li>
+</ul>
+<h5 id="平台优化"><a href="#平台优化" class="headerlink" title="平台优化"></a>平台优化</h5><ul>
+<li><strong>云服务器基建：</strong>多数据中心、服务节点、客户端的<strong>资源分配</strong>问题；如P2P覆盖及多层云等<strong>分布式架构</strong>。</li>
+<li><strong>通信：</strong>如多层编码和图形压缩等<strong>数据压缩</strong>方法；<strong>自适应传输</strong>根据网络动态适时更改编码比特率、帧率、分辨率等参数。</li>
+</ul>
+<p><a name="xSV1b"></a></p>
+<h4 id="实现示例"><a href="#实现示例" class="headerlink" title="实现示例"></a>实现示例</h4><p><a name="CWcPw"></a></p>
+<h5 id="平台部署"><a href="#平台部署" class="headerlink" title="平台部署"></a>平台部署</h5><p><img src="/assets/post_images/Collaborative-Engine/image_004.png?x-oss-process=image/resize,w_848,limit_0#from=url&id=XEUvw&originHeight=1150&originWidth=848&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&status=done&style=none&title="><br><a name="aT4m6"></a></p>
+<h5 id="WebRTC"><a href="#WebRTC" class="headerlink" title="WebRTC"></a>WebRTC</h5><p>一个成熟的实时通信架构，应该具备音视频传输、多平台支持、插件管理等功能。<br /><img src="/assets/post_images/Collaborative-Engine/image_005.jpeg?x-oss-process=image/resize,w_1049,limit_0/interlace,1#from=url&id=XzYD9&originHeight=722&originWidth=1049&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=true&status=done&style=none&title=%E6%88%90%E7%86%9F%E7%9A%84%E5%AE%9E%E6%97%B6%E9%80%9A%E4%BF%A1%E5%85%B7%E5%A4%87%E7%9A%84%E8%83%BD%E5%8A%9B" alt="成熟的实时通信具备的能力" title="成熟的实时通信具备的能力"><br />WebRTC实现了上面所有的功能，是做网络实时通信的最优解。<br />目前UE的云游戏、淘宝直播、以及ZOOM等都用这套方案。<br /><img src="/assets/post_images/Collaborative-Engine/image_006.jpeg?x-oss-process=image/resize,w_1049,limit_0/interlace,1#from=url&id=YfsGs&originHeight=982&originWidth=1049&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=true&status=done&style=none&title=webrtc%E6%9E%B6%E6%9E%84%E5%9B%BE" alt="webrtc架构图" title="webrtc架构图"><br /><img src="/assets/post_images/Collaborative-Engine/image_007.jpeg#from=url&id=Od2sY&originHeight=422&originWidth=1104&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=true&status=done&style=none&title=VS%E8%87%AA%E7%A0%94" alt="VS自研" title="VS自研"><br><a name="e8TPM"></a></p>
+<h6 id="使用WebRTC实现云推流"><a href="#使用WebRTC实现云推流" class="headerlink" title="使用WebRTC实现云推流"></a>使用WebRTC实现云推流</h6><p><img src="/assets/post_images/Collaborative-Engine/image_008.png?x-oss-process=image/resize,w_1049,limit_0#from=url&id=egyIn&originHeight=403&originWidth=1049&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&status=done&style=none&title="></p>
+<ol>
+<li>云端引擎的像素流送模块首先将建立到信令和Web服务器的链接。</li>
+<li>客户端会连接到信令服务器，服务器将对客户端提供一个HTML页面，其中包含播放器控件和以JavaScript编写的控制代码。</li>
+<li>用户开始流送时，信令服务器将进行交涉，在客户端浏览器和云端引擎之间建立直接连接。客户端和云端引擎须了解相互的IP地址，此连接方能工作。如两者在同一网络中运行，通常它们可看到各自的IP地址。然而在两个端点之间运行的网络地址转换（NAT）服务可能对任意一方的外部可见IP地址进行修改。解决此问题的方法通常是是用STUN或TURN服务器，告知每个组件其自身的外部可见IP地址。</li>
+<li>客户端和云侧引擎之间的连接建立后，像素流送模块便会直接开始将媒体流送到浏览器。来自客户端的输入由播放器页面的JavaScript环境直接发送回云端引擎中。</li>
+<li>即使媒体流送已经开始播放，信令和Web服务器仍会维持其与浏览器和云端引擎的连接，以便在必要时将用户从流送中移除，并处理浏览器造成的连接断开。</li>
+</ol>
+<p><a name="EgMGc"></a></p>
+<h3 id="混合渲染"><a href="#混合渲染" class="headerlink" title="混合渲染"></a>混合渲染</h3><p><a name="AgiXu"></a></p>
+<h4 id="基于差异的协同渲染"><a href="#基于差异的协同渲染" class="headerlink" title="基于差异的协同渲染"></a>基于差异的协同渲染</h4><p><a name="F8Blq"></a></p>
+<h5 id="Delta-Encoding"><a href="#Delta-Encoding" class="headerlink" title="Delta Encoding"></a>Delta Encoding</h5><p><img src="/assets/post_images/Collaborative-Engine/image_009.png#clientId=u6c985579-b31a-4&from=paste&height=346&id=u9e79b35d&originHeight=484&originWidth=1096&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=true&size=134356&status=done&style=none&taskId=u740a3788-e34f-495c-a72c-4573e4a61f4&title=Delta%20Encoding&width=782.8571561891208" alt="Delta Encoding" title="Delta Encoding"><br /><img src="/assets/post_images/Collaborative-Engine/image_010.png#clientId=u6c985579-b31a-4&from=paste&height=615&id=udc6bbd07&originHeight=879&originWidth=908&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=1154804&status=done&style=none&taskId=u7244bc89-0a0c-45e9-bea7-99a0fcb2476&title=&width=635" alt="image.png"><br /><img src="/assets/post_images/Collaborative-Engine/image_011.png#clientId=u6c985579-b31a-4&from=paste&height=307&id=u27583dfc&originHeight=430&originWidth=861&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=613435&status=done&style=none&taskId=u5433f83a-3bbf-45e1-bcb9-50d1267acf5&title=&width=615.0000104733878" alt="image.png"><br><a name="vQree"></a></p>
+<h5 id="I-Frame-Rendering"><a href="#I-Frame-Rendering" class="headerlink" title="I-Frame Rendering"></a>I-Frame Rendering</h5><p><img src="/assets/post_images/Collaborative-Engine/image_012.png#clientId=u6c985579-b31a-4&from=paste&height=321&id=u20f03a62&originHeight=450&originWidth=1121&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=true&size=122778&status=done&style=none&taskId=ua047e6cc-ce19-426a-9625-180863a1525&title=Client-Side%20I-Frame%20Rendering&width=800.714299350369" alt="Client-Side I-Frame Rendering" title="Client-Side I-Frame Rendering"><br><a name="fRD3Y"></a></p>
+<h4 id="云光线追踪"><a href="#云光线追踪" class="headerlink" title="云光线追踪"></a>云光线追踪</h4><p><img src="/assets/post_images/Collaborative-Engine/image_013.png#clientId=u6c985579-b31a-4&from=paste&height=55&id=u89247432&originHeight=77&originWidth=348&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=15287&status=done&style=none&taskId=ua4b558d6-b380-4c1f-93f5-271383ab0f7&title=&width=248.57143280457484" alt="image.png"><br /><img src="/assets/post_images/Collaborative-Engine/image_014.png#clientId=u6c985579-b31a-4&from=paste&height=1301&id=uad26227d&originHeight=1821&originWidth=2085&originalType=binary&ratio=1.399999976158142&rotation=0&showTitle=false&size=1773956&status=done&style=none&taskId=u4a4eac5d-7d87-4ff0-8213-1cfe234793a&title=&width=1489.2857396480993" alt="image.png"><br><a name="u71fy"></a></p>
+<h4 id="分布式动态光照探针"><a href="#分布式动态光照探针" class="headerlink" title="分布式动态光照探针"></a>分布式动态光照探针</h4><p><img src="/assets/post_images/Collaborative-Engine/image_015.png#clientId=u31aa8cf2-a761-4&from=paste&height=306&id=u232887b9&originHeight=589&originWidth=1576&originalType=binary&ratio=1.9250000715255737&rotation=0&showTitle=true&size=434252&status=done&style=none&taskId=u1af1f252-7bd9-4f98-931a-8a271c769e9&title=%5BA%20Distributed,%20Decoupled%20System%20for%20Losslessly%0D%20Streaming%20Dynamic%20Light%20Probes%20to%20Thin%20Clients%5D&width=818.701268281518" alt="[A Distributed, Decoupled System for Losslessly
+ Streaming Dynamic Light Probes to Thin Clients]" title="[A Distributed, Decoupled System for Losslessly
+ Streaming Dynamic Light Probes to Thin Clients]"><br><a name="WOjXr"></a></p>
+<h4 id="开个脑洞"><a href="#开个脑洞" class="headerlink" title="开个脑洞"></a>开个脑洞</h4><p><a name="Hs2vd"></a></p>
+<h5 id="NV’s-Hybrid-Pipeline"><a href="#NV’s-Hybrid-Pipeline" class="headerlink" title="NV’s Hybrid Pipeline"></a>NV’s Hybrid Pipeline</h5><p><img src="/assets/post_images/Collaborative-Engine/image_016.png#clientId=u31aa8cf2-a761-4&from=paste&height=1122&id=XEiVy&originHeight=2160&originWidth=3840&originalType=binary&ratio=1.9250000715255737&rotation=0&showTitle=true&size=5925382&status=done&style=none&taskId=u7e7d609a-aaef-4273-81a3-27a599f15d5&title=%5BHybrid%20Rendering%20for%20Real-Time%20Ray%20Tracing%5D&width=1995" alt="[Hybrid Rendering for Real-Time Ray Tracing]" title="[Hybrid Rendering for Real-Time Ray Tracing]"></p>
+<p><a name="P5kHz"></a></p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p>[2020][VR]Cloud-to-end Rendering and Storage Management for Virtual Reality in Experimental Education</p>
+<p>[2022][IXR]Distributed Hybrid Rendering for Metaverse Experiences</p>
+<p>[2022][PG Poster]Cloud-Assisted Hybrid Rendering for Thin-Client Games and VR Applications</p>
+<p>[2022]A Full Dive into Realizing the Edge-enabled Metaverse</p>
+<p>[2008][ICIP]Low Delay Streaming of Computer Graphics</p>
+<p>[2009]Geelix_LiveGames_Remote_Playing_of_Video_Games</p>
+<p>[2015][MobiSys]Kahawai</p>
+<p>[2016]Mobile Cloud Computing Research</p>
+<p>[2020][MICRO]A Benchmarking Framework for Interactive 3D Applications in the Cloud</p>
+<p>[2020][MTA]A Hybrid Remote Rendering Method for Mobile</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/EpicGames/PixelStreamingInfrastructure">GitHub - EpicGames&#x2F;PixelStreamingInfrastructure: The official Pixel Streaming servers and frontend.</a><br /></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/EpicGames/UnrealEngine/tree/release/Engine/Plugins/Media/PixelStreaming">Build software better, together</a><br /></p>
+<p><a target="_blank" rel="noopener" href="https://devblogs.microsoft.com/cse/2019/03/19/real-time-streaming-of-3d-enterprise-applications-from-the-cloud-to-low-powered-devices/">Real-time Streaming Of 3D Enterprise Applications From The Cloud To Low-powered Devices - CSE Developer Blog</a><br /></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/en-us/gaming/azure/reference-architectures/unreal-pixel-streaming-in-azure">Unreal Pixel Streaming in Azure - Azure Gaming</a><br /></p>
+<p><a target="_blank" rel="noopener" href="https://docs.unrealengine.com/5.1/zh-CN/overview-of-pixel-streaming-in-unreal-engine/">像素流介绍</a><br /></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/580146138">搞懂WebRTC ，看这一篇就够了</a><br /></p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/424264607/answer/2394172608">WebRTC和WebSocket有什么关系和区别？ - 知乎</a><br /></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/409462524">音视频通信为什么要选择WebRTC？</a><br /></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/63093901">【技术】UE4 Pixel Streaming 详细解读（实践篇）</a><br /></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/153098799">PixelStreaming 局域网及公有云部署全流程记录</a><br /></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/76406905">UE4像素流（Pixel Streaming）应用场景</a></p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>Author：<a href="https://graphicyan.github.io">Yan Zhang</a>
+            <p>Link：<a href="https://graphicyan.github.io/2023/02/21/Collaborative-Engine/">https://graphicyan.github.io/2023/02/21/Collaborative-Engine/</a>
+            <p>Publish date：<a href="https://graphicyan.github.io/2023/02/21/Collaborative-Engine/">February 21st 2023, 12:33:15 pm</a>
+            <p>Update date：<a href="https://graphicyan.github.io/2023/02/21/Collaborative-Engine/">July 18th 2025, 11:55:52 am</a>
+            <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/05/21/Build-WebRTC-For-MSVC/" title="编译可以在MSVC中使用的WebRTC库">
+                    <div class="nextTitle">编译可以在MSVC中使用的WebRTC库</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2022/12/29/Mixed-Virtual-Production/" title="混合虚拟制片">
+                    <div class="prevTitle">混合虚拟制片</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:yanzhang.cg@gmail.com" class="iconfont-archer email" title="email" ></a>
+                <a href="https://github.com/GraphicYan" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/wechat.png" />
+                </span>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E5%88%9B%E6%80%A7%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">原创性声明</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E4%BA%91%E6%B8%B8%E6%88%8F%E5%88%B0%E6%B7%B7%E5%90%88%E6%B8%B2%E6%9F%93"><span class="toc-number">1.1.</span> <span class="toc-text">从云游戏到混合渲染</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%91%E6%B8%B8%E6%88%8F%EF%BC%88Cloud-Game%EF%BC%89"><span class="toc-number">1.1.1.</span> <span class="toc-text">云游戏（Cloud Game）</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-number">1.1.1.1.</span> <span class="toc-text">原理</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%89%B9%E7%82%B9"><span class="toc-number">1.1.1.2.</span> <span class="toc-text">特点</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B7%B7%E5%90%88%E6%B8%B2%E6%9F%93%EF%BC%88Hybrid-Rendering%EF%BC%89"><span class="toc-number">1.1.2.</span> <span class="toc-text">混合渲染（Hybrid Rendering）</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8E%9F%E7%90%86-1"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">原理</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%89%B9%E7%82%B9-1"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">特点</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%91%E6%B8%B8%E6%88%8F"><span class="toc-number">1.2.</span> <span class="toc-text">云游戏</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Framework-for-Cloud-Gaming"><span class="toc-number">1.2.1.</span> <span class="toc-text">Framework for Cloud Gaming</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BB%B6%E8%BF%9F"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">延迟</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8A%80%E6%9C%AF%E5%88%86%E7%B1%BB"><span class="toc-number">1.2.2.</span> <span class="toc-text">技术分类</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B9%B3%E5%8F%B0%E6%8A%80%E6%9C%AF"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">平台技术</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B9%B3%E5%8F%B0%E4%BC%98%E5%8C%96"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">平台优化</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.2.3.</span> <span class="toc-text">实现示例</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B9%B3%E5%8F%B0%E9%83%A8%E7%BD%B2"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">平台部署</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#WebRTC"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">WebRTC</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8WebRTC%E5%AE%9E%E7%8E%B0%E4%BA%91%E6%8E%A8%E6%B5%81"><span class="toc-number">1.2.3.2.1.</span> <span class="toc-text">使用WebRTC实现云推流</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%B7%E5%90%88%E6%B8%B2%E6%9F%93"><span class="toc-number">1.3.</span> <span class="toc-text">混合渲染</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E5%B7%AE%E5%BC%82%E7%9A%84%E5%8D%8F%E5%90%8C%E6%B8%B2%E6%9F%93"><span class="toc-number">1.3.1.</span> <span class="toc-text">基于差异的协同渲染</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Delta-Encoding"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">Delta Encoding</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#I-Frame-Rendering"><span class="toc-number">1.3.1.2.</span> <span class="toc-text">I-Frame Rendering</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%91%E5%85%89%E7%BA%BF%E8%BF%BD%E8%B8%AA"><span class="toc-number">1.3.2.</span> <span class="toc-text">云光线追踪</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E5%8A%A8%E6%80%81%E5%85%89%E7%85%A7%E6%8E%A2%E9%92%88"><span class="toc-number">1.3.3.</span> <span class="toc-text">分布式动态光照探针</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%80%E4%B8%AA%E8%84%91%E6%B4%9E"><span class="toc-number">1.3.4.</span> <span class="toc-text">开个脑洞</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#NV%E2%80%99s-Hybrid-Pipeline"><span class="toc-number">1.3.4.1.</span> <span class="toc-text">NV’s Hybrid Pipeline</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="toc-number">2.</span> <span class="toc-text">参考文献</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 16
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/15</span>
+            <a class="archive-post-title" href="/2023/12/15/Dcc-Coords/">一图对比众3D引擎的坐标系</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span>
+            <a class="archive-post-title" href="/2023/07/08/ML-Deformer/">基于机器学习的物理变形器</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span>
+            <a class="archive-post-title" href="/2023/07/02/Dynamic-Bones/">基于动力学的骨骼动画技术综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/Simulation-Dynamics-Engine/">仿真及动力学系统综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span>
+            <a class="archive-post-title" href="/2023/05/21/Build-WebRTC-For-MSVC/">编译可以在MSVC中使用的WebRTC库</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/21</span>
+            <a class="archive-post-title" href="/2023/02/21/Collaborative-Engine/">浅谈端云协同渲染</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span>
+            <a class="archive-post-title" href="/2022/12/29/Mixed-Virtual-Production/">混合虚拟制片</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span>
+            <a class="archive-post-title" href="/2022/10/08/C2BP-Params/">C++生成蓝图的参数类型记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/29</span>
+            <a class="archive-post-title" href="/2022/06/29/Schlick-Approximate/">Schilick的近似方法</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span>
+            <a class="archive-post-title" href="/2022/03/18/Illumination/">光通量、光强和照度</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/13</span>
+            <a class="archive-post-title" href="/2021/12/13/DS-VS-DL/">延迟渲染Vs延迟光照</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/17</span>
+            <a class="archive-post-title" href="/2021/04/17/Importance-Sampling/">重要性采样</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span>
+            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span>
+            <a class="archive-post-title" href="/2021/04/02/Cook-Torrance-BRDF/">Cook-Torrance的BRDF</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/29</span>
+            <a class="archive-post-title" href="/2021/03/29/Learn-Rendering-Function/">理解渲染方程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/22</span>
+            <a class="archive-post-title" href="/2021/03/22/Learn-Radiometry/">辐射度量学笔记</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://graphicyan.github.io",
+        root: siteMetaRoot,
+        author: "Yan Zhang"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+    </body>
+</html>

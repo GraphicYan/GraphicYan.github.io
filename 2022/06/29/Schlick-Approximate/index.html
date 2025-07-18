@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Yan Zhang">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Yan Zhang">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="">
+    <meta name="description" content="1. 符号定义对于着色点 P，如下图所示，T 表示表面切向量，N表示法线，V表示出射方向，V‘表示入射方向，H 表示半程向量，  表示半程向量的投影：各个角度及其对应的余弦的表示方式如下（之后会用到）：  2. 反射模型简介Schlick在文章中介绍了3种反射模型，在这里简单了解一下即可。2.1 Cook-Torrance 模型关于基于微表面的Cook-Torrance模型，其BRDF如下：其中">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Schilick的近似方法">
+<meta property="og:url" content="https://graphicyan.github.io/2022/06/29/Schlick-Approximate/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1. 符号定义对于着色点 P，如下图所示，T 表示表面切向量，N表示法线，V表示出射方向，V‘表示入射方向，H 表示半程向量，  表示半程向量的投影：各个角度及其对应的余弦的表示方式如下（之后会用到）：  2. 反射模型简介Schlick在文章中介绍了3种反射模型，在这里简单了解一下即可。2.1 Cook-Torrance 模型关于基于微表面的Cook-Torrance模型，其BRDF如下：其中">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_000.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u04a1f308&originHeight=23&originWidth=19&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u30c2aaee-d305-4fd0-8066-f76b573bc74&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_001.png#clientId=ue945f1e2-e1f0-4&from=paste&id=udfa83281&originHeight=676&originWidth=714&originalType=url&ratio=1&rotation=0&showTitle=false&size=98173&status=done&style=none&taskId=u955eff7f-d091-4ad1-be32-0ed731ad1eb&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_002.png#clientId=ue945f1e2-e1f0-4&from=paste&id=u2097ab7b&originHeight=254&originWidth=676&originalType=url&ratio=1&rotation=0&showTitle=false&size=55824&status=done&style=none&taskId=ucc83f121-f46d-4e17-ae8c-2a08d5a05f1&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_003.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ub7a83214&originHeight=59&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u9581f2dd-4bef-4616-853e-82e9e99f399&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_004.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u015fd7cf&originHeight=26&originWidth=93&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=uba775425-f07e-493b-9782-1fdd6641e82&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_005.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u02406ab1&originHeight=15&originWidth=12&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u2a20ec7c-d97e-4dce-b958-d3ade7f87b9&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_006.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u173f86c9&originHeight=15&originWidth=12&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u85b1a5e5-bb2b-4dfd-8020-e245763b633&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_007.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u718a2b29&originHeight=122&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u7a904be5-3f03-47c5-87a3-4b778410218&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_008.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u3705d37d&originHeight=26&originWidth=145&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u710a63a9-ac2b-4711-87ae-012c58f81b3&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_009.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uf07e72f5&originHeight=68&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ucb3eb6c0-a4da-4f51-a891-0816d64bf44&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_010.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u369c55f6&originHeight=26&originWidth=156&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ud0929d3a-954d-42ea-bc6a-b1aeff9964c&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_011.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uedc5c77e&originHeight=65&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u02fb856c-bae0-41e0-9dd1-bf2968e25e9&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_012.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u7cd89498&originHeight=59&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u3f15b81f-00bb-477f-919c-495d62bba09&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_013.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ud18ba6bc&originHeight=50&originWidth=722&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ub13451f2-6464-4d91-accc-4661c3f4e7a&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_014.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ua07ec324&originHeight=27&originWidth=68&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u076ecbfb-2000-4353-8e79-0304149c82b&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_015.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u48f99274&originHeight=122&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u22b1939d-c4f0-4b02-a7fe-31dcdf53455&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_016.png#clientId=ue945f1e2-e1f0-4&from=paste&id=u43a90696&originHeight=480&originWidth=966&originalType=url&ratio=1&rotation=0&showTitle=false&size=79656&status=done&style=none&taskId=uec5c5d84-efd0-4f79-981b-7c81f8d3e5f&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_017.png#clientId=ue945f1e2-e1f0-4&from=paste&id=u831084b4&originHeight=186&originWidth=1730&originalType=url&ratio=1&rotation=0&showTitle=false&size=23440&status=done&style=none&taskId=u5b1aef1b-5832-455c-a4ba-28502a22999&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_018.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u117cb737&originHeight=57&originWidth=126&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u76abad32-e126-4f32-9502-d8ce1798af0&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_019.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u98a907b4&originHeight=26&originWidth=114&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u2397dbc6-fc4a-479b-bfcd-50993ceecc1&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_020.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u42b9de54&originHeight=26&originWidth=64&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u9d1de4d9-fbe0-4ec9-bf0e-036fcf69559&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_021.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uf1ca7239&originHeight=122&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u020e06e4-e031-43d3-844c-105a85a55a7&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_022.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u06e6f0ba&originHeight=63&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u3cb47586-de4b-4f79-948f-0b23517f119&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_023.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u1e48b6d4&originHeight=116&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u859e2c8f-0a84-4f33-b789-4e2889764ee&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_024.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u2f7d10e7&originHeight=26&originWidth=114&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u91853ddb-a750-4602-8a58-7affea0948e&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_025.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u25e3f670&originHeight=47&originWidth=639&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u54b6f95c-5093-47bf-aef1-0fdb98167c2&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_026.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u97b2752c&originHeight=26&originWidth=64&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ub8ad99ad-9abd-42ba-b423-7dd4626955b&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_027.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u4706eecb&originHeight=21&originWidth=82&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u649e77a0-e221-4b45-a837-3fe069e98e8&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_028.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uae815488&originHeight=26&originWidth=88&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u9a3ba458-75d1-4fe1-94f9-8a9bf6ff1be&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_029.png#clientId=ue945f1e2-e1f0-4&from=paste&id=uf0df9f43&originHeight=572&originWidth=1502&originalType=url&ratio=1&rotation=0&showTitle=false&size=81473&status=done&style=none&taskId=u7dc3dbdd-9858-4fff-9bc6-d3fdfe21c5f&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_030.png#clientId=ue945f1e2-e1f0-4&from=paste&id=u7b288abc&originHeight=153&originWidth=720&originalType=url&ratio=1&rotation=0&showTitle=false&size=51991&status=done&style=none&taskId=u81fd443b-6424-4a24-b87a-3d89cbfcbb1&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_031.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uc33ad5f7&originHeight=15&originWidth=12&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u19e56faf-a2f6-42a7-9ba0-62fd53945ad&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_032.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u17d65496&originHeight=15&originWidth=12&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=uf45f1a78-6f55-4d09-a6e2-d9b305b879f&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_033.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u8df9bb91&originHeight=15&originWidth=13&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u5cdf57b7-0dcd-48b5-a81e-3c374fd8624&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_034.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u003dfce5&originHeight=20&originWidth=11&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ubbc14e6f-230a-413b-a587-ae8a1624ee5&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_035.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uebd65969&originHeight=20&originWidth=50&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ucb981e59-7398-42f2-967d-42cd5808e0e&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_036.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u465b18b2&originHeight=26&originWidth=81&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=uce9a85de-0da4-42c2-b66c-b92d4671694&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_037.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u815d7a07&originHeight=18&originWidth=13&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u969ccf75-80c7-45d6-bda3-c508f21d557&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_038.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u5d744f13&originHeight=23&originWidth=11&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=uf635ac4d-1c6d-414b-b883-4582bda9e54&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_039.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u1ece96a4&originHeight=20&originWidth=50&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=udf0838d7-4be7-40fe-87bf-c8810c4f052&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_040.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ubbca3fff&originHeight=23&originWidth=21&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u23a82c90-feb0-4379-8482-f5fef574b7c&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_041.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u5a8a6505&originHeight=26&originWidth=63&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u9c51e93b-f10a-468f-b131-b0ea5ee9b8f&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_042.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u36a615c4&originHeight=18&originWidth=13&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ud28f12ac-7a7f-4121-99aa-ad459eb22ef&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_043.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u8710d8ce&originHeight=23&originWidth=11&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u985461ff-059d-4bf9-9d82-11419b3b200&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_044.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u3cfd635e&originHeight=27&originWidth=44&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ua17327ab-0b12-4533-892e-f943c92a611&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_045.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u47ff6d84&originHeight=29&originWidth=86&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ua808b354-0825-43d0-acbe-a095a1272e0&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_046.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u28cd2477&originHeight=20&originWidth=12&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u61ca7fb4-a9d5-45b7-b506-5ddff4ca1de&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_047.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u1b2df4c0&originHeight=62&originWidth=293&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u92b611c3-d60d-4988-b394-8307e367561&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_048.png#clientId=ue945f1e2-e1f0-4&from=paste&id=ub0c5d83d&originHeight=574&originWidth=714&originalType=url&ratio=1&rotation=0&showTitle=false&size=58043&status=done&style=none&taskId=ua9aac293-0b15-4dc9-8bda-d88ff9bb2c8&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_049.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u78f5fc62&originHeight=23&originWidth=21&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ua2d3eb6b-fa84-4dc7-bafb-a9d6c1d9fd1&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_050.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u3c8dfeee&originHeight=23&originWidth=23&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u5f814202-d0b9-4fca-aeef-313fe371612&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_051.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u979940a2&originHeight=45&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ube9d5f38-f31a-4505-91af-af27810b65f&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_052.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ud4d3d7cd&originHeight=48&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u6a6d0e40-e70f-4fe5-89a1-c40c5bff28a&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_053.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u7a318a5c&originHeight=21&originWidth=82&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u7dec9d5d-2640-4855-a53c-8f5ececc23d&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_054.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uf99d18eb&originHeight=26&originWidth=99&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u836d2e58-27e1-44cc-9aef-242a1cd25ec&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_055.png#clientId=ue945f1e2-e1f0-4&from=paste&id=ubcfde2c9&originHeight=278&originWidth=720&originalType=url&ratio=1&rotation=0&showTitle=false&size=48106&status=done&style=none&taskId=ub45f32b1-0583-4fc1-93ad-956223c442a&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_056.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u34df539a&originHeight=27&originWidth=207&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ubb81fe27-17a5-4a13-a017-c300daa603e&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_057.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uf5d1951c&originHeight=68&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u135a4460-5e62-4c7d-89fa-5b1fc0b8558&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_058.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u21015a40&originHeight=15&originWidth=18&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u475bb3c1-38ef-409b-9b7c-b8889eb8b7c&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_059.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u1bc1b442&originHeight=23&originWidth=26&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ub5704ed9-0147-40a4-b944-80031570737&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_060.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u048db80d&originHeight=65&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ufed647f4-b973-4603-b004-0c18a90cd49&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_061.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ubdc1e4e2&originHeight=23&originWidth=26&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ua0dadb61-ff1d-4a3d-98f4-2bd28cb7eb8&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_062.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ud9cf3a67&originHeight=65&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u931e4dbe-eddb-47d0-b288-3816e99124c&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_063.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u075a7a69&originHeight=21&originWidth=76&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u12af5444-83e3-4ec3-90d3-124c97fa989&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_064.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ucd0f941f&originHeight=26&originWidth=99&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ue38a5875-9661-47df-9923-7a48ca5f0d4&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_065.png#clientId=ue945f1e2-e1f0-4&from=paste&id=uc252988d&originHeight=276&originWidth=720&originalType=url&ratio=1&rotation=0&showTitle=false&size=67786&status=done&style=none&taskId=ud0ae7c5b-b524-4a8d-b313-d496a492859&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_066.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u9668b90a&originHeight=66&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u66234872-d03a-426f-bf4d-eda78dc08a6&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_067.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u2c0f9225&originHeight=21&originWidth=90&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ue75ff3f1-f361-412b-906f-2efcccbeade&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_068.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uaf4f2d82&originHeight=26&originWidth=41&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u14e23f2f-66b7-4d0f-8561-c336820a839&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_069.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u0baccd29&originHeight=65&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=uc0f28f35-52d8-474b-a18c-3e87a8d424b&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_070.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u0f15ac96&originHeight=29&originWidth=50&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u6e906673-b752-465b-90a2-9f1994321e3&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_071.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u34803c40&originHeight=68&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u538d403b-180e-4a17-b7c6-22e05501029&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_072.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u13d1da80&originHeight=21&originWidth=82&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u4ad8bfc0-a172-4a89-a7ce-9404a2c40ec&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_073.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u2ad4d51f&originHeight=26&originWidth=99&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u71ee4cf5-87ea-4903-9a6e-af7993eaeba&title=">
+<meta property="og:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_074.png#clientId=ue945f1e2-e1f0-4&from=paste&id=u7ce1c895&originHeight=276&originWidth=720&originalType=url&ratio=1&rotation=0&showTitle=false&size=47117&status=done&style=none&taskId=u05cc31ae-234a-48f5-bf12-854903daeef&title=">
+<meta property="article:published_time" content="2022-06-29T11:23:29.000Z">
+<meta property="article:modified_time" content="2025-07-18T03:55:52.139Z">
+<meta property="article:author" content="Yan Zhang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://graphicyan.github.io/assets/post_images/Schlick-Approximate/image_000.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u04a1f308&originHeight=23&originWidth=19&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u30c2aaee-d305-4fd0-8066-f76b573bc74&title=">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/yan.jpg">
+    <title>Schilick的近似方法 · Yan&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Yan's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Yan&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">Schilick的近似方法</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                Schilick的近似方法
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count word-count">2.7k</span>Reading time: <span class="post-count reading-time">9 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2022/06/29</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><a name="Gu3LO"></a></p>
+<h2 id="1-符号定义"><a href="#1-符号定义" class="headerlink" title="1. 符号定义"></a>1. 符号定义</h2><p>对于着色点 P，如下图所示，T 表示表面切向量，N表示法线，V表示出射方向，V‘表示入射方向，H 表示半程向量， <img src="/assets/post_images/Schlick-Approximate/image_000.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u04a1f308&originHeight=23&originWidth=19&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u30c2aaee-d305-4fd0-8066-f76b573bc74&title="> 表示半程向量的投影：<br /><img src="/assets/post_images/Schlick-Approximate/image_001.png#clientId=ue945f1e2-e1f0-4&from=paste&id=udfa83281&originHeight=676&originWidth=714&originalType=url&ratio=1&rotation=0&showTitle=false&size=98173&status=done&style=none&taskId=u955eff7f-d091-4ad1-be32-0ed731ad1eb&title=" alt="image.png"><br />各个角度及其对应的余弦的表示方式如下（之后会用到）：<br /><img src="/assets/post_images/Schlick-Approximate/image_002.png#clientId=ue945f1e2-e1f0-4&from=paste&id=u2097ab7b&originHeight=254&originWidth=676&originalType=url&ratio=1&rotation=0&showTitle=false&size=55824&status=done&style=none&taskId=ucc83f121-f46d-4e17-ae8c-2a08d5a05f1&title=" alt="image.png"></p>
+<p><a name="vAAca"></a></p>
+<h2 id="2-反射模型简介"><a href="#2-反射模型简介" class="headerlink" title="2. 反射模型简介"></a>2. 反射模型简介</h2><p>Schlick在文章中介绍了3种反射模型，在这里简单了解一下即可。<br /><strong>2.1 Cook-Torrance 模型</strong><br />关于基于微表面的Cook-Torrance模型，其BRDF如下：<br /><img src="/assets/post_images/Schlick-Approximate/image_003.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ub7a83214&originHeight=59&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u9581f2dd-4bef-4616-853e-82e9e99f399&title="><br />其中d + s &#x3D; 1，分别表示表面diffuse反射率和specular反射率。 <img src="/assets/post_images/Schlick-Approximate/image_004.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u015fd7cf&originHeight=26&originWidth=93&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=uba775425-f07e-493b-9782-1fdd6641e82&title="> 表示光线的波长中被diffuse反射的比率，可以定义表面颜色，即折射进入此表面并经过散射，未被吸收而重新出表面的部分波长。BSDF部分分母在Cook-Torrance的原文中使用 <img src="/assets/post_images/Schlick-Approximate/image_005.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u02406ab1&originHeight=15&originWidth=12&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u2a20ec7c-d97e-4dce-b958-d3ade7f87b9&title="> ，之后简化为4，此处使用4<img src="/assets/post_images/Schlick-Approximate/image_006.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u173f86c9&originHeight=15&originWidth=12&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u85b1a5e5-bb2b-4dfd-8020-e245763b633&title="> ，应该是要和G项部分进行一个归一化处理。<br />由于要满足BRDF的能量守恒原则，则微表面D项在平面上的投影应该等于单位圆面积(此处临时使用一些目前通用的符号方便理解，不排除以后把前面的符号都改了！)，<br /><img src="/assets/post_images/Schlick-Approximate/image_007.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u718a2b29&originHeight=122&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u7a904be5-3f03-47c5-87a3-4b778410218&title="><br />假设BRDF各向异性，则 <img src="/assets/post_images/Schlick-Approximate/image_008.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u3705d37d&originHeight=26&originWidth=145&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u710a63a9-ac2b-4711-87ae-012c58f81b3&title="> ,上式可以化简为：<br /><img src="/assets/post_images/Schlick-Approximate/image_009.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uf07e72f5&originHeight=68&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ucb3eb6c0-a4da-4f51-a891-0816d64bf44&title="><br />我们再令 D，F，G 三项使用其<strong>余弦项</strong>表示，即 <img src="/assets/post_images/Schlick-Approximate/image_010.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u369c55f6&originHeight=26&originWidth=156&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ud0929d3a-954d-42ea-bc6a-b1aeff9964c&title="> ,再通过余弦项换元可以将上式简化为：<br /><img src="/assets/post_images/Schlick-Approximate/image_011.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uedc5c77e&originHeight=65&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u02fb856c-bae0-41e0-9dd1-bf2968e25e9&title="><br />将角度符号变换为其余弦符号（参考第一节）之后，最后得到BRDF可以表示为：<br /><img src="/assets/post_images/Schlick-Approximate/image_012.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u7cd89498&originHeight=59&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u3f15b81f-00bb-477f-919c-495d62bba09&title="><br /><strong>2.2 He-Torrance-Sillion-Greenberg 模型</strong><br />He等人提出了一个更加复杂且完全物理的BRDF模型，它考虑了光线的偏振(polarization)、衍射、干涉、表面电导率以及掠射角更小的粗糙度。如果不考虑偏振则其模型为：<br /><img src="/assets/post_images/Schlick-Approximate/image_013.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ud18ba6bc&originHeight=50&originWidth=722&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ub13451f2-6464-4d91-accc-4661c3f4e7a&title="><br />这个表达式隐藏了很多模型复杂的细节，如D项细节就很劝退，但其与Cook-Torrance模型相比主要区别在于显式加入了宏观平面的Coherent reflection相关项， <img src="/assets/post_images/Schlick-Approximate/image_014.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ua07ec324&originHeight=27&originWidth=68&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u076ecbfb-2000-4353-8e79-0304149c82b&title="> 表示表面粗糙度衰减系数。<br /><strong>2.3 Ward 模型</strong><br />对于各向异性材质的模型比较少，Ward提出了一个简单的各向异性BRDF，其对于偏心角(excentricity)改变带有一个椭圆形的区别：<br /><img src="/assets/post_images/Schlick-Approximate/image_015.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u48f99274&originHeight=122&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u22b1939d-c4f0-4b02-a7fe-31dcdf53455&title="><br />这个模型考虑了各向异性条件，通过 m 和 n 项定义不同的粗糙度控制表面划痕的水平和垂直程度，其 m 和 n 差别越大，各向异性表现越明显。</p>
+<p><a name="ihhJt"></a></p>
+<h2 id="3-Unsatisfactory-Points-不足"><a href="#3-Unsatisfactory-Points-不足" class="headerlink" title="3. Unsatisfactory Points 不足"></a>3. Unsatisfactory Points 不足</h2><p><strong>3.1 Constant weight</strong><br />对于当时的BRDF，Schlick提出了三点不足，首先是关于BRDF不应该是diffuse和specular的常量权重的线性组合（d 和 s 项），由于入射角度的改变通常会改变BRDF的diffuse和specular的权重量，而不是一个常量，如下图中菲涅尔现象带来的权重改变（光线粗细表示能量比率）：<br /><img src="/assets/post_images/Schlick-Approximate/image_016.png#clientId=ue945f1e2-e1f0-4&from=paste&id=u43a90696&originHeight=480&originWidth=966&originalType=url&ratio=1&rotation=0&showTitle=false&size=79656&status=done&style=none&taskId=uec5c5d84-efd0-4f79-981b-7c81f8d3e5f&title=" alt="image.png"><br />涂过清漆的木地板在不同角度入射光的反射表现<br />对于同质的材质，也会因为粗糙度不同而带来权重改变，如下图展示的不同粗糙度表面：<br /><img src="/assets/post_images/Schlick-Approximate/image_017.png#clientId=ue945f1e2-e1f0-4&from=paste&id=u831084b4&originHeight=186&originWidth=1730&originalType=url&ratio=1&rotation=0&showTitle=false&size=23440&status=done&style=none&taskId=u5b1aef1b-5832-455c-a4ba-28502a22999&title=" alt="image.png"><br />diffuse和specular的连续变化<br /><strong>3.2 reemission of self-obstructed light</strong><br />其次对于G项的运用由于忽略了间接反射，存在一个明显的能量损失，当时没有一个模型正确考虑了这些自遮挡带来的 1 - G 的间接反射的影响。<br /><strong>3.3 accuracy&#x2F;cost ratio</strong><br />最后也可能是最重要的，即精确度和开销的比例关系，通常来说经验模型缺失了物理性质但拥有一个较低的开销，而基于物理的模型能够做到物理精确但是开销巨大，但是在渲染管线其他部分所带来的误差通常会无视BRDf精确性带来的表现，例如如果使用低精度的光谱采样或方向采样，就没有使用高精度BRDF的意义。所以使用一个低开销而结果近似的算法来替换一些基于物理的算法是一个不错的解决方案。</p>
+<p><a name="PteiQ"></a></p>
+<h2 id="4-Optimization-by-Rational-Fraction-Approximation-有理分式近似方法"><a href="#4-Optimization-by-Rational-Fraction-Approximation-有理分式近似方法" class="headerlink" title="4. Optimization by Rational Fraction Approximation 有理分式近似方法"></a>4. Optimization by Rational Fraction Approximation 有理分式近似方法</h2><p><strong>4.1 一些思考</strong><br />经典的优化算法有打表与插值方法，但这会带来存储开销，有计算表达式的泰勒展开式，但这仅在原点附近有效，使用截断泰勒级数则不能保证其大量分段的连续性。还有一种方法，是根据表达式的泰勒展开式，生成其有理分式并使用帕德近似。相比于单纯的多项式近似，帕德近似在远离原点的时候也能有一个较好的精度。但这种方法有两个限制，首先是必须要有函数的泰勒展开式，其次是不能满足函数的一些特性，例如对于在a到b上的分布函数f，定义函数满足 <img src="/assets/post_images/Schlick-Approximate/image_018.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u117cb737&originHeight=57&originWidth=126&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u76abad32-e126-4f32-9502-d8ce1798af0&title="> ，而这种近似方法几乎不能满足这个条件，造成数学上的不正确。<br /><strong>4.2 主要方法</strong><br />Schlick提出了一种叫做有理分式近似(rational fraction approximation)的方法，不同于帕德近似方法，Schlick的方法使用泰勒展开式来获取分子和分母多项式，其想法是通过学习我们想要近似的函数并获得其 kernel 条件。<br />kernel 条件可以是函数的任何内在特征，包括其函数、导数、积分或其他相关函数，找 kernel 条件的通用方法是回答这个问题呢：对我而言每一个近似值都应该满足函数的那些特征？<br />当 kernel 条件找到以后，通过确定函数及其每一个 kernel 条件的近似值来简单获得有理分式的系数，对于n个条件，这给出了n个未知量与n个方程的方程组。<br />举例，用该方法去近似 <img src="/assets/post_images/Schlick-Approximate/image_019.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u98a907b4&originHeight=26&originWidth=114&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u2397dbc6-fc4a-479b-bfcd-50993ceecc1&title="> 函数，范围为 <img src="/assets/post_images/Schlick-Approximate/image_020.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u42b9de54&originHeight=26&originWidth=64&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u9d1de4d9-fbe0-4ec9-bf0e-036fcf69559&title="> ，我们可以利用已知函数得到以下四个特征，这些特征会是每一个近似函数的关键：<br /><img src="/assets/post_images/Schlick-Approximate/image_021.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uf1ca7239&originHeight=122&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u020e06e4-e031-43d3-844c-105a85a55a7&title="><br />这四个特征就是 kernel 条件，我们找一个包含四个独立参数(a,b,c,d)的有理分式，例如：<br /><img src="/assets/post_images/Schlick-Approximate/image_022.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u06e6f0ba&originHeight=63&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u3cb47586-de4b-4f79-948f-0b23517f119&title="><br />注意，此处不能使用(ax + b)&#x2F;(cx + d)作为有理分式，因为这个表达式可以消去一项而变成三个独立参数，我们需要四个独立参数的有理分式。代入4个特征，从而得到一个方程组：<br /><img src="/assets/post_images/Schlick-Approximate/image_023.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u1e48b6d4&originHeight=116&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u859e2c8f-0a84-4f33-b789-4e2889764ee&title="><br />最终得到了一个关于 <img src="/assets/post_images/Schlick-Approximate/image_024.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u2f7d10e7&originHeight=26&originWidth=114&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u91853ddb-a750-4602-8a58-7affea0948e&title="> 的近似表达式：<br /><img src="/assets/post_images/Schlick-Approximate/image_025.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u25e3f670&originHeight=47&originWidth=639&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u54b6f95c-5093-47bf-aef1-0fdb98167c2&title="><br />如下为原函数和近似函数的分布图，即周期为 <img src="/assets/post_images/Schlick-Approximate/image_026.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u97b2752c&originHeight=26&originWidth=64&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ub8ad99ad-9abd-42ba-b423-7dd4626955b&title="> 的正弦函数，Schlick使用他们的误差计算方法（对一百万个随机点计算其准确值和近似值），得到的的相对误差 <img src="/assets/post_images/Schlick-Approximate/image_027.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u4706eecb&originHeight=21&originWidth=82&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u649e77a0-e221-4b45-a837-3fe069e98e8&title="> ，加速因子 <img src="/assets/post_images/Schlick-Approximate/image_028.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uae815488&originHeight=26&originWidth=88&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u9a3ba458-75d1-4fe1-94f9-8a9bf6ff1be&title="> 。<br /><img src="/assets/post_images/Schlick-Approximate/image_029.png#clientId=ue945f1e2-e1f0-4&from=paste&id=uf0df9f43&originHeight=572&originWidth=1502&originalType=url&ratio=1&rotation=0&showTitle=false&size=81473&status=done&style=none&taskId=u7dc3dbdd-9858-4fff-9bc6-d3fdfe21c5f&title=" alt="image.png"><br />左图：原函数 右图：近似函数<br />接下来我们将使用这种方法来近似F，G，D项。</p>
+<p><a name="j3fFQ"></a></p>
+<h2 id="5-Fresnel-Factor-菲涅尔项"><a href="#5-Fresnel-Factor-菲涅尔项" class="headerlink" title="5. Fresnel Factor 菲涅尔项"></a>5. Fresnel Factor 菲涅尔项</h2><p>菲涅尔项表示表面specular反射率随着入射角度的变大而变大，在掠射角附近将会完全specular反射。对于一个非极化（无偏振）电磁波，菲涅尔公式为：<br /><img src="/assets/post_images/Schlick-Approximate/image_030.png#clientId=ue945f1e2-e1f0-4&from=paste&id=u7b288abc&originHeight=153&originWidth=720&originalType=url&ratio=1&rotation=0&showTitle=false&size=51991&status=done&style=none&taskId=u81fd443b-6424-4a24-b87a-3d89cbfcbb1&title=" alt="image.png"><br />其中<img src="/assets/post_images/Schlick-Approximate/image_031.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uc33ad5f7&originHeight=15&originWidth=12&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u19e56faf-a2f6-42a7-9ba0-62fd53945ad&title=">是出射光与半程向量的夹角的余弦项，可以得知 <img src="/assets/post_images/Schlick-Approximate/image_032.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u17d65496&originHeight=15&originWidth=12&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=uf45f1a78-6f55-4d09-a6e2-d9b305b879f&title="> 越大specular反射率越大， <img src="/assets/post_images/Schlick-Approximate/image_033.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u8df9bb91&originHeight=15&originWidth=13&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u5cdf57b7-0dcd-48b5-a81e-3c374fd8624&title="> 表示折射率， <img src="/assets/post_images/Schlick-Approximate/image_034.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u003dfce5&originHeight=20&originWidth=11&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ubbc14e6f-230a-413b-a587-ae8a1624ee5&title="> 表示吸收系数。<br />菲涅尔项的一个特征是，任何波长的光线在掠射角入射都将会完全specular反射，此时出射光和半程向量夹角为90度，其余弦 <img src="/assets/post_images/Schlick-Approximate/image_035.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uebd65969&originHeight=20&originWidth=50&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ucb981e59-7398-42f2-967d-42cd5808e0e&title=">，得到 <img src="/assets/post_images/Schlick-Approximate/image_036.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u465b18b2&originHeight=26&originWidth=81&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=uce9a85de-0da4-42c2-b66c-b92d4671694&title="> 。<br />由于各种材质的 n 和 k项很少被测量出，所以很难在所有渲染环境中有一个通用的 F 形式，一些实验数据仅测算出可见光谱中单独某个波长的 <img src="/assets/post_images/Schlick-Approximate/image_037.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u815d7a07&originHeight=18&originWidth=13&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u969ccf75-80c7-45d6-bda3-c508f21d557&title="> 和 <img src="/assets/post_images/Schlick-Approximate/image_038.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u5d744f13&originHeight=23&originWidth=11&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=uf635ac4d-1c6d-414b-b883-4582bda9e54&title="> 值。但是许多材质在法线方向( <img src="/assets/post_images/Schlick-Approximate/image_039.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u1ece96a4&originHeight=20&originWidth=50&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=udf0838d7-4be7-40fe-87bf-c8810c4f052&title="> )入射得到的菲涅尔项的光谱分布 <img src="/assets/post_images/Schlick-Approximate/image_040.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ubbca3fff&originHeight=23&originWidth=21&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u23a82c90-feb0-4379-8482-f5fef574b7c&title="> (F0)已经被测量出来了，对于仅有的 <img src="/assets/post_images/Schlick-Approximate/image_041.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u5a8a6505&originHeight=26&originWidth=63&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u9c51e93b-f10a-468f-b131-b0ea5ee9b8f&title="> 数据，Cook和Torrance提出了一下的近似方法：<br />对于已测算出 <img src="/assets/post_images/Schlick-Approximate/image_042.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u36a615c4&originHeight=18&originWidth=13&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ud28f12ac-7a7f-4121-99aa-ad459eb22ef&title="> 和 <img src="/assets/post_images/Schlick-Approximate/image_043.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u8710d8ce&originHeight=23&originWidth=11&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u985461ff-059d-4bf9-9d82-11419b3b200&title="> 的材质 <img src="/assets/post_images/Schlick-Approximate/image_044.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u3cfd635e&originHeight=27&originWidth=44&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ua17327ab-0b12-4533-892e-f943c92a611&title="> ，和法线入射的情况 <img src="/assets/post_images/Schlick-Approximate/image_045.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u47ff6d84&originHeight=29&originWidth=86&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ua808b354-0825-43d0-acbe-a095a1272e0&title="> ，使用上述公式计算菲涅尔项。否则对于任意波长 <img src="/assets/post_images/Schlick-Approximate/image_046.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u28cd2477&originHeight=20&originWidth=12&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u61ca7fb4-a9d5-45b7-b506-5ddff4ca1de&title="> ，使用公式 <img src="/assets/post_images/Schlick-Approximate/image_047.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u1b2df4c0&originHeight=62&originWidth=293&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u92b611c3-d60d-4988-b394-8307e367561&title="> 计算，这是一种插值计算的近似方法。<br />这种近似方法并不能解决数据缺失的问题，但加速了计算，因为完整的菲涅尔公式只会用平均n 和 k 项计算一次，但这依然制造了巨大的开销，需要做进一步优化。如下图表示测量得到的菲涅尔项分布（横坐标是入射角的余弦项 u），我们得知各种物质的分布曲线并没有太大的差别，曲线仅依赖于其在法线入射方向的菲涅尔项值。<br /><img src="/assets/post_images/Schlick-Approximate/image_048.png#clientId=ue945f1e2-e1f0-4&from=paste&id=ub0c5d83d&originHeight=574&originWidth=714&originalType=url&ratio=1&rotation=0&showTitle=false&size=58043&status=done&style=none&taskId=ua9aac293-0b15-4dc9-8bda-d88ff9bb2c8&title=" alt="image.png"><br />从下到上：钻石、玻璃、铜、金的菲涅尔项<br />因此，可以使用kernel条件来获得一个仅依赖于 <img src="/assets/post_images/Schlick-Approximate/image_049.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u78f5fc62&originHeight=23&originWidth=21&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ua2d3eb6b-fa84-4dc7-bafb-a9d6c1d9fd1&title="> (即 <img src="/assets/post_images/Schlick-Approximate/image_050.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u3c8dfeee&originHeight=23&originWidth=23&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u5f814202-d0b9-4fca-aeef-313fe371612&title="> )的近似表达式，条件如下：<br /><img src="/assets/post_images/Schlick-Approximate/image_051.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u979940a2&originHeight=45&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ube9d5f38-f31a-4505-91af-af27810b65f&title="><br />从而推导出:<br /><img src="/assets/post_images/Schlick-Approximate/image_052.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ud4d3d7cd&originHeight=48&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u6a6d0e40-e70f-4fe5-89a1-c40c5bff28a&title="><br />最终得到如下的分布，其相对误差 <img src="/assets/post_images/Schlick-Approximate/image_053.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u7a318a5c&originHeight=21&originWidth=82&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u7dec9d5d-2640-4855-a53c-8f5ececc23d&title="> ，加速因子 <img src="/assets/post_images/Schlick-Approximate/image_054.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uf99d18eb&originHeight=26&originWidth=99&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u836d2e58-27e1-44cc-9aef-242a1cd25ec&title="> 。<br /><img src="/assets/post_images/Schlick-Approximate/image_055.png#clientId=ue945f1e2-e1f0-4&from=paste&id=ubcfde2c9&originHeight=278&originWidth=720&originalType=url&ratio=1&rotation=0&showTitle=false&size=48106&status=done&style=none&taskId=ub45f32b1-0583-4fc1-93ad-956223c442a&title=" alt="image.png"><br />左图：真实分布 右图：近似分布</p>
+<p><a name="nXqQZ"></a></p>
+<h2 id="6-Geometrical-Attenuation-Coefficient-几何衰减系数"><a href="#6-Geometrical-Attenuation-Coefficient-几何衰减系数" class="headerlink" title="6. Geometrical Attenuation Coefficient 几何衰减系数"></a>6. Geometrical Attenuation Coefficient 几何衰减系数</h2><p>使用Smith得到的G项公式可以表示为 <img src="/assets/post_images/Schlick-Approximate/image_056.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u34df539a&originHeight=27&originWidth=207&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ubb81fe27-17a5-4a13-a017-c300daa603e&title="> ，经过推倒后得到：<br /><img src="/assets/post_images/Schlick-Approximate/image_057.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uf5d1951c&originHeight=68&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u135a4460-5e62-4c7d-89fa-5b1fc0b8558&title="><br />其中 <img src="/assets/post_images/Schlick-Approximate/image_058.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u21015a40&originHeight=15&originWidth=18&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u475bb3c1-38ef-409b-9b7c-b8889eb8b7c&title="> 表示微表面斜率的RMS（<strong>cook-torrance中的符号表示方法，能用来表示粗糙度，可以看作Roughness</strong>），虽然 <img src="/assets/post_images/Schlick-Approximate/image_059.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u1bc1b442&originHeight=23&originWidth=26&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ub5704ed9-0147-40a4-b944-80031570737&title="> 公式形式很复杂，但它的曲线很简单，所以我们可以使用如下的 kernel 条件来表示其特征：<br /><img src="/assets/post_images/Schlick-Approximate/image_060.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u048db80d&originHeight=65&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ufed647f4-b973-4603-b004-0c18a90cd49&title="><br />从而推导出一个很简单的表达式（与UE4的 <img src="/assets/post_images/Schlick-Approximate/image_061.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ubdc1e4e2&originHeight=23&originWidth=26&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ua0dadb61-ff1d-4a3d-98f4-2bd28cb7eb8&title="> 项仅在 k 的定义上不同）：<br /><img src="/assets/post_images/Schlick-Approximate/image_062.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ud9cf3a67&originHeight=65&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u931e4dbe-eddb-47d0-b288-3816e99124c&title="><br />如下图（横坐标是一个余弦项，这篇文章中的符号很容易弄错），除了 v &#x3D; 1 附近有一些误差，其他地方都很接近，其相对误差 <img src="/assets/post_images/Schlick-Approximate/image_063.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u075a7a69&originHeight=21&originWidth=76&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u12af5444-83e3-4ec3-90d3-124c97fa989&title="> ，加速因子 <img src="/assets/post_images/Schlick-Approximate/image_064.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=ucd0f941f&originHeight=26&originWidth=99&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ue38a5875-9661-47df-9923-7a48ca5f0d4&title="> 。下图为m &#x3D; 0.01,0.05,0.1,0.25,0.5的G(v)曲线：<br /><img src="/assets/post_images/Schlick-Approximate/image_065.png#clientId=ue945f1e2-e1f0-4&from=paste&id=uc252988d&originHeight=276&originWidth=720&originalType=url&ratio=1&rotation=0&showTitle=false&size=67786&status=done&style=none&taskId=ud0ae7c5b-b524-4a8d-b313-d496a492859&title=" alt="image.png"><br />左图：真实函数 右图：有理分式近似</p>
+<p><a name="ET15d"></a></p>
+<h2 id="7-Slope-Distribution-Function-斜率分布函数-法线分布函数）"><a href="#7-Slope-Distribution-Function-斜率分布函数-法线分布函数）" class="headerlink" title="7. Slope Distribution Function 斜率分布函数(法线分布函数）"></a>7. Slope Distribution Function 斜率分布函数(法线分布函数）</h2><p>对于当时的D项，仅Beckmann模型满足了能量守恒，且只依赖于 m 和 t ：<br /><img src="/assets/post_images/Schlick-Approximate/image_066.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u9668b90a&originHeight=66&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u66234872-d03a-426f-bf4d-eda78dc08a6&title="><br />其能量守恒条件显然是它的一个 kernel 条件，另一个被Beckmann发现的重要特征是对于 <img src="/assets/post_images/Schlick-Approximate/image_067.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u2c0f9225&originHeight=21&originWidth=90&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=ue75ff3f1-f361-412b-906f-2efcccbeade&title="> ， <img src="/assets/post_images/Schlick-Approximate/image_068.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=uaf4f2d82&originHeight=26&originWidth=41&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u14e23f2f-66b7-4d0f-8561-c336820a839&title="> 几乎为空。再加上 t &#x3D; 1 时可以得到值，其 kernel 条件如下：<br /><img src="/assets/post_images/Schlick-Approximate/image_069.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u0baccd29&originHeight=65&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=uc0f28f35-52d8-474b-a18c-3e87a8d424b&title="><br />带有积分的条件会比较复杂，一个比较通用的方法是找一个带有 <img src="/assets/post_images/Schlick-Approximate/image_070.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u0f15ac96&originHeight=29&originWidth=50&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u6e906673-b752-465b-90a2-9f1994321e3&title="> 形式的有理分式，这样就能分析积分。因此推导出近似式：<br /><img src="/assets/post_images/Schlick-Approximate/image_071.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u34803c40&originHeight=68&originWidth=675&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u538d403b-180e-4a17-b7c6-22e05501029&title="><br />关于m &#x3D; 0.01,0.05,0.1,0.25,0.5的分布如下图，相对误差为 <img src="/assets/post_images/Schlick-Approximate/image_072.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u13d1da80&originHeight=21&originWidth=82&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u4ad8bfc0-a172-4a89-a7ce-9404a2c40ec&title="> ，加速因子为 <img src="/assets/post_images/Schlick-Approximate/image_073.svg#clientId=ue945f1e2-e1f0-4&from=paste&id=u2ad4d51f&originHeight=26&originWidth=99&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u71ee4cf5-87ea-4903-9a6e-af7993eaeba&title="> 。<br /><img src="/assets/post_images/Schlick-Approximate/image_074.png#clientId=ue945f1e2-e1f0-4&from=paste&id=u7ce1c895&originHeight=276&originWidth=720&originalType=url&ratio=1&rotation=0&showTitle=false&size=47117&status=done&style=none&taskId=u05cc31ae-234a-48f5-bf12-854903daeef&title=" alt="image.png"><br />左图：Beckmann函数 右图：有理近似函数</p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>Author：<a href="https://graphicyan.github.io">Yan Zhang</a>
+            <p>Link：<a href="https://graphicyan.github.io/2022/06/29/Schlick-Approximate/">https://graphicyan.github.io/2022/06/29/Schlick-Approximate/</a>
+            <p>Publish date：<a href="https://graphicyan.github.io/2022/06/29/Schlick-Approximate/">June 29th 2022, 7:23:29 pm</a>
+            <p>Update date：<a href="https://graphicyan.github.io/2022/06/29/Schlick-Approximate/">July 18th 2025, 11:55:52 am</a>
+            <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2022/10/08/C2BP-Params/" title="C++生成蓝图的参数类型记录">
+                    <div class="nextTitle">C++生成蓝图的参数类型记录</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2022/03/18/Illumination/" title="光通量、光强和照度">
+                    <div class="prevTitle">光通量、光强和照度</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:yanzhang.cg@gmail.com" class="iconfont-archer email" title="email" ></a>
+                <a href="https://github.com/GraphicYan" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/wechat.png" />
+                </span>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%AC%A6%E5%8F%B7%E5%AE%9A%E4%B9%89"><span class="toc-number">1.</span> <span class="toc-text">1. 符号定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%8F%8D%E5%B0%84%E6%A8%A1%E5%9E%8B%E7%AE%80%E4%BB%8B"><span class="toc-number">2.</span> <span class="toc-text">2. 反射模型简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Unsatisfactory-Points-%E4%B8%8D%E8%B6%B3"><span class="toc-number">3.</span> <span class="toc-text">3. Unsatisfactory Points 不足</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-Optimization-by-Rational-Fraction-Approximation-%E6%9C%89%E7%90%86%E5%88%86%E5%BC%8F%E8%BF%91%E4%BC%BC%E6%96%B9%E6%B3%95"><span class="toc-number">4.</span> <span class="toc-text">4. Optimization by Rational Fraction Approximation 有理分式近似方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-Fresnel-Factor-%E8%8F%B2%E6%B6%85%E5%B0%94%E9%A1%B9"><span class="toc-number">5.</span> <span class="toc-text">5. Fresnel Factor 菲涅尔项</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-Geometrical-Attenuation-Coefficient-%E5%87%A0%E4%BD%95%E8%A1%B0%E5%87%8F%E7%B3%BB%E6%95%B0"><span class="toc-number">6.</span> <span class="toc-text">6. Geometrical Attenuation Coefficient 几何衰减系数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-Slope-Distribution-Function-%E6%96%9C%E7%8E%87%E5%88%86%E5%B8%83%E5%87%BD%E6%95%B0-%E6%B3%95%E7%BA%BF%E5%88%86%E5%B8%83%E5%87%BD%E6%95%B0%EF%BC%89"><span class="toc-number">7.</span> <span class="toc-text">7. Slope Distribution Function 斜率分布函数(法线分布函数）</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 16
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/15</span>
+            <a class="archive-post-title" href="/2023/12/15/Dcc-Coords/">一图对比众3D引擎的坐标系</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span>
+            <a class="archive-post-title" href="/2023/07/08/ML-Deformer/">基于机器学习的物理变形器</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span>
+            <a class="archive-post-title" href="/2023/07/02/Dynamic-Bones/">基于动力学的骨骼动画技术综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/Simulation-Dynamics-Engine/">仿真及动力学系统综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span>
+            <a class="archive-post-title" href="/2023/05/21/Build-WebRTC-For-MSVC/">编译可以在MSVC中使用的WebRTC库</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/21</span>
+            <a class="archive-post-title" href="/2023/02/21/Collaborative-Engine/">浅谈端云协同渲染</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span>
+            <a class="archive-post-title" href="/2022/12/29/Mixed-Virtual-Production/">混合虚拟制片</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span>
+            <a class="archive-post-title" href="/2022/10/08/C2BP-Params/">C++生成蓝图的参数类型记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/29</span>
+            <a class="archive-post-title" href="/2022/06/29/Schlick-Approximate/">Schilick的近似方法</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span>
+            <a class="archive-post-title" href="/2022/03/18/Illumination/">光通量、光强和照度</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/13</span>
+            <a class="archive-post-title" href="/2021/12/13/DS-VS-DL/">延迟渲染Vs延迟光照</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/17</span>
+            <a class="archive-post-title" href="/2021/04/17/Importance-Sampling/">重要性采样</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span>
+            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span>
+            <a class="archive-post-title" href="/2021/04/02/Cook-Torrance-BRDF/">Cook-Torrance的BRDF</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/29</span>
+            <a class="archive-post-title" href="/2021/03/29/Learn-Rendering-Function/">理解渲染方程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/22</span>
+            <a class="archive-post-title" href="/2021/03/22/Learn-Radiometry/">辐射度量学笔记</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://graphicyan.github.io",
+        root: siteMetaRoot,
+        author: "Yan Zhang"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+    </body>
+</html>
