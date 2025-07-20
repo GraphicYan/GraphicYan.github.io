@@ -12,7 +12,7 @@
     <meta name="description" content="">
     <meta property="og:type" content="website">
 <meta property="og:title" content="Hexo">
-<meta property="og:url" content="https://graphicyan.github.io/archives/2023/07/index.html">
+<meta property="og:url" content="https://graphicyan.github.io/tags/Rendering/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:locale" content="en_US">
 <meta property="article:author" content="Yan Zhang">
@@ -399,32 +399,25 @@
                 <main class="main index-page">
             
         <article class="index-post">
-            <a class="abstract-title" href="/2023/07/08/ML-Deformer/">
+            <a class="abstract-title" href="/2022/06/29/Schlick-Approximate/">
                     <span class="iconfont-archer stick-top">&#xe63d;</span>
-                <span class="abstract-title-text">基于机器学习的物理变形器</span>
+                <span class="abstract-title-text">Schilick的近似方法</span>
             </a>
             <div class="abstract-content">
-                原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&#x79;&#97;&#x6e;&#x7a;&#x68;&#x61;&#110;&#103;&#46;&#99;&#x67;&#x40;&#103;&#109;&#97;&#105;&#x6c;&#x2e;&#x63;&#111;&#109; 或 https://graphicyan.github.io/）
+                
+1. 符号定义对于着色点 P，如下图所示，T 表示表面切向量，N表示法线，V表示出射方向，V‘表示入射方向，H 表示半程向量，  表示半程向量的投影：各个角度及其对应的余弦的表示方式如下（之后会用到）：
 
-UE5中的应用示例
-Workflow
-ML Deformer in UE5
-Vertex Delta Model
-基于GPU的神经网络。
-顶点差是参数。
-性能较为糟糕。
-
-Neural Morph Mod...
+2. 反射模型简介Schlick在文章中介绍了3种反射模型，在这里简单了解一下即可。2.1 Cook-Torrance 模型关于基于微表面的Cook-Torrance模型，其BRDF如下：其中d + s &#x3D; 1，分别表示表面diffuse反射率和specular反射率。  表示光线的波长中被diffuse反射的比率，可以定义表面颜色，即折射进入此表面并经过散射，未被吸收而重...
             </div>
             <!-- read more -->
             <div class="abstract-post-meta">
                 <!-- date -->
                 <div class="abstract-date" title="Last updated: 2025/07/20">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2023/07/08</span>
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2022/06/29</span>
                 </div>
                 <!-- tags -->
                     <div class="abstract-tags" >
-        <a class="post-tag" href="javascript:void(0);" data-tags="Animations">Animations</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags="Rendering">Rendering</a>
 </div>
 
             </div>
@@ -432,25 +425,115 @@ Neural Morph Mod...
         <div class="index-post-divider"></div>
             
         <article class="index-post">
-            <a class="abstract-title" href="/2023/07/02/Dynamic-Bones/">
+            <a class="abstract-title" href="/2022/03/18/Illumination/">
                     <span class="iconfont-archer stick-top">&#xe63d;</span>
-                <span class="abstract-title-text">基于动力学的骨骼动画技术综述</span>
+                <span class="abstract-title-text">光通量、光强和照度</span>
             </a>
             <div class="abstract-content">
-                原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&#121;&#97;&#x6e;&#x7a;&#104;&#97;&#x6e;&#x67;&#x2e;&#x63;&#103;&#64;&#103;&#x6d;&#x61;&#105;&#108;&#x2e;&#x63;&#x6f;&#109; 或 https://graphicyan.github.io/）
-
-DynamicBone (Unity)
-INTRODynamic Bone | Animation Tools | Unity Asset StoreDynamicBone是一个简单的基于模拟弹簧振子的...
+                光学单位控制曝光，本质是在空间和时间上控制环境光照抵达传感器的量。没有环境光照，那一切都白谈，那我们不妨来了解一下关于环境光照（Scene Illumination）的一些基础概念，这些概念并不需要死记硬背，但需要理解。理解了这些概念，就像“打通任督二脉”，知道为什么，就能在各种环境下去指导你怎么做，光看那些 xx 老师教你拍 ABC 题材、DEF 场景参数应该怎么设置，是没有办法通用的。今晚的故事从一根蜡烛开始。假设在一个全黑的环境里，你只有一支蜡烛——它在安静地燃烧，同时放出大量的热（部分以红外线的形式）、可见光，但是影响我们对它亮度感知的，只有可见光波段的强度。这支蜡烛在可见光波段...
             </div>
             <!-- read more -->
             <div class="abstract-post-meta">
                 <!-- date -->
                 <div class="abstract-date" title="Last updated: 2025/07/20">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2023/07/02</span>
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2022/03/18</span>
                 </div>
                 <!-- tags -->
                     <div class="abstract-tags" >
-        <a class="post-tag" href="javascript:void(0);" data-tags="Animations">Animations</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags="Rendering">Rendering</a>
+</div>
+
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2021/12/13/DS-VS-DL/">
+                    <span class="iconfont-archer stick-top">&#xe63d;</span>
+                <span class="abstract-title-text">延迟渲染Vs延迟光照</span>
+            </a>
+            <div class="abstract-content">
+                原文：http://www.realtimerendering.com/blog/deferred-lighting-approaches/
+鉴于传统的Forward Rendering对于多光源渲染时的低效问题，各种Deferred Rendering的方法被提出并且广泛使用。比如Deferred Shading以及其之后的Deferred Lighting。Deferred方法相对于传统Forward Rendering最主要区别都是提高了对多光源渲染时的效率，它是是将光源的计算转到屏幕空间来进行，进而不浪费无效的光源着色。Deferred Rendering的方法已经已经成为现在游...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2025/07/20">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/12/13</span>
+                </div>
+                <!-- tags -->
+                    <div class="abstract-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="Rendering">Rendering</a>
+</div>
+
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">
+                <span class="abstract-title-text">蒙特卡洛路径追踪</span>
+            </a>
+            <div class="abstract-content">
+                
+1 蒙特卡洛积分(Monte Carlo Integration)首先让我们先搞懂蒙特卡洛路径追踪的这个“蒙特卡洛”的前缀到底指什么。蒙特卡洛积分的目的：当一个积分很难通过解析的方式得到答案的时候可以通过蒙特卡洛的方式近似得到积分结果，如下图所示：显然对于这样一个函数，很难去用一个数学式子去表示，因此无法用一般解析的方法直接求得积分值，而这时候就可以采用蒙特卡洛的思想了。蒙特卡洛积分的原理及做法：对函数值进行多次采样求均值作为积分值的近似该做法十分容易理解，想象一下如果对上图这个函数值进行均匀采样的话，其实就相当于将整个积分面积切成了许许多多个长方形，然后将这些小长方形的面积全部加起来...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2025/07/20">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/04/09</span>
+                </div>
+                <!-- tags -->
+                    <div class="abstract-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="Rendering">Rendering</a>
+</div>
+
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2021/04/02/Cook-Torrance-BRDF/">
+                <span class="abstract-title-text">Cook-Torrance的BRDF</span>
+            </a>
+            <div class="abstract-content">
+                Cook-Torrance BRDF的定义:首先让我们先看看如何计算出。
+3.1 漫反射项推导在很久之前谈光栅化的时候就提及过，漫反射会均匀的向每个方向反射因此，漫反射的BRDF一定是一个常数。假设入射光是均匀且遍布整个半球方向，可以得到如下方程：（根据定义， 积分过程省略） 由于假设入射光是均匀且遍布整个半球方向，所以与方向无关，且等于，最终约去两边，得到结果：但有一点要注意的是，这里并没有考虑能量被吸收，将反射率考虑进来之后，得到最终的漫反射BRDF：这里的可以类比光栅化当中的漫反射系数去理解，本质就是一个3维向量，含有物体表面的颜色信息。
+3.2 镜面反射项推导漫反射项的形式简单且...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2025/07/20">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/04/02</span>
+                </div>
+                <!-- tags -->
+                    <div class="abstract-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="Rendering">Rendering</a>
+</div>
+
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2021/03/29/Learn-Rendering-Function/">
+                <span class="abstract-title-text">理解渲染方程</span>
+            </a>
+            <div class="abstract-content">
+                渲染方程知识在反射方程的基础之上添加了一个自发光项(Emission term)，从而使得反射方程更加的general：其中为自发光项，反射方程中的用，代替。 (tips：所有光线方向均指向外)接下来从一个点光源和单个物体的场景开始理解渲染方程：(点光源对一个点来说自然只有一个方向有入射光，所以这里没有了积分)多个点光源一个物体的情况：将这些所有的点光源的贡献全部求和即可，那么如果点光源变成了面光源呢？如下图所示：其实面光源就相当于无穷多个点光源的集合，只需要对 面光源所在的立体角范围进行积分，并且能够确定不同立体角方向的面光源的入射光radiance即可。那么更进一步的，再在场景当中加...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2025/07/20">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/03/29</span>
+                </div>
+                <!-- tags -->
+                    <div class="abstract-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="Rendering">Rendering</a>
 </div>
 
             </div>

@@ -12,7 +12,7 @@
     <meta name="description" content="">
     <meta property="og:type" content="website">
 <meta property="og:title" content="Hexo">
-<meta property="og:url" content="https://graphicyan.github.io/archives/2023/07/index.html">
+<meta property="og:url" content="https://graphicyan.github.io/tags/UE/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:locale" content="en_US">
 <meta property="article:author" content="Yan Zhang">
@@ -399,58 +399,24 @@
                 <main class="main index-page">
             
         <article class="index-post">
-            <a class="abstract-title" href="/2023/07/08/ML-Deformer/">
-                    <span class="iconfont-archer stick-top">&#xe63d;</span>
-                <span class="abstract-title-text">基于机器学习的物理变形器</span>
+            <a class="abstract-title" href="/2022/10/08/C2BP-Params/">
+                <span class="abstract-title-text">C++生成蓝图的参数类型记录</span>
             </a>
             <div class="abstract-content">
-                原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&#x79;&#97;&#x6e;&#x7a;&#x68;&#x61;&#110;&#103;&#46;&#99;&#x67;&#x40;&#103;&#109;&#97;&#105;&#x6c;&#x2e;&#x63;&#111;&#109; 或 https://graphicyan.github.io/）
-
-UE5中的应用示例
-Workflow
-ML Deformer in UE5
-Vertex Delta Model
-基于GPU的神经网络。
-顶点差是参数。
-性能较为糟糕。
-
-Neural Morph Mod...
+                
+1. 普通参数在UE C++中寻常函数传参为UFUNCTION(BlueprintCallable) static void Func1(FString InputStr); 
+2. 多输出引脚但是在UE4的C++中，不带Const的引用在蓝图中是默认为输出引脚的，所以可以借此来实现蓝图的多引脚输出。UFUNCTION(BlueprintCallable) static void Func2(FString&amp; OutputStr); 具体蓝图节点如下在虚幻官方的蓝图文档中”在带大量返回参数的函数和返回结构体的函数之间优先前者。“
+所以返回大量参数的优先级更高，可以使用Type&...
             </div>
             <!-- read more -->
             <div class="abstract-post-meta">
                 <!-- date -->
                 <div class="abstract-date" title="Last updated: 2025/07/20">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2023/07/08</span>
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2022/10/08</span>
                 </div>
                 <!-- tags -->
                     <div class="abstract-tags" >
-        <a class="post-tag" href="javascript:void(0);" data-tags="Animations">Animations</a>
-</div>
-
-            </div>
-        </article>
-        <div class="index-post-divider"></div>
-            
-        <article class="index-post">
-            <a class="abstract-title" href="/2023/07/02/Dynamic-Bones/">
-                    <span class="iconfont-archer stick-top">&#xe63d;</span>
-                <span class="abstract-title-text">基于动力学的骨骼动画技术综述</span>
-            </a>
-            <div class="abstract-content">
-                原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&#121;&#97;&#x6e;&#x7a;&#104;&#97;&#x6e;&#x67;&#x2e;&#x63;&#103;&#64;&#103;&#x6d;&#x61;&#105;&#108;&#x2e;&#x63;&#x6f;&#109; 或 https://graphicyan.github.io/）
-
-DynamicBone (Unity)
-INTRODynamic Bone | Animation Tools | Unity Asset StoreDynamicBone是一个简单的基于模拟弹簧振子的...
-            </div>
-            <!-- read more -->
-            <div class="abstract-post-meta">
-                <!-- date -->
-                <div class="abstract-date" title="Last updated: 2025/07/20">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2023/07/02</span>
-                </div>
-                <!-- tags -->
-                    <div class="abstract-tags" >
-        <a class="post-tag" href="javascript:void(0);" data-tags="Animations">Animations</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags="UE">UE</a>
 </div>
 
             </div>
