@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Yan Zhang">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Yan Zhang">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="">
+    <meta name="description" content="原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&amp;#x79;&amp;#x61;&amp;#x6e;&amp;#122;&amp;#x68;&amp;#x61;&amp;#x6e;&amp;#x67;&amp;#x2e;&amp;#x63;&amp;#103;&amp;#64;&amp;#103;&amp;#109;&amp;#x61;&amp;#x69;&amp;#108;&amp;#46;&amp;#99;&amp;#111;&amp;#109; 或 https:&#x2F;&#x2F;graphicyan.github.io&#x2F;）  一、项目">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Transformer的人体姿态重建（二）：实现模板">
+<meta property="og:url" content="https://graphicyan.github.io/2024/08/09/Transformer-Based-HPE-Template/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&amp;#x79;&amp;#x61;&amp;#x6e;&amp;#122;&amp;#x68;&amp;#x61;&amp;#x6e;&amp;#x67;&amp;#x2e;&amp;#x63;&amp;#103;&amp;#64;&amp;#103;&amp;#109;&amp;#x61;&amp;#x69;&amp;#108;&amp;#46;&amp;#99;&amp;#111;&amp;#109; 或 https:&#x2F;&#x2F;graphicyan.github.io&#x2F;）  一、项目">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-08-09T12:25:09.000Z">
+<meta property="article:modified_time" content="2025-07-20T09:39:32.619Z">
+<meta property="article:author" content="Yan Zhang">
+<meta name="twitter:card" content="summary">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/yan.jpg">
+    <title>基于Transformer的人体姿态重建（二）：实现模板 · Yan&#39;s World</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Yan's World.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Yan&#39;s World.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">基于Transformer的人体姿态重建（二）：实现模板</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                基于Transformer的人体姿态重建（二）：实现模板
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count word-count">1.4k</span>Reading time: <span class="post-count reading-time">7 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2024/08/09</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <h2 id="原创性声明"><a href="#原创性声明" class="headerlink" title="原创性声明"></a>原创性声明</h2><p>本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（<a href="mailto:&#x79;&#x61;&#x6e;&#122;&#x68;&#x61;&#x6e;&#x67;&#x2e;&#x63;&#103;&#64;&#103;&#109;&#x61;&#x69;&#108;&#46;&#99;&#111;&#109;">&#x79;&#x61;&#x6e;&#122;&#x68;&#x61;&#x6e;&#x67;&#x2e;&#x63;&#103;&#64;&#103;&#109;&#x61;&#x69;&#108;&#46;&#99;&#111;&#109;</a> 或 <a href="https://graphicyan.github.io/%EF%BC%89">https://graphicyan.github.io/）</a></p>
+<hr>
+<h2 id="一、项目结构"><a href="#一、项目结构" class="headerlink" title="一、项目结构"></a>一、项目结构</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">transformer-pose-reconstruction/</span><br><span class="line">├── configs/                # 配置文件</span><br><span class="line">│   └── base_config.yaml</span><br><span class="line">├── data/                   # 数据处理模块</span><br><span class="line">│   ├── datasets/</span><br><span class="line">│   │   ├── h36m_dataset.py</span><br><span class="line">│   │   └── agora_dataset.py</span><br><span class="line">│   └── transforms.py</span><br><span class="line">├── models/                 # 模型定义模块</span><br><span class="line">│   ├── backbones/</span><br><span class="line">│   │   └── vit.py</span><br><span class="line">│   ├── heads/</span><br><span class="line">│   │   └── smplx_head.py</span><br><span class="line">│   └── pose_regressor.py</span><br><span class="line">├── loss/                   # 损失函数模块</span><br><span class="line">│   └── loss_functions.py</span><br><span class="line">├── utils/                  # 工具函数</span><br><span class="line">│   ├── visualization.py</span><br><span class="line">│   └── smplx_utils.py</span><br><span class="line">├── training/               # 训练脚本</span><br><span class="line">│   └── train.py</span><br><span class="line">├── evaluation/             # 评估脚本</span><br><span class="line">│   └── evaluate.py</span><br><span class="line">├── inference/              # 推理模块</span><br><span class="line">│   └── infer.py</span><br><span class="line">├── checkpoints/            # 模型权重保存路径</span><br><span class="line">├── logs/                   # 日志文件（TensorBoard等）</span><br><span class="line">├── README.md</span><br><span class="line">└── requirements.txt</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="二、核心模块详解"><a href="#二、核心模块详解" class="headerlink" title="二、核心模块详解"></a>二、核心模块详解</h2><h3 id="2-1-配置文件（configs-x2F-base-config-yaml）"><a href="#2-1-配置文件（configs-x2F-base-config-yaml）" class="headerlink" title="2.1 配置文件（configs&#x2F;base_config.yaml）"></a>2.1 配置文件（configs&#x2F;base_config.yaml）</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Model configuration</span></span><br><span class="line"><span class="attr">model:</span></span><br><span class="line">  <span class="attr">backbone:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">&quot;vit-base&quot;</span></span><br><span class="line">    <span class="attr">pretrained:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">image_size:</span> <span class="number">224</span></span><br><span class="line">    <span class="attr">patch_size:</span> <span class="number">16</span></span><br><span class="line">  <span class="attr">head:</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">&quot;transformer&quot;</span></span><br><span class="line">    <span class="attr">num_queries:</span> <span class="number">10</span></span><br><span class="line">    <span class="attr">smplx_dim:</span> <span class="number">126</span></span><br><span class="line">  <span class="attr">smplx:</span></span><br><span class="line">    <span class="attr">model_path:</span> <span class="string">&quot;data/models/smplx/SMPLX_NEUTRAL.npz&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Dataset configuration</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="attr">dataset:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">&quot;h36m&quot;</span></span><br><span class="line">    <span class="attr">root:</span> <span class="string">&quot;data/datasets/h36m&quot;</span></span><br><span class="line">    <span class="attr">image_size:</span> <span class="number">224</span></span><br><span class="line">    <span class="attr">split_ratio:</span> <span class="number">0.9</span></span><br><span class="line">  <span class="attr">batch_size:</span> <span class="number">64</span></span><br><span class="line">  <span class="attr">num_workers:</span> <span class="number">4</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Training configuration</span></span><br><span class="line"><span class="attr">training:</span></span><br><span class="line">  <span class="attr">epochs:</span> <span class="number">100</span></span><br><span class="line">  <span class="attr">lr:</span> <span class="number">1e-4</span></span><br><span class="line">  <span class="attr">weight_decay:</span> <span class="number">0.01</span></span><br><span class="line">  <span class="attr">device:</span> <span class="string">&quot;cuda&quot;</span></span><br><span class="line">  <span class="attr">log_freq:</span> <span class="number">10</span></span><br><span class="line">  <span class="attr">save_freq:</span> <span class="number">10</span></span><br><span class="line">  <span class="attr">log_dir:</span> <span class="string">&quot;logs/&quot;</span></span><br><span class="line">  <span class="attr">checkpoint_dir:</span> <span class="string">&quot;checkpoints/&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Evaluation configuration</span></span><br><span class="line"><span class="attr">evaluation:</span></span><br><span class="line">  <span class="attr">metrics:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;mpjpe&quot;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;pa-mpjpe&quot;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;mpvpe&quot;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-2-数据模块（data-x2F-datasets-x2F-h36m-dataset-py）"><a href="#2-2-数据模块（data-x2F-datasets-x2F-h36m-dataset-py）" class="headerlink" title="2.2 数据模块（data&#x2F;datasets&#x2F;h36m_dataset.py）"></a>2.2 数据模块（data&#x2F;datasets&#x2F;h36m_dataset.py）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> Dataset</span><br><span class="line"><span class="keyword">from</span> torchvision <span class="keyword">import</span> transforms</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">H36MDataset</span>(<span class="title class_ inherited__">Dataset</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, root, image_size=<span class="number">224</span>, transform=<span class="literal">None</span></span>):</span><br><span class="line">        self.root = root</span><br><span class="line">        self.image_size = image_size</span><br><span class="line">        self.transform = transform <span class="keyword">or</span> transforms.Compose([</span><br><span class="line">            transforms.ToTensor(),</span><br><span class="line">            transforms.Normalize(mean=[<span class="number">0.485</span>, <span class="number">0.456</span>, <span class="number">0.406</span>], std=[<span class="number">0.229</span>, <span class="number">0.224</span>, <span class="number">0.225</span>])</span><br><span class="line">        ])</span><br><span class="line">        <span class="comment"># 加载标注数据（此处为示意，实际应从文件加载）</span></span><br><span class="line">        self.samples = [...]  <span class="comment"># 包含图像路径、3D关节、SMPLX参数等</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__len__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.samples)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getitem__</span>(<span class="params">self, idx</span>):</span><br><span class="line">        sample = self.samples[idx]</span><br><span class="line">        image = cv2.imread(sample[<span class="string">&#x27;image_path&#x27;</span>])</span><br><span class="line">        image = cv2.resize(image, (self.image_size, self.image_size))</span><br><span class="line">        joints_3d = sample[<span class="string">&#x27;joints_3d&#x27;</span>]</span><br><span class="line">        smplx_params = sample[<span class="string">&#x27;smplx&#x27;</span>]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.transform:</span><br><span class="line">            image = self.transform(image)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            <span class="string">&#x27;image&#x27;</span>: image,</span><br><span class="line">            <span class="string">&#x27;joints_3d&#x27;</span>: torch.tensor(joints_3d, dtype=torch.float32),</span><br><span class="line">            <span class="string">&#x27;smplx&#x27;</span>: torch.tensor(smplx_params, dtype=torch.float32)</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-3-模型模块（models）"><a href="#2-3-模型模块（models）" class="headerlink" title="2.3 模型模块（models）"></a>2.3 模型模块（models）</h3><h4 id="Vision-Transformer-Backbone（models-x2F-backbones-x2F-vit-py）"><a href="#Vision-Transformer-Backbone（models-x2F-backbones-x2F-vit-py）" class="headerlink" title="Vision Transformer Backbone（models&#x2F;backbones&#x2F;vit.py）"></a>Vision Transformer Backbone（models&#x2F;backbones&#x2F;vit.py）</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> ViTModel</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ViTBackbone</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, model_name=<span class="string">&quot;google/vit-base-patch16-224&quot;</span>, pretrained=<span class="literal">True</span></span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        self.vit = ViTModel.from_pretrained(model_name) <span class="keyword">if</span> pretrained <span class="keyword">else</span> ViTModel(config=...)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        outputs = self.vit(x)</span><br><span class="line">        <span class="keyword">return</span> outputs.last_hidden_state  <span class="comment"># shape: (B, N, D)</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="SMPLX-Head（models-x2F-heads-x2F-smplx-head-py）"><a href="#SMPLX-Head（models-x2F-heads-x2F-smplx-head-py）" class="headerlink" title="SMPLX Head（models&#x2F;heads&#x2F;smplx_head.py）"></a>SMPLX Head（models&#x2F;heads&#x2F;smplx_head.py）</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">SMPLXHead</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, embed_dim, smplx_dim=<span class="number">126</span></span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        self.head = nn.Sequential(</span><br><span class="line">            nn.Linear(embed_dim, <span class="number">512</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.Linear(<span class="number">512</span>, smplx_dim)</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        <span class="comment"># x: (B, N, D)</span></span><br><span class="line">        x = x.mean(dim=<span class="number">1</span>)  <span class="comment"># 全局平均池化</span></span><br><span class="line">        <span class="keyword">return</span> self.head(x)</span><br></pre></td></tr></table></figure>
+
+<h4 id="总体模型（models-x2F-pose-regressor-py）"><a href="#总体模型（models-x2F-pose-regressor-py）" class="headerlink" title="总体模型（models&#x2F;pose_regressor.py）"></a>总体模型（models&#x2F;pose_regressor.py）</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> models.backbones.vit <span class="keyword">import</span> ViTBackbone</span><br><span class="line"><span class="keyword">from</span> models.heads.smplx_head <span class="keyword">import</span> SMPLXHead</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PoseRegressor</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, config</span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        self.backbone = ViTBackbone(config[<span class="string">&#x27;model&#x27;</span>][<span class="string">&#x27;backbone&#x27;</span>][<span class="string">&#x27;name&#x27;</span>])</span><br><span class="line">        self.head = SMPLXHead(</span><br><span class="line">            embed_dim=<span class="number">768</span>,</span><br><span class="line">            smplx_dim=config[<span class="string">&#x27;model&#x27;</span>][<span class="string">&#x27;head&#x27;</span>][<span class="string">&#x27;smplx_dim&#x27;</span>]</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        features = self.backbone(x)</span><br><span class="line">        smplx_params = self.head(features)</span><br><span class="line">        <span class="keyword">return</span> smplx_params</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-4-损失函数（loss-x2F-loss-functions-py）"><a href="#2-4-损失函数（loss-x2F-loss-functions-py）" class="headerlink" title="2.4 损失函数（loss&#x2F;loss_functions.py）"></a>2.4 损失函数（loss&#x2F;loss_functions.py）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PoseLoss</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, lambda_joint=<span class="number">1.0</span>, lambda_smplx=<span class="number">1.0</span></span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        self.lambda_joint = lambda_joint</span><br><span class="line">        self.lambda_smplx = lambda_smplx</span><br><span class="line">        self.l2_loss = nn.MSELoss()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, pred_smplx, target_smplx, pred_joints, target_joints</span>):</span><br><span class="line">        loss_joint = self.l2_loss(pred_joints, target_joints)</span><br><span class="line">        loss_smplx = self.l2_loss(pred_smplx, target_smplx)</span><br><span class="line">        total_loss = self.lambda_joint * loss_joint + self.lambda_smplx * loss_smplx</span><br><span class="line">        <span class="keyword">return</span> total_loss</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-5-训练脚本（training-x2F-train-py）"><a href="#2-5-训练脚本（training-x2F-train-py）" class="headerlink" title="2.5 训练脚本（training&#x2F;train.py）"></a>2.5 训练脚本（training&#x2F;train.py）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> DataLoader</span><br><span class="line"><span class="keyword">from</span> models.pose_regressor <span class="keyword">import</span> PoseRegressor</span><br><span class="line"><span class="keyword">from</span> data.datasets.h36m_dataset <span class="keyword">import</span> H36MDataset</span><br><span class="line"><span class="keyword">from</span> loss.loss_functions <span class="keyword">import</span> PoseLoss</span><br><span class="line"><span class="keyword">from</span> configs.base_config <span class="keyword">import</span> load_config</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">train</span>():</span><br><span class="line">    config = load_config(<span class="string">&quot;configs/base_config.yaml&quot;</span>)</span><br><span class="line">    device = torch.device(config[<span class="string">&#x27;training&#x27;</span>][<span class="string">&#x27;device&#x27;</span>])</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 数据集</span></span><br><span class="line">    train_dataset = H36MDataset(config[<span class="string">&#x27;data&#x27;</span>][<span class="string">&#x27;root&#x27;</span>])</span><br><span class="line">    train_loader = DataLoader(train_dataset, batch_size=config[<span class="string">&#x27;data&#x27;</span>][<span class="string">&#x27;batch_size&#x27;</span>],</span><br><span class="line">                              shuffle=<span class="literal">True</span>, num_workers=config[<span class="string">&#x27;data&#x27;</span>][<span class="string">&#x27;num_workers&#x27;</span>])</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 模型</span></span><br><span class="line">    model = PoseRegressor(config).to(device)</span><br><span class="line">    optimizer = torch.optim.AdamW(model.parameters(), lr=config[<span class="string">&#x27;training&#x27;</span>][<span class="string">&#x27;lr&#x27;</span>],</span><br><span class="line">                                   weight_decay=config[<span class="string">&#x27;training&#x27;</span>][<span class="string">&#x27;weight_decay&#x27;</span>])</span><br><span class="line"></span><br><span class="line">    criterion = PoseLoss()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 训练循环</span></span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(config[<span class="string">&#x27;training&#x27;</span>][<span class="string">&#x27;epochs&#x27;</span>]):</span><br><span class="line">        model.train()</span><br><span class="line">        <span class="keyword">for</span> batch <span class="keyword">in</span> train_loader:</span><br><span class="line">            images = batch[<span class="string">&#x27;image&#x27;</span>].to(device)</span><br><span class="line">            joints_3d = batch[<span class="string">&#x27;joints_3d&#x27;</span>].to(device)</span><br><span class="line">            smplx_params = batch[<span class="string">&#x27;smplx&#x27;</span>].to(device)</span><br><span class="line"></span><br><span class="line">            pred_smplx = model(images)</span><br><span class="line">            <span class="comment"># 这里应调用SMPLX模型生成joints用于监督</span></span><br><span class="line">            pred_joints = smplx_forward(pred_smplx)  <span class="comment"># 需要实现SMPLX前向函数</span></span><br><span class="line"></span><br><span class="line">            loss = criterion(pred_smplx, smplx_params, pred_joints, joints_3d)</span><br><span class="line"></span><br><span class="line">            optimizer.zero_grad()</span><br><span class="line">            loss.backward()</span><br><span class="line">            optimizer.step()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 保存模型</span></span><br><span class="line">        <span class="keyword">if</span> (epoch + <span class="number">1</span>) % config[<span class="string">&#x27;training&#x27;</span>][<span class="string">&#x27;save_freq&#x27;</span>] == <span class="number">0</span>:</span><br><span class="line">            torch.save(model.state_dict(), os.path.join(config[<span class="string">&#x27;training&#x27;</span>][<span class="string">&#x27;checkpoint_dir&#x27;</span>], <span class="string">f&quot;model_<span class="subst">&#123;epoch&#125;</span>.pth&quot;</span>))</span><br><span class="line"></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Epoch <span class="subst">&#123;epoch&#125;</span>, Loss: <span class="subst">&#123;loss.item()&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    train()</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-6-推理模块（inference-x2F-infer-py）"><a href="#2-6-推理模块（inference-x2F-infer-py）" class="headerlink" title="2.6 推理模块（inference&#x2F;infer.py）"></a>2.6 推理模块（inference&#x2F;infer.py）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> models.pose_regressor <span class="keyword">import</span> PoseRegressor</span><br><span class="line"><span class="keyword">from</span> configs.base_config <span class="keyword">import</span> load_config</span><br><span class="line"><span class="keyword">from</span> utils.smplx_utils <span class="keyword">import</span> load_smplx_model, get_joints_from_smplx</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">infer</span>(<span class="params">image_path, model_path</span>):</span><br><span class="line">    config = load_config(<span class="string">&quot;configs/base_config.yaml&quot;</span>)</span><br><span class="line">    device = torch.device(config[<span class="string">&#x27;training&#x27;</span>][<span class="string">&#x27;device&#x27;</span>])</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 加载模型</span></span><br><span class="line">    model = PoseRegressor(config)</span><br><span class="line">    model.load_state_dict(torch.load(model_path))</span><br><span class="line">    model.to(device)</span><br><span class="line">    model.<span class="built_in">eval</span>()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 图像预处理</span></span><br><span class="line">    image = cv2.imread(image_path)</span><br><span class="line">    image = cv2.resize(image, (config[<span class="string">&#x27;data&#x27;</span>][<span class="string">&#x27;image_size&#x27;</span>], config[<span class="string">&#x27;data&#x27;</span>][<span class="string">&#x27;image_size&#x27;</span>]))</span><br><span class="line">    image = image / <span class="number">255.0</span></span><br><span class="line">    image = torch.tensor(image, dtype=torch.float32).permute(<span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>).unsqueeze(<span class="number">0</span>).to(device)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        smplx_params = model(image)</span><br><span class="line">        vertices, joints = get_joints_from_smplx(smplx_params)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 可视化</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Predicted 3D Joints:&quot;</span>, joints)</span><br><span class="line">    <span class="comment"># 可视化代码见 utils/visualization.py</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    infer(<span class="string">&quot;data/images/test.jpg&quot;</span>, <span class="string">&quot;checkpoints/model_final.pth&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-7-SMPLX-工具函数（utils-x2F-smplx-utils-py）"><a href="#2-7-SMPLX-工具函数（utils-x2F-smplx-utils-py）" class="headerlink" title="2.7 SMPLX 工具函数（utils&#x2F;smplx_utils.py）"></a>2.7 SMPLX 工具函数（utils&#x2F;smplx_utils.py）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> smplx</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">load_smplx_model</span>(<span class="params">model_path</span>):</span><br><span class="line">    model = smplx.create(model_path, model_type=<span class="string">&#x27;smplx&#x27;</span>,</span><br><span class="line">                         gender=<span class="string">&#x27;neutral&#x27;</span>, ext=<span class="string">&#x27;npz&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> model</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_joints_from_smplx</span>(<span class="params">smplx_params</span>):</span><br><span class="line">    <span class="comment"># 假设smplx_params = [beta, theta, gamma]</span></span><br><span class="line">    <span class="comment"># 需要拆分参数</span></span><br><span class="line">    model = load_smplx_model(<span class="string">&quot;data/models/smplx/SMPLX_NEUTRAL.npz&quot;</span>)</span><br><span class="line">    output = model(betas=smplx_params[:, :<span class="number">10</span>],</span><br><span class="line">                   global_orient=smplx_params[:, <span class="number">10</span>:<span class="number">13</span>],</span><br><span class="line">                   body_pose=smplx_params[:, <span class="number">13</span>:])</span><br><span class="line">    <span class="keyword">return</span> output.vertices, output.joints</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="三、依赖安装（requirements-txt）"><a href="#三、依赖安装（requirements-txt）" class="headerlink" title="三、依赖安装（requirements.txt）"></a>三、依赖安装（requirements.txt）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">torch&gt;=1.10</span><br><span class="line">torchvision</span><br><span class="line">transformers</span><br><span class="line">opencv-python</span><br><span class="line">numpy</span><br><span class="line">yacs  # 用于配置文件</span><br><span class="line">smplx</span><br><span class="line">pytorch3d</span><br><span class="line">tensorboard</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="四、使用说明"><a href="#四、使用说明" class="headerlink" title="四、使用说明"></a>四、使用说明</h2><h3 id="1-安装依赖"><a href="#1-安装依赖" class="headerlink" title="1. 安装依赖"></a>1. 安装依赖</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install -r requirements.txt</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-数据准备"><a href="#2-数据准备" class="headerlink" title="2. 数据准备"></a>2. 数据准备</h3><ul>
+<li>下载并解压 H36M、AGORA 等数据集到 <code>data/datasets/</code></li>
+<li>下载 SMPLX 模型并解压到 <code>data/models/smplx/</code></li>
+</ul>
+<h3 id="3-开始训练"><a href="#3-开始训练" class="headerlink" title="3. 开始训练"></a>3. 开始训练</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python training/train.py</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-推理测试"><a href="#4-推理测试" class="headerlink" title="4. 推理测试"></a>4. 推理测试</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python inference/infer.py --image data/images/test.jpg --model checkpoints/model_final.pth</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="五、扩展建议"><a href="#五、扩展建议" class="headerlink" title="五、扩展建议"></a>五、扩展建议</h2><ul>
+<li>增加 <strong>Transformer Decoder</strong> 结构用于更精细的参数预测</li>
+<li>添加 <strong>Temporal Transformer</strong> 模块用于视频序列建模</li>
+<li>支持 <strong>ONNX 导出</strong> 与 <strong>TensorRT</strong> 加速部署</li>
+<li>集成 <strong>MAE</strong> 等自监督预训练方法</li>
+<li>支持多视角融合与深度估计</li>
+</ul>
+<hr>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>Author：<a href="https://graphicyan.github.io">Yan Zhang</a>
+            <p>Link：<a href="https://graphicyan.github.io/2024/08/09/Transformer-Based-HPE-Template/">https://graphicyan.github.io/2024/08/09/Transformer-Based-HPE-Template/</a>
+            <p>Publish date：<a href="https://graphicyan.github.io/2024/08/09/Transformer-Based-HPE-Template/">August 9th 2024, 8:25:09 pm</a>
+            <p>Update date：<a href="https://graphicyan.github.io/2024/08/09/Transformer-Based-HPE-Template/">July 20th 2025, 5:39:32 pm</a>
+            <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2024/10/05/Transformer-Based-HPE-SOTA/" title="基于Transformer的人体姿态重建（三）：几种SOTA工作的详细解析与未来展望">
+                    <div class="nextTitle">基于Transformer的人体姿态重建（三）：几种SOTA工作的详细解析与未来展望</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2024/07/04/Transformer-Based-HMR/" title="基于Transformer的人体姿态重建：技术实践与原理详解">
+                    <div class="prevTitle">基于Transformer的人体姿态重建：技术实践与原理详解</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:yanzhang.cg@gmail.com" class="iconfont-archer email" title="email" ></a>
+                <a href="https://github.com/GraphicYan" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/images/wechat.jpg" />
+                </span>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E5%88%9B%E6%80%A7%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">原创性声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">一、项目结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%A0%B8%E5%BF%83%E6%A8%A1%E5%9D%97%E8%AF%A6%E8%A7%A3"><span class="toc-number">3.</span> <span class="toc-text">二、核心模块详解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%EF%BC%88configs-x2F-base-config-yaml%EF%BC%89"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 配置文件（configs&#x2F;base_config.yaml）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9D%97%EF%BC%88data-x2F-datasets-x2F-h36m-dataset-py%EF%BC%89"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 数据模块（data&#x2F;datasets&#x2F;h36m_dataset.py）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E6%A8%A1%E5%9E%8B%E6%A8%A1%E5%9D%97%EF%BC%88models%EF%BC%89"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 模型模块（models）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Vision-Transformer-Backbone%EF%BC%88models-x2F-backbones-x2F-vit-py%EF%BC%89"><span class="toc-number">3.3.1.</span> <span class="toc-text">Vision Transformer Backbone（models&#x2F;backbones&#x2F;vit.py）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SMPLX-Head%EF%BC%88models-x2F-heads-x2F-smplx-head-py%EF%BC%89"><span class="toc-number">3.3.2.</span> <span class="toc-text">SMPLX Head（models&#x2F;heads&#x2F;smplx_head.py）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E4%BD%93%E6%A8%A1%E5%9E%8B%EF%BC%88models-x2F-pose-regressor-py%EF%BC%89"><span class="toc-number">3.3.3.</span> <span class="toc-text">总体模型（models&#x2F;pose_regressor.py）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%EF%BC%88loss-x2F-loss-functions-py%EF%BC%89"><span class="toc-number">3.4.</span> <span class="toc-text">2.4 损失函数（loss&#x2F;loss_functions.py）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-%E8%AE%AD%E7%BB%83%E8%84%9A%E6%9C%AC%EF%BC%88training-x2F-train-py%EF%BC%89"><span class="toc-number">3.5.</span> <span class="toc-text">2.5 训练脚本（training&#x2F;train.py）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-%E6%8E%A8%E7%90%86%E6%A8%A1%E5%9D%97%EF%BC%88inference-x2F-infer-py%EF%BC%89"><span class="toc-number">3.6.</span> <span class="toc-text">2.6 推理模块（inference&#x2F;infer.py）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-7-SMPLX-%E5%B7%A5%E5%85%B7%E5%87%BD%E6%95%B0%EF%BC%88utils-x2F-smplx-utils-py%EF%BC%89"><span class="toc-number">3.7.</span> <span class="toc-text">2.7 SMPLX 工具函数（utils&#x2F;smplx_utils.py）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E4%BE%9D%E8%B5%96%E5%AE%89%E8%A3%85%EF%BC%88requirements-txt%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">三、依赖安装（requirements.txt）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E"><span class="toc-number">5.</span> <span class="toc-text">四、使用说明</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96"><span class="toc-number">5.1.</span> <span class="toc-text">1. 安装依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87"><span class="toc-number">5.2.</span> <span class="toc-text">2. 数据准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%BC%80%E5%A7%8B%E8%AE%AD%E7%BB%83"><span class="toc-number">5.3.</span> <span class="toc-text">3. 开始训练</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%8E%A8%E7%90%86%E6%B5%8B%E8%AF%95"><span class="toc-number">5.4.</span> <span class="toc-text">4. 推理测试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%89%A9%E5%B1%95%E5%BB%BA%E8%AE%AE"><span class="toc-number">6.</span> <span class="toc-text">五、扩展建议</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 21
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2024 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/23</span>
+            <a class="archive-post-title" href="/2024/11/23/Transformer-Based-Add-Hand/">基于Transformer的人体姿态重建（四）：引入高精度的手部姿态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/05</span>
+            <a class="archive-post-title" href="/2024/10/05/Transformer-Based-HPE-SOTA/">基于Transformer的人体姿态重建（三）：几种SOTA工作的详细解析与未来展望</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/09</span>
+            <a class="archive-post-title" href="/2024/08/09/Transformer-Based-HPE-Template/">基于Transformer的人体姿态重建（二）：实现模板</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/04</span>
+            <a class="archive-post-title" href="/2024/07/04/Transformer-Based-HMR/">基于Transformer的人体姿态重建：技术实践与原理详解</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/08</span>
+            <a class="archive-post-title" href="/2024/03/08/ViT/">Vision Transformer (ViT) 详细技术文档</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/15</span>
+            <a class="archive-post-title" href="/2023/12/15/Dcc-Coords/">一图对比众3D引擎的坐标系</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span>
+            <a class="archive-post-title" href="/2023/07/08/ML-Deformer/">基于机器学习的物理变形器</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span>
+            <a class="archive-post-title" href="/2023/07/02/Dynamic-Bones/">基于动力学的骨骼动画技术综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/Simulation-Dynamics-Engine/">仿真及动力学系统综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span>
+            <a class="archive-post-title" href="/2023/05/21/Build-WebRTC-For-MSVC/">编译可以在MSVC中使用的WebRTC库</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/21</span>
+            <a class="archive-post-title" href="/2023/02/21/Collaborative-Engine/">浅谈端云协同渲染</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span>
+            <a class="archive-post-title" href="/2022/12/29/Mixed-Virtual-Production/">混合虚拟制片</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span>
+            <a class="archive-post-title" href="/2022/10/08/C2BP-Params/">C++生成蓝图的参数类型记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/29</span>
+            <a class="archive-post-title" href="/2022/06/29/Schlick-Approximate/">Schilick的近似方法</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span>
+            <a class="archive-post-title" href="/2022/03/18/Illumination/">光通量、光强和照度</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/13</span>
+            <a class="archive-post-title" href="/2021/12/13/DS-VS-DL/">延迟渲染Vs延迟光照</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/17</span>
+            <a class="archive-post-title" href="/2021/04/17/Importance-Sampling/">重要性采样</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span>
+            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span>
+            <a class="archive-post-title" href="/2021/04/02/Cook-Torrance-BRDF/">Cook-Torrance的BRDF</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/29</span>
+            <a class="archive-post-title" href="/2021/03/29/Learn-Rendering-Function/">理解渲染方程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/22</span>
+            <a class="archive-post-title" href="/2021/03/22/Learn-Radiometry/">辐射度量学笔记</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://graphicyan.github.io",
+        root: siteMetaRoot,
+        author: "Yan Zhang"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+    </body>
+</html>

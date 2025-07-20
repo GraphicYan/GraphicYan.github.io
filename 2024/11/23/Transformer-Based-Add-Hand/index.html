@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Yan Zhang">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Yan Zhang">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="">
+    <meta name="description" content="原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&amp;#x79;&amp;#97;&amp;#x6e;&amp;#122;&amp;#104;&amp;#x61;&amp;#110;&amp;#103;&amp;#46;&amp;#x63;&amp;#103;&amp;#x40;&amp;#103;&amp;#x6d;&amp;#x61;&amp;#x69;&amp;#x6c;&amp;#x2e;&amp;#x63;&amp;#x6f;&amp;#109; 或 https:&#x2F;&#x2F;graphicyan.github.io&#x2F;）  1.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Transformer的人体姿态重建（四）：引入高精度的手部姿态">
+<meta property="og:url" content="https://graphicyan.github.io/2024/11/23/Transformer-Based-Add-Hand/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&amp;#x79;&amp;#97;&amp;#x6e;&amp;#122;&amp;#104;&amp;#x61;&amp;#110;&amp;#103;&amp;#46;&amp;#x63;&amp;#103;&amp;#x40;&amp;#103;&amp;#x6d;&amp;#x61;&amp;#x69;&amp;#x6c;&amp;#x2e;&amp;#x63;&amp;#x6f;&amp;#109; 或 https:&#x2F;&#x2F;graphicyan.github.io&#x2F;）  1.">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-11-23T15:08:13.000Z">
+<meta property="article:modified_time" content="2025-07-20T09:39:12.321Z">
+<meta property="article:author" content="Yan Zhang">
+<meta name="twitter:card" content="summary">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/yan.jpg">
+    <title>基于Transformer的人体姿态重建（四）：引入高精度的手部姿态 · Yan&#39;s World</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Yan's World.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Yan&#39;s World.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">基于Transformer的人体姿态重建（四）：引入高精度的手部姿态</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                基于Transformer的人体姿态重建（四）：引入高精度的手部姿态
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count word-count">1.9k</span>Reading time: <span class="post-count reading-time">6 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2024/11/23</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <h2 id="原创性声明"><a href="#原创性声明" class="headerlink" title="原创性声明"></a>原创性声明</h2><p>本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（<a href="mailto:&#x79;&#97;&#x6e;&#122;&#104;&#x61;&#110;&#103;&#46;&#x63;&#103;&#x40;&#103;&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#x6f;&#109;">&#x79;&#97;&#x6e;&#122;&#104;&#x61;&#110;&#103;&#46;&#x63;&#103;&#x40;&#103;&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#x6f;&#109;</a> 或 <a href="https://graphicyan.github.io/%EF%BC%89">https://graphicyan.github.io/）</a></p>
+<hr>
+<h2 id="1-引言"><a href="#1-引言" class="headerlink" title="1. 引言"></a>1. 引言</h2><p>在视频动捕应用中，准确的人体姿态重建是至关重要的。然而，当前大多数方法通常将身体姿态和手部姿态分开处理，因为手部动作需要更高的精度和更细粒度的关注。为了提供更完整和自然的人形动画输出，本文将探讨如何通过引入专门的手部姿态检测网络，并将其与全身姿态估计模型相结合，以实现更加精确和流畅的动画效果。</p>
+<hr>
+<h2 id="2-当前人体姿态重建的现状"><a href="#2-当前人体姿态重建的现状" class="headerlink" title="2. 当前人体姿态重建的现状"></a>2. 当前人体姿态重建的现状</h2><h3 id="全身姿态估计"><a href="#全身姿态估计" class="headerlink" title="全身姿态估计"></a>全身姿态估计</h3><ul>
+<li><strong>现有方法</strong>：如GVHMR、HMR2.0等，专注于全身的姿态估计，包括头部、躯干和四肢的主要关节。</li>
+<li><strong>局限性</strong>：这些方法虽然能够捕捉到整体的动作，但在细节上（尤其是手部动作）表现不足，无法满足高精度需求。</li>
+</ul>
+<h3 id="手部姿态检测"><a href="#手部姿态检测" class="headerlink" title="手部姿态检测"></a>手部姿态检测</h3><ul>
+<li><strong>现有方法</strong>：如HaMeR、InterHand2.6M等，专注于手部关键点的定位和姿态估计，具有较高的精度和鲁棒性。</li>
+<li><strong>局限性</strong>：这些方法通常独立于全身姿态估计，难以直接集成到完整的动捕系统中。</li>
+</ul>
+<hr>
+<h2 id="3-手部姿态检测的重要性"><a href="#3-手部姿态检测的重要性" class="headerlink" title="3. 手部姿态检测的重要性"></a>3. 手部姿态检测的重要性</h2><h3 id="动作完整性"><a href="#动作完整性" class="headerlink" title="动作完整性"></a>动作完整性</h3><ul>
+<li>在许多应用场景中，手部动作对于表达情感、交互行为等至关重要。例如，在虚拟现实（VR）、增强现实（AR）或游戏开发中，用户的手部动作直接影响体验的真实感和沉浸感。</li>
+</ul>
+<h3 id="精度要求"><a href="#精度要求" class="headerlink" title="精度要求"></a>精度要求</h3><ul>
+<li>手部包含大量的关节和自由度，其运动复杂且精细。因此，对手部动作的检测需要更高的精度和更细致的关注，以确保最终动画的自然性和真实性。</li>
+</ul>
+<hr>
+<h2 id="4-融合全身和手部姿态的方法"><a href="#4-融合全身和手部姿态的方法" class="headerlink" title="4. 融合全身和手部姿态的方法"></a>4. 融合全身和手部姿态的方法</h2><h3 id="数据预处理"><a href="#数据预处理" class="headerlink" title="数据预处理"></a>数据预处理</h3><ul>
+<li><strong>图像分割</strong>：对输入视频帧进行分割，提取出包含全身和特写手部区域的图像。</li>
+<li><strong>Patch Embedding</strong>：使用ViT或其他适合的特征提取器，将分割后的图像转换为嵌入向量。</li>
+</ul>
+<h3 id="模型选择与配置"><a href="#模型选择与配置" class="headerlink" title="模型选择与配置"></a>模型选择与配置</h3><ul>
+<li><strong>全身姿态估计模型</strong>：如GVHMR，用于估计身体的整体姿态。</li>
+<li><strong>手部姿态检测模型</strong>：如HaMeR，专注于手部关键点的定位和姿态估计。</li>
+</ul>
+<h3 id="特征融合策略"><a href="#特征融合策略" class="headerlink" title="特征融合策略"></a>特征融合策略</h3><ul>
+<li><p><strong>Attention-based Fusion</strong>: 使用注意力机制将手部特征与全身特征结合。具体来说，在全身姿态估计模型的最后一层Transformer编码器之后添加一个额外的注意力层，该层接受来自手部姿态检测模型的特征作为查询向量，从而增强对手部区域的关注度。</p>
+<ul>
+<li><strong>Global Feature Map</strong>: 来自全身姿态估计模型的全局特征图包含了丰富的上下文信息。</li>
+<li><strong>Local Feature Vector</strong>: 来自手部姿态检测模型的局部特征向量提供了精细化的手部细节。</li>
+</ul>
+</li>
+<li><p><strong>Feature Concatenation</strong>: 将手部特征向量与全身特征向量进行拼接，然后送入后续的全连接层进行最终的姿态预测。</p>
+</li>
+</ul>
+<h3 id="时间一致性"><a href="#时间一致性" class="headerlink" title="时间一致性"></a>时间一致性</h3><ul>
+<li><strong>Temporal Consistency</strong>: 对于视频序列中的连续帧，除了空间上的特征融合外，还需要考虑时间维度的一致性。可以通过引入时序模型（如LSTM或GRU）来平滑手部和身体姿态的变化，确保动画的流畅性。</li>
+</ul>
+<hr>
+<h2 id="5-具体实现步骤"><a href="#5-具体实现步骤" class="headerlink" title="5. 具体实现步骤"></a>5. 具体实现步骤</h2><h3 id="步骤一：数据准备"><a href="#步骤一：数据准备" class="headerlink" title="步骤一：数据准备"></a>步骤一：数据准备</h3><ol>
+<li><strong>视频采集</strong>：使用多摄像头系统捕捉用户的全身动作，特别关注手部的细节。</li>
+<li><strong>图像分割</strong>：对每帧图像进行预处理，提取出包含全身和手部特写的区域。</li>
+</ol>
+<h3 id="步骤二：模型推理"><a href="#步骤二：模型推理" class="headerlink" title="步骤二：模型推理"></a>步骤二：模型推理</h3><ol>
+<li><strong>全身姿态估计</strong>：<ul>
+<li>使用GVHMR处理全身图像，获取身体和面部的姿态参数。</li>
+</ul>
+</li>
+<li><strong>手部姿态检测</strong>：<ul>
+<li>同时，使用HaMeR处理手部特写，获取手部关键点的位置。</li>
+</ul>
+</li>
+</ol>
+<h3 id="步骤三：特征融合"><a href="#步骤三：特征融合" class="headerlink" title="步骤三：特征融合"></a>步骤三：特征融合</h3><ol>
+<li><strong>Attention-based Fusion</strong>：<ul>
+<li>在GVHMR的最后一层Transformer编码器之后添加一个额外的注意力层，该层接受来自HaMeR的手部特征作为查询向量。</li>
+</ul>
+</li>
+<li><strong>Feature Concatenation</strong>：<ul>
+<li>将HaMeR输出的手部特征向量与GVHMR的全局特征向量进行拼接，然后送入后续的全连接层进行最终的姿态预测。</li>
+</ul>
+</li>
+</ol>
+<h3 id="步骤四：优化后处理"><a href="#步骤四：优化后处理" class="headerlink" title="步骤四：优化后处理"></a>步骤四：优化后处理</h3><ol>
+<li><strong>基于物理约束的优化算法</strong>：为了进一步提高精度，可以在生成初步的3D网格后，应用基于物理约束的优化算法。例如，确保手指关节的角度符合解剖学限制，或者根据相机视图调整身体各部分的比例关系。</li>
+</ol>
+<h3 id="步骤五：渲染与展示"><a href="#步骤五：渲染与展示" class="headerlink" title="步骤五：渲染与展示"></a>步骤五：渲染与展示</h3><ol>
+<li><strong>SMPL-X参数化模型</strong>：使用参数化人体模型（如SMPL-X），将全身和手部的姿态参数一起输入，生成完整的3D人体网格。</li>
+<li><strong>实时渲染</strong>：将最终生成的3D人体网格实时渲染到VR环境中，为用户提供沉浸式的体验。</li>
+</ol>
+<hr>
+<h2 id="6-实验结果与分析"><a href="#6-实验结果与分析" class="headerlink" title="6. 实验结果与分析"></a>6. 实验结果与分析</h2><h3 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h3><ul>
+<li><strong>MuPoTS, 3DPW, EHF</strong>：用于评估全身姿态估计性能。</li>
+<li><strong>InterHand2.6M</strong>：用于评估手部姿态检测性能。</li>
+</ul>
+<h3 id="性能指标"><a href="#性能指标" class="headerlink" title="性能指标"></a>性能指标</h3><ul>
+<li><strong>PA-MPJPE</strong>：Protocol-A Mean Per Joint Position Error，用于评估全身姿态估计的准确性。</li>
+<li><strong>MPJPE</strong>：Mean Per Joint Position Error，用于评估手部姿态检测的准确性。</li>
+<li><strong>Temporal Smoothness</strong>：时间一致性指标，用于评估动画的流畅性。</li>
+</ul>
+<h3 id="结果对比"><a href="#结果对比" class="headerlink" title="结果对比"></a>结果对比</h3><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>PA-MPJPE (全身)</th>
+<th>MPJPE (手部)</th>
+<th>Temporal Smoothness</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GVHMR + HaMeR</td>
+<td>78.8 mm</td>
+<td>25.6 mm</td>
+<td>高</td>
+</tr>
+<tr>
+<td>单独GVHMR</td>
+<td>78.8 mm</td>
+<td>N&#x2F;A</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>单独HaMeR</td>
+<td>N&#x2F;A</td>
+<td>25.6 mm</td>
+<td>低</td>
+</tr>
+</tbody></table>
+<p>从实验结果可以看出，结合GVHMR和HaMeR的方法不仅提高了手部姿态检测的精度，还显著提升了整体动画的时间一致性和流畅性。</p>
+<hr>
+<h2 id="7-缺点与挑战"><a href="#7-缺点与挑战" class="headerlink" title="7. 缺点与挑战"></a>7. 缺点与挑战</h2><h3 id="计算资源需求大"><a href="#计算资源需求大" class="headerlink" title="计算资源需求大"></a>计算资源需求大</h3><ul>
+<li><strong>高计算成本</strong>：同时运行两个复杂的深度学习模型（全身姿态估计和手部姿态检测）需要大量的计算资源和内存。</li>
+</ul>
+<h3 id="数据同步问题"><a href="#数据同步问题" class="headerlink" title="数据同步问题"></a>数据同步问题</h3><ul>
+<li><strong>时间同步</strong>：确保全身和手部数据的时间同步是一个挑战，特别是在高速运动的情况下，可能会出现延迟或错位。</li>
+</ul>
+<h3 id="模型集成难度"><a href="#模型集成难度" class="headerlink" title="模型集成难度"></a>模型集成难度</h3><ul>
+<li><strong>特征融合</strong>：如何有效地融合全身和手部特征，使其相互补充而不是冲突，是一个需要解决的技术难题。</li>
+</ul>
+<hr>
+<h2 id="8-未来发展方向"><a href="#8-未来发展方向" class="headerlink" title="8. 未来发展方向"></a>8. 未来发展方向</h2><h3 id="模型轻量化"><a href="#模型轻量化" class="headerlink" title="模型轻量化"></a>模型轻量化</h3><ul>
+<li><strong>Efficient Architectures</strong>：探索更高效的模型结构，如MobileViT或轻量级的Transformer变种，以减少计算资源的需求。</li>
+</ul>
+<h3 id="自监督学习"><a href="#自监督学习" class="headerlink" title="自监督学习"></a>自监督学习</h3><ul>
+<li><strong>Self-Supervised Learning</strong>：利用自监督学习方法减少对大规模标注数据的依赖，提升模型的泛化能力。</li>
+</ul>
+<h3 id="多模态融合"><a href="#多模态融合" class="headerlink" title="多模态融合"></a>多模态融合</h3><ul>
+<li><strong>Multi-modal Fusion</strong>：结合RGB-D、IMU等多种传感器数据，进一步提升遮挡和低光照条件下的姿态估计精度。</li>
+</ul>
+<h3 id="更智能的融合机制"><a href="#更智能的融合机制" class="headerlink" title="更智能的融合机制"></a>更智能的融合机制</h3><ul>
+<li><strong>Intelligent Fusion Mechanisms</strong>：开发更加智能的特征融合机制，自动识别并处理不同来源特征之间的潜在冲突，提升整体系统的鲁棒性和稳定性。</li>
+</ul>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>Author：<a href="https://graphicyan.github.io">Yan Zhang</a>
+            <p>Link：<a href="https://graphicyan.github.io/2024/11/23/Transformer-Based-Add-Hand/">https://graphicyan.github.io/2024/11/23/Transformer-Based-Add-Hand/</a>
+            <p>Publish date：<a href="https://graphicyan.github.io/2024/11/23/Transformer-Based-Add-Hand/">November 23rd 2024, 11:08:13 pm</a>
+            <p>Update date：<a href="https://graphicyan.github.io/2024/11/23/Transformer-Based-Add-Hand/">July 20th 2025, 5:39:12 pm</a>
+            <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2024/10/05/Transformer-Based-HPE-SOTA/" title="基于Transformer的人体姿态重建（三）：几种SOTA工作的详细解析与未来展望">
+                    <div class="prevTitle">基于Transformer的人体姿态重建（三）：几种SOTA工作的详细解析与未来展望</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:yanzhang.cg@gmail.com" class="iconfont-archer email" title="email" ></a>
+                <a href="https://github.com/GraphicYan" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/images/wechat.jpg" />
+                </span>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E5%88%9B%E6%80%A7%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">原创性声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%BC%95%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">1. 引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%BD%93%E5%89%8D%E4%BA%BA%E4%BD%93%E5%A7%BF%E6%80%81%E9%87%8D%E5%BB%BA%E7%9A%84%E7%8E%B0%E7%8A%B6"><span class="toc-number">3.</span> <span class="toc-text">2. 当前人体姿态重建的现状</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A8%E8%BA%AB%E5%A7%BF%E6%80%81%E4%BC%B0%E8%AE%A1"><span class="toc-number">3.1.</span> <span class="toc-text">全身姿态估计</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%8B%E9%83%A8%E5%A7%BF%E6%80%81%E6%A3%80%E6%B5%8B"><span class="toc-number">3.2.</span> <span class="toc-text">手部姿态检测</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%89%8B%E9%83%A8%E5%A7%BF%E6%80%81%E6%A3%80%E6%B5%8B%E7%9A%84%E9%87%8D%E8%A6%81%E6%80%A7"><span class="toc-number">4.</span> <span class="toc-text">3. 手部姿态检测的重要性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A8%E4%BD%9C%E5%AE%8C%E6%95%B4%E6%80%A7"><span class="toc-number">4.1.</span> <span class="toc-text">动作完整性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B2%BE%E5%BA%A6%E8%A6%81%E6%B1%82"><span class="toc-number">4.2.</span> <span class="toc-text">精度要求</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E8%9E%8D%E5%90%88%E5%85%A8%E8%BA%AB%E5%92%8C%E6%89%8B%E9%83%A8%E5%A7%BF%E6%80%81%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">5.</span> <span class="toc-text">4. 融合全身和手部姿态的方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E9%A2%84%E5%A4%84%E7%90%86"><span class="toc-number">5.1.</span> <span class="toc-text">数据预处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E4%B8%8E%E9%85%8D%E7%BD%AE"><span class="toc-number">5.2.</span> <span class="toc-text">模型选择与配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E5%BE%81%E8%9E%8D%E5%90%88%E7%AD%96%E7%95%A5"><span class="toc-number">5.3.</span> <span class="toc-text">特征融合策略</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%B6%E9%97%B4%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">5.4.</span> <span class="toc-text">时间一致性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0%E6%AD%A5%E9%AA%A4"><span class="toc-number">6.</span> <span class="toc-text">5. 具体实现步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4%E4%B8%80%EF%BC%9A%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87"><span class="toc-number">6.1.</span> <span class="toc-text">步骤一：数据准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4%E4%BA%8C%EF%BC%9A%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86"><span class="toc-number">6.2.</span> <span class="toc-text">步骤二：模型推理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4%E4%B8%89%EF%BC%9A%E7%89%B9%E5%BE%81%E8%9E%8D%E5%90%88"><span class="toc-number">6.3.</span> <span class="toc-text">步骤三：特征融合</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4%E5%9B%9B%EF%BC%9A%E4%BC%98%E5%8C%96%E5%90%8E%E5%A4%84%E7%90%86"><span class="toc-number">6.4.</span> <span class="toc-text">步骤四：优化后处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4%E4%BA%94%EF%BC%9A%E6%B8%B2%E6%9F%93%E4%B8%8E%E5%B1%95%E7%A4%BA"><span class="toc-number">6.5.</span> <span class="toc-text">步骤五：渲染与展示</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C%E4%B8%8E%E5%88%86%E6%9E%90"><span class="toc-number">7.</span> <span class="toc-text">6. 实验结果与分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">7.1.</span> <span class="toc-text">数据集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87"><span class="toc-number">7.2.</span> <span class="toc-text">性能指标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C%E5%AF%B9%E6%AF%94"><span class="toc-number">7.3.</span> <span class="toc-text">结果对比</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E7%BC%BA%E7%82%B9%E4%B8%8E%E6%8C%91%E6%88%98"><span class="toc-number">8.</span> <span class="toc-text">7. 缺点与挑战</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E8%B5%84%E6%BA%90%E9%9C%80%E6%B1%82%E5%A4%A7"><span class="toc-number">8.1.</span> <span class="toc-text">计算资源需求大</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E9%97%AE%E9%A2%98"><span class="toc-number">8.2.</span> <span class="toc-text">数据同步问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E9%9B%86%E6%88%90%E9%9A%BE%E5%BA%A6"><span class="toc-number">8.3.</span> <span class="toc-text">模型集成难度</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E6%9C%AA%E6%9D%A5%E5%8F%91%E5%B1%95%E6%96%B9%E5%90%91"><span class="toc-number">9.</span> <span class="toc-text">8. 未来发展方向</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E8%BD%BB%E9%87%8F%E5%8C%96"><span class="toc-number">9.1.</span> <span class="toc-text">模型轻量化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0"><span class="toc-number">9.2.</span> <span class="toc-text">自监督学习</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E6%A8%A1%E6%80%81%E8%9E%8D%E5%90%88"><span class="toc-number">9.3.</span> <span class="toc-text">多模态融合</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9B%B4%E6%99%BA%E8%83%BD%E7%9A%84%E8%9E%8D%E5%90%88%E6%9C%BA%E5%88%B6"><span class="toc-number">9.4.</span> <span class="toc-text">更智能的融合机制</span></a></li></ol></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 21
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2024 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/23</span>
+            <a class="archive-post-title" href="/2024/11/23/Transformer-Based-Add-Hand/">基于Transformer的人体姿态重建（四）：引入高精度的手部姿态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/05</span>
+            <a class="archive-post-title" href="/2024/10/05/Transformer-Based-HPE-SOTA/">基于Transformer的人体姿态重建（三）：几种SOTA工作的详细解析与未来展望</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/09</span>
+            <a class="archive-post-title" href="/2024/08/09/Transformer-Based-HPE-Template/">基于Transformer的人体姿态重建（二）：实现模板</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/04</span>
+            <a class="archive-post-title" href="/2024/07/04/Transformer-Based-HMR/">基于Transformer的人体姿态重建：技术实践与原理详解</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/08</span>
+            <a class="archive-post-title" href="/2024/03/08/ViT/">Vision Transformer (ViT) 详细技术文档</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/15</span>
+            <a class="archive-post-title" href="/2023/12/15/Dcc-Coords/">一图对比众3D引擎的坐标系</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span>
+            <a class="archive-post-title" href="/2023/07/08/ML-Deformer/">基于机器学习的物理变形器</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span>
+            <a class="archive-post-title" href="/2023/07/02/Dynamic-Bones/">基于动力学的骨骼动画技术综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/Simulation-Dynamics-Engine/">仿真及动力学系统综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span>
+            <a class="archive-post-title" href="/2023/05/21/Build-WebRTC-For-MSVC/">编译可以在MSVC中使用的WebRTC库</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/21</span>
+            <a class="archive-post-title" href="/2023/02/21/Collaborative-Engine/">浅谈端云协同渲染</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span>
+            <a class="archive-post-title" href="/2022/12/29/Mixed-Virtual-Production/">混合虚拟制片</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span>
+            <a class="archive-post-title" href="/2022/10/08/C2BP-Params/">C++生成蓝图的参数类型记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/29</span>
+            <a class="archive-post-title" href="/2022/06/29/Schlick-Approximate/">Schilick的近似方法</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span>
+            <a class="archive-post-title" href="/2022/03/18/Illumination/">光通量、光强和照度</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/13</span>
+            <a class="archive-post-title" href="/2021/12/13/DS-VS-DL/">延迟渲染Vs延迟光照</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/17</span>
+            <a class="archive-post-title" href="/2021/04/17/Importance-Sampling/">重要性采样</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span>
+            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span>
+            <a class="archive-post-title" href="/2021/04/02/Cook-Torrance-BRDF/">Cook-Torrance的BRDF</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/29</span>
+            <a class="archive-post-title" href="/2021/03/29/Learn-Rendering-Function/">理解渲染方程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/22</span>
+            <a class="archive-post-title" href="/2021/03/22/Learn-Radiometry/">辐射度量学笔记</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://graphicyan.github.io",
+        root: siteMetaRoot,
+        author: "Yan Zhang"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+    </body>
+</html>

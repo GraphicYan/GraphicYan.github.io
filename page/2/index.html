@@ -406,6 +406,121 @@
                 <main class="main index-page">
             
         <article class="index-post">
+            <a class="abstract-title" href="/2023/02/21/Collaborative-Engine/">
+                    <span class="iconfont-archer stick-top">&#xe63d;</span>
+                <span class="abstract-title-text">浅谈端云协同渲染</span>
+            </a>
+            <div class="abstract-content">
+                原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&#121;&#x61;&#x6e;&#122;&#x68;&#x61;&#x6e;&#x67;&#46;&#x63;&#103;&#x40;&#x67;&#109;&#97;&#105;&#x6c;&#46;&#99;&#x6f;&#x6d; 或 https://graphicyan.github.io/）
+
+从云游戏到混合渲染
+云游戏（Cloud Game）
+原理
+发送用户输入，从端到云。
+渲染完整帧，云。
+将画面以视频流传回，从云到端。
+
+特点
+适用于异构、低级别的终端设备。
+围绕高效的视频压缩及传输技术构...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2025/07/18">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2023/02/21</span>
+                </div>
+                <!-- tags -->
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2022/12/29/Mixed-Virtual-Production/">
+                    <span class="iconfont-archer stick-top">&#xe63d;</span>
+                <span class="abstract-title-text">混合虚拟制片</span>
+            </a>
+            <div class="abstract-content">
+                原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&#x79;&#x61;&#x6e;&#x7a;&#x68;&#97;&#x6e;&#103;&#46;&#99;&#x67;&#x40;&#x67;&#109;&#x61;&#x69;&#x6c;&#x2e;&#99;&#111;&#109; 或 https://graphicyan.github.io/）
+
+1 引言
+1.1 虚拟制片
+1.1.1 混合虚拟制片混合虚拟制片是一种通过摄像机追踪将绿幕摄影与CG元素合成的技术，可为摄影导演和摄影助理提供实时预览，并在后期制作阶段中完善；也可直接作为摄像机的最终画面...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2025/07/18">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2022/12/29</span>
+                </div>
+                <!-- tags -->
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2022/10/08/C2BP-Params/">
+                <span class="abstract-title-text">C++生成蓝图的参数类型记录</span>
+            </a>
+            <div class="abstract-content">
+                
+1. 普通参数在UE C++中寻常函数传参为UFUNCTION(BlueprintCallable) static void Func1(FString InputStr); 
+2. 多输出引脚但是在UE4的C++中，不带Const的引用在蓝图中是默认为输出引脚的，所以可以借此来实现蓝图的多引脚输出。UFUNCTION(BlueprintCallable) static void Func2(FString&amp; OutputStr); 具体蓝图节点如下在虚幻官方的蓝图文档中”在带大量返回参数的函数和返回结构体的函数之间优先前者。“
+所以返回大量参数的优先级更高，可以使用Type&...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2025/07/18">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2022/10/08</span>
+                </div>
+                <!-- tags -->
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2022/06/29/Schlick-Approximate/">
+                    <span class="iconfont-archer stick-top">&#xe63d;</span>
+                <span class="abstract-title-text">Schilick的近似方法</span>
+            </a>
+            <div class="abstract-content">
+                
+1. 符号定义对于着色点 P，如下图所示，T 表示表面切向量，N表示法线，V表示出射方向，V‘表示入射方向，H 表示半程向量，  表示半程向量的投影：各个角度及其对应的余弦的表示方式如下（之后会用到）：
+
+2. 反射模型简介Schlick在文章中介绍了3种反射模型，在这里简单了解一下即可。2.1 Cook-Torrance 模型关于基于微表面的Cook-Torrance模型，其BRDF如下：其中d + s &#x3D; 1，分别表示表面diffuse反射率和specular反射率。  表示光线的波长中被diffuse反射的比率，可以定义表面颜色，即折射进入此表面并经过散射，未被吸收而重...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2025/07/18">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2022/06/29</span>
+                </div>
+                <!-- tags -->
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2022/03/18/Illumination/">
+                    <span class="iconfont-archer stick-top">&#xe63d;</span>
+                <span class="abstract-title-text">光通量、光强和照度</span>
+            </a>
+            <div class="abstract-content">
+                光学单位控制曝光，本质是在空间和时间上控制环境光照抵达传感器的量。没有环境光照，那一切都白谈，那我们不妨来了解一下关于环境光照（Scene Illumination）的一些基础概念，这些概念并不需要死记硬背，但需要理解。理解了这些概念，就像“打通任督二脉”，知道为什么，就能在各种环境下去指导你怎么做，光看那些 xx 老师教你拍 ABC 题材、DEF 场景参数应该怎么设置，是没有办法通用的。今晚的故事从一根蜡烛开始。假设在一个全黑的环境里，你只有一支蜡烛——它在安静地燃烧，同时放出大量的热（部分以红外线的形式）、可见光，但是影响我们对它亮度感知的，只有可见光波段的强度。这支蜡烛在可见光波段...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2025/07/18">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2022/03/18</span>
+                </div>
+                <!-- tags -->
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
             <a class="abstract-title" href="/2021/12/13/DS-VS-DL/">
                     <span class="iconfont-archer stick-top">&#xe63d;</span>
                 <span class="abstract-title-text">延迟渲染Vs延迟光照</span>
@@ -501,28 +616,9 @@
             </div>
         </article>
         <div class="index-post-divider"></div>
-            
-        <article class="index-post">
-            <a class="abstract-title" href="/2021/03/22/Learn-Radiometry/">
-                <span class="abstract-title-text">辐射度量学笔记</span>
-            </a>
-            <div class="abstract-content">
-                射度量学其实是对光照的一套测量系统和单位，它能够准确的描述光线的物理性质。具体来说，我们需要明白的是其中的几个关于光线的概念，分别为：辐射能量(Radiant energy)，辐射通量(Radiant flux)，辐射强度(Radiant intensity)，irradiance，radiance，(对后两种概念没有合适的中文，所以就直接用英文了)，接下来就对这些概念进行具体解释。
-2.1 辐射能量(Radiant energy)和辐射通量(Radiant flux)首先看一看Radiant energy的定义：所谓辐射能量其实非常直观，就是辐射出来的电磁能量，单位为焦耳。可以用物理当...
-            </div>
-            <!-- read more -->
-            <div class="abstract-post-meta">
-                <!-- date -->
-                <div class="abstract-date" title="Last updated: 2025/07/18">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/03/22</span>
-                </div>
-                <!-- tags -->
-            </div>
-        </article>
-        <div class="index-post-divider"></div>
     <!-- paginator  -->
         <nav class="page-nav">
-            <a class="extend prev" rel="prev" href="/">&lt; PREV</a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+            <a class="extend prev" rel="prev" href="/">&lt; PREV</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/">NEXT &gt;</a>
         </nav>
 </main>
 
@@ -598,13 +694,41 @@
         
         
         
+        
+        
+        
+        
+        
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 16
+        Total : 21
         </div>
         <!-- search  -->
     </div>
     <div class="post-archive">
+            <div class="archive-year"> 2024 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/23</span>
+            <a class="archive-post-title" href="/2024/11/23/Transformer-Based-Add-Hand/">基于Transformer的人体姿态重建（四）：引入高精度的手部姿态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/05</span>
+            <a class="archive-post-title" href="/2024/10/05/Transformer-Based-HPE-SOTA/">基于Transformer的人体姿态重建（三）：几种SOTA工作的详细解析与未来展望</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/09</span>
+            <a class="archive-post-title" href="/2024/08/09/Transformer-Based-HPE-Template/">基于Transformer的人体姿态重建（二）：实现模板</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/04</span>
+            <a class="archive-post-title" href="/2024/07/04/Transformer-Based-HMR/">基于Transformer的人体姿态重建：技术实践与原理详解</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/08</span>
+            <a class="archive-post-title" href="/2024/03/08/ViT/">Vision Transformer (ViT) 详细技术文档</a>
+        </li>
+                </ul>
             <div class="archive-year"> 2023 </div>
             <ul class="year-list">
         <li class="archive-post-item">
