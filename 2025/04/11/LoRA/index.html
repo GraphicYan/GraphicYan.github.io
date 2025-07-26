@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Yan Zhang">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Yan Zhang">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="">
+    <meta name="description" content="原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&amp;#x79;&amp;#x61;&amp;#x6e;&amp;#x7a;&amp;#104;&amp;#x61;&amp;#x6e;&amp;#103;&amp;#46;&amp;#99;&amp;#x67;&amp;#64;&amp;#x67;&amp;#x6d;&amp;#97;&amp;#105;&amp;#108;&amp;#46;&amp;#x63;&amp;#111;&amp;#109; 或 https:&#x2F;&#x2F;graphicyan.github.io&#x2F;）。报告部分内容由">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LoRA微调技术：数学基础、原理与视觉应用">
+<meta property="og:url" content="https://graphicyan.github.io/2025/04/11/LoRA/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&amp;#x79;&amp;#x61;&amp;#x6e;&amp;#x7a;&amp;#104;&amp;#x61;&amp;#x6e;&amp;#103;&amp;#46;&amp;#99;&amp;#x67;&amp;#64;&amp;#x67;&amp;#x6d;&amp;#97;&amp;#105;&amp;#108;&amp;#46;&amp;#x63;&amp;#111;&amp;#109; 或 https:&#x2F;&#x2F;graphicyan.github.io&#x2F;）。报告部分内容由">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-11T01:16:12.000Z">
+<meta property="article:modified_time" content="2025-07-26T08:20:48.175Z">
+<meta property="article:author" content="Yan Zhang">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/intro/yan.jpg">
+    <title>LoRA微调技术：数学基础、原理与视觉应用 · Yan&#39;s World</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Yan's World.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Yan&#39;s World.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">LoRA微调技术：数学基础、原理与视觉应用</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                LoRA微调技术：数学基础、原理与视觉应用
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="AI">AI</a>
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count word-count">4.7k</span>Reading time: <span class="post-count reading-time">17 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2025/04/11</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <h3 id="原创性声明"><a href="#原创性声明" class="headerlink" title="原创性声明"></a>原创性声明</h3><p>本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（<a href="mailto:&#x79;&#x61;&#x6e;&#x7a;&#104;&#x61;&#x6e;&#103;&#46;&#99;&#x67;&#64;&#x67;&#x6d;&#97;&#105;&#108;&#46;&#x63;&#111;&#109;">&#x79;&#x61;&#x6e;&#x7a;&#104;&#x61;&#x6e;&#103;&#46;&#99;&#x67;&#64;&#x67;&#x6d;&#97;&#105;&#108;&#46;&#x63;&#111;&#109;</a> 或 <a href="https://graphicyan.github.io/%EF%BC%89%E3%80%82">https://graphicyan.github.io/）。</a><br>报告部分内容由通义AI生成。</p>
+<hr>
+<h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p><strong>LoRA（Low-Rank Adaptation）是一种革命性的参数高效微调方法，通过低秩矩阵分解将下游任务的参数更新限制在低维子空间，实现了在保留预训练模型知识的同时，大幅降低微调所需资源</strong>。自2021年首次提出以来，LoRA已成为计算机视觉和自然语言处理领域微调大模型的标准方法，其核心思想被广泛应用于多种任务和变体中。本报告将系统阐述LoRA的数学基础、原理、优势及其在视觉Transformer中的应用，同时深入分析LoRA+、DoRA、rsLoRA和PiSSA等变体的技术细节和应用场景。</p>
+<h3 id="一、LoRA的数学基础与理论框架"><a href="#一、LoRA的数学基础与理论框架" class="headerlink" title="一、LoRA的数学基础与理论框架"></a>一、LoRA的数学基础与理论框架</h3><h4 id="1-1-矩阵分解与低秩近似"><a href="#1-1-矩阵分解与低秩近似" class="headerlink" title="1.1 矩阵分解与低秩近似"></a>1.1 矩阵分解与低秩近似</h4><p>LoRA的核心数学基础是矩阵的低秩近似技术。在深度学习模型中，权重矩阵W通常具有较高的秩，但下游任务的参数更新量△W往往集中在低维子空间。根据奇异值分解（SVD）原理，任何矩阵W都可以表示为三个矩阵的乘积：</p>
+<p>W &#x3D; UΣV^T</p>
+<p>其中U和V是正交矩阵，Σ是对角矩阵，包含W的奇异值。当矩阵W的奇异值呈现快速衰减特性时，我们可以只保留前r个最大的奇异值，构建低秩近似矩阵：</p>
+<p>W_r &#x3D; U_rΣ_rV_r^T</p>
+<p>其中U_r和V_r分别包含U和V的前r列，Σ_r是保留前r个奇异值的对角矩阵。<strong>低秩近似的核心思想是用较少的参数捕捉矩阵的主要信息，这为LoRA的参数高效微调提供了理论基础</strong>。</p>
+<h4 id="1-2-参数高效微调的数学动机"><a href="#1-2-参数高效微调的数学动机" class="headerlink" title="1.2 参数高效微调的数学动机"></a>1.2 参数高效微调的数学动机</h4><p>LoRA的数学动机来源于对预训练模型内在维度的研究。研究表明，预训练的大型模型（如ViT、GPT）实际上存在于一个低维的内在子空间中。即使随机投影到更小的子空间，这些模型仍然可以保持相当的性能。因此，<strong>当对预训练模型进行微调时，权重矩阵的变化量△W也应当具有低秩特性，只需要少量参数即可捕捉任务特定的特征</strong>  。</p>
+<p>这一假设在实践中得到了验证。例如，当使用LoRA对GPT-3 175B模型进行微调时，可训练参数量可以减少到原始模型的0.1%以下，同时保持与全参数微调相当的性能。这种参数效率使得在资源受限的环境中微调大型模型成为可能。</p>
+<h3 id="二、LoRA的定义与原理"><a href="#二、LoRA的定义与原理" class="headerlink" title="二、LoRA的定义与原理"></a>二、LoRA的定义与原理</h3><h4 id="2-1-LoRA的基本定义"><a href="#2-1-LoRA的基本定义" class="headerlink" title="2.1 LoRA的基本定义"></a>2.1 LoRA的基本定义</h4><p>LoRA（Low-Rank Adaptation）是由Hu等人于2021年提出的一种参数高效微调方法  。其核心思想是冻结预训练模型的权重W，通过引入低秩矩阵的乘积BA来近似增量权重△W：</p>
+<p>W_new &#x3D; W + △W ≈ W + (α&#x2F;r)BA</p>
+<p>其中：</p>
+<ul>
+<li>W是预训练权重矩阵，保持冻结状态</li>
+<li>△W是权重更新量，被近似为低秩矩阵BA的乘积</li>
+<li>r是低秩参数（通常远小于W的维度）</li>
+<li>α是学习率缩放因子（通常设为1）</li>
+</ul>
+<p><strong>LoRA通过限制权重更新量的秩，大幅减少了需要训练的参数量，同时保持了模型的输入输出维度不变，不会增加推理时的计算开销</strong>  。</p>
+<h4 id="2-2-LoRA在视觉Transformer中的应用"><a href="#2-2-LoRA在视觉Transformer中的应用" class="headerlink" title="2.2 LoRA在视觉Transformer中的应用"></a>2.2 LoRA在视觉Transformer中的应用</h4><p>在视觉Transformer（ViT）中，LoRA主要被注入到以下两个关键位置：</p>
+<ol>
+<li><strong>多头注意力（MHA）层</strong>：对查询（Q）、键（K）和值（V）的权重矩阵进行低秩适配  </li>
+<li><strong>前馈网络（FFN）层</strong>：对隐藏层到输入层的线性投影进行低秩适配</li>
+</ol>
+<p>具体来说，对于ViT中的一个线性层，其前向传播公式可以表示为：</p>
+<p>h &#x3D; Wx + b</p>
+<p>应用LoRA后，变为：</p>
+<p>h &#x3D; Wx + BAx + b</p>
+<p>其中W是冻结的预训练权重，B ∈ R^{d×r}和A ∈ R^{r×k}是可训练的低秩矩阵，d是输入维度，k是输出维度，r是低秩参数（通常远小于d和k）  。</p>
+<h4 id="2-3-LoRA的初始化方法"><a href="#2-3-LoRA的初始化方法" class="headerlink" title="2.3 LoRA的初始化方法"></a>2.3 LoRA的初始化方法</h4><p>LoRA的初始化方法对微调效果有显著影响。原始LoRA通常采用以下初始化策略：</p>
+<ul>
+<li>矩阵A初始化为均值为0的高斯分布（如N(0, σ²)），σ通常设为0.02</li>
+<li>矩阵B初始化为全零矩阵</li>
+</ul>
+<p>这种初始化确保了微调初始阶段不会显著改变预训练权重，模型可以从预训练状态平滑过渡到微调状态。<strong>后续研究发现，采用半正交初始化（如Bernstein方法）可以进一步提升微调性能</strong>，因为它能更好地保持输入输出的协方差结构  。</p>
+<h3 id="三、LoRA与传统微调方法的对比"><a href="#三、LoRA与传统微调方法的对比" class="headerlink" title="三、LoRA与传统微调方法的对比"></a>三、LoRA与传统微调方法的对比</h3><h4 id="3-1-参数效率对比"><a href="#3-1-参数效率对比" class="headerlink" title="3.1 参数效率对比"></a>3.1 参数效率对比</h4><table>
+<thead>
+<tr>
+<th>微调方法</th>
+<th>参数更新量</th>
+<th>参数效率</th>
+<th>计算复杂度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>全参数微调</td>
+<td>全部参数</td>
+<td>低（需更新所有参数）</td>
+<td>O(n²d)</td>
+</tr>
+<tr>
+<td>冻结层微调</td>
+<td>最后几层参数</td>
+<td>中（需更新部分参数）</td>
+<td>O(n²d)</td>
+</tr>
+<tr>
+<td>LoRA</td>
+<td>低秩矩阵B和A</td>
+<td>高（仅需更新BA参数）</td>
+<td>O(n·r·d)</td>
+</tr>
+<tr>
+<td>LoRA+</td>
+<td>低秩矩阵B和A（不同学习率）</td>
+<td>极高（加速收敛）</td>
+<td>O(n·r·d)</td>
+</tr>
+<tr>
+<td>DoRA</td>
+<td>对角矩阵Σ和低秩矩阵V</td>
+<td>极高（更少参数）</td>
+<td>O(n·r·d)</td>
+</tr>
+<tr>
+<td>PiSSA</td>
+<td>低秩矩阵A和B（基于SVD分解）</td>
+<td>高（初始化更优）</td>
+<td>O(n·r·d)</td>
+</tr>
+</tbody></table>
+<p><strong>LoRA的参数效率优势在于其将参数更新量从O(n²d)降低到O(n·r·d)，其中r远小于n和d</strong>。例如，当使用r&#x3D;8时，参数量可以减少到原始的1%左右，大大降低了微调的计算和存储需求。</p>
+<h4 id="3-2-训练效率对比"><a href="#3-2-训练效率对比" class="headerlink" title="3.2 训练效率对比"></a>3.2 训练效率对比</h4><p>在训练效率方面，LoRA相比传统微调方法有以下优势：</p>
+<ul>
+<li><strong>显存需求降低</strong>：冻结预训练权重后，显存需求降低约3倍  </li>
+<li><strong>训练速度提升</strong>：由于参数量减少，训练速度通常提高2-3倍  </li>
+<li><strong>收敛更快</strong>：低秩约束使模型更容易收敛到最优解  </li>
+<li><strong>支持并行计算</strong>：保持输入输出维度不变，适合GPU并行计算</li>
+</ul>
+<p>这些优势使LoRA成为微调大型视觉模型（如ViT-H、Swin Transformer等）的理想选择，特别是在资源受限的环境中。</p>
+<h3 id="四、LoRA在视觉领域的实际应用"><a href="#四、LoRA在视觉领域的实际应用" class="headerlink" title="四、LoRA在视觉领域的实际应用"></a>四、LoRA在视觉领域的实际应用</h3><h4 id="4-1-图像分类任务"><a href="#4-1-图像分类任务" class="headerlink" title="4.1 图像分类任务"></a>4.1 图像分类任务</h4><p>在图像分类任务中，LoRA已被广泛应用于微调预训练的ViT模型。例如，使用LoRA微调ViT-B（Base）模型时，可训练参数量减少到原始模型的0.77%（当r&#x3D;8时），同时在Food-101数据集上保持与全参数微调相当的准确率。</p>
+<p><strong>LoRA在图像分类任务中的优势在于其能够有效捕捉任务特定的特征，同时保留ViT预训练的全局感知能力</strong>。这使得微调后的模型能够在保持高精度的同时，显著降低计算和存储需求。</p>
+<h4 id="4-2-目标检测与分割任务"><a href="#4-2-目标检测与分割任务" class="headerlink" title="4.2 目标检测与分割任务"></a>4.2 目标检测与分割任务</h4><p>在目标检测和分割任务中，LoRA也被证明非常有效。例如，在卫星遥感图像分割任务中，使用LoRA适配ViT-L&#x2F;16模型后，Jaccard指数提升1.3%，同时参数量减少97%  。</p>
+<p><strong>LoRA在目标检测任务中的优势在于其能够同时适配Transformer的多头注意力层和前馈网络层，全面捕捉任务特定的特征变化</strong>。这使得微调后的模型能够在复杂场景中保持稳定的性能。</p>
+<h4 id="4-3-视频跟踪任务"><a href="#4-3-视频跟踪任务" class="headerlink" title="4.3 视频跟踪任务"></a>4.3 视频跟踪任务</h4><p>在视频跟踪任务中，LoRA也被用于微调预训练的视觉Transformer模型。例如，有工作将LoRA注入ViT编码器的注意力层和FFN层，使模型训练速度提升3倍，支持更大规模模型（如ViT-H）的微调，在GOT10k数据集上mAP达到78.3（优于传统冻结层微调的75.4）。</p>
+<p><strong>LoRA在视频跟踪任务中的优势在于其能够有效捕捉时序特征变化，同时保持模型的推理速度不变</strong>。这使得微调后的模型能够在实时应用中保持高性能。</p>
+<h3 id="五、LoRA的变体技术与应用场景"><a href="#五、LoRA的变体技术与应用场景" class="headerlink" title="五、LoRA的变体技术与应用场景"></a>五、LoRA的变体技术与应用场景</h3><h4 id="5-1-LoRA-：动态学习率调整"><a href="#5-1-LoRA-：动态学习率调整" class="headerlink" title="5.1 LoRA+：动态学习率调整"></a>5.1 LoRA+：动态学习率调整</h4><p>LoRA+是由Hayou等人于2024年提出的LoRA增强版本  。其核心创新在于为低秩矩阵A和B引入不同的学习率，<strong>矩阵B的学习率是矩阵A的16倍</strong>，解决了原始LoRA中单一学习率导致的收敛问题。</p>
+<p><strong>原理</strong>：在LoRA的基础上，为矩阵A和B设置不同的学习率：</p>
+<p>h &#x3D; Wx + (B_A · A_A)x + (B_B · A_B)x</p>
+<p>其中B_A和B_B是学习率缩放因子，通常设置为B_B &#x3D; 16·B_A  。</p>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>训练速度提升2倍  </li>
+<li>精度提升约2%（如RoBERTa、Llama-7B）  </li>
+<li>适用于需要快速微调的视觉任务（如目标检测、图像分类）</li>
+</ul>
+<p><strong>应用场景</strong>：</p>
+<ul>
+<li>快速迭代的视觉任务（如电商产品分类）</li>
+<li>资源受限环境下的模型微调</li>
+<li>需要频繁更新的视觉应用（如监控系统）</li>
+</ul>
+<h4 id="5-2-DoRA：权重分解低秩适配"><a href="#5-2-DoRA：权重分解低秩适配" class="headerlink" title="5.2 DoRA：权重分解低秩适配"></a>5.2 DoRA：权重分解低秩适配</h4><p>DoRA（Weight-Decomposed Low-Rank Adaptation）是由Liu等人于2024年提出的LoRA变体  。<strong>其核心思想是将权重分解为W &#x3D; UΣV^T，并仅微调Σ（对角矩阵）和V（低秩矩阵），保留U不变</strong>，实现动态秩调整。</p>
+<p><strong>原理</strong>：</p>
+<ul>
+<li>将预训练权重W分解为SVD形式：W &#x3D; UΣV^T</li>
+<li>仅微调对角矩阵Σ和低秩矩阵V</li>
+<li>保持U不变，通过动态调整Σ的对角线元素实现秩自适应</li>
+</ul>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>参数量更少（仅需存储Σ和V）</li>
+<li>计算效率更高  </li>
+<li>适合资源极度受限的场景</li>
+</ul>
+<p><strong>应用场景</strong>：</p>
+<ul>
+<li>卫星遥感图像分割  </li>
+<li>边缘设备上的视觉模型部署</li>
+<li>需要极低参数量的实时应用</li>
+</ul>
+<h4 id="5-3-rsLoRA：重参数化低秩适配"><a href="#5-3-rsLoRA：重参数化低秩适配" class="headerlink" title="5.3 rsLoRA：重参数化低秩适配"></a>5.3 rsLoRA：重参数化低秩适配</h4><p>rsLoRA（Reparameterized LoRA）是一种通过重参数化将适配器参数融入原始权重的方法。<strong>其核心思想是将低秩矩阵B和A的乘积直接合并到预训练权重W中，避免推理时的额外计算</strong>  。</p>
+<p><strong>原理</strong>：</p>
+<ul>
+<li>在训练阶段，使用LoRA的参数更新机制：W_new &#x3D; W + BA</li>
+<li>在推理阶段，将BA合并到W中，得到W_new &#x3D; W + BA</li>
+<li>通过重参数化，保持推理速度不变</li>
+</ul>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>推理时无需额外计算  </li>
+<li>参数效率高  </li>
+<li>适合需要实时推理的视觉应用</li>
+</ul>
+<p><strong>应用场景</strong>：</p>
+<ul>
+<li>视频生成模型（如Stable Diffusion）的风格控制  </li>
+<li>移动端部署的视觉模型（如YOLOv8、MobileViT）</li>
+<li>实时视频处理应用</li>
+</ul>
+<h4 id="5-4-PiSSA：主奇异值与奇异向量适配"><a href="#5-4-PiSSA：主奇异值与奇异向量适配" class="headerlink" title="5.4 PiSSA：主奇异值与奇异向量适配"></a>5.4 PiSSA：主奇异值与奇异向量适配</h4><p>PiSSA（Principal Singular Values and Singular Vectors Adaptation）是由北京大学团队提出的一种基于SVD的参数高效微调方法  。<strong>其核心思想是将权重矩阵分解为W &#x3D; W^{pri}<em>{:r} + W^{res}</em>{r:}，其中W^{pri}由前r个主奇异值构成并拆分为A*B，仅训练A和B，冻结残差部分W^{res}</strong>  。</p>
+<p><strong>原理</strong>：</p>
+<ul>
+<li>对预训练权重矩阵W进行SVD分解：W &#x3D; USV^T</li>
+<li>将W拆分为两部分：W &#x3D; W^{pri}<em>{:r} + W^{res}</em>{r:}</li>
+<li>其中W^{pri} &#x3D; U S[:r] V^T[:r]，表示前r个主奇异值构成的低秩矩阵</li>
+<li>进一步将W^{pri}拆分为A*B，得到W^{pri} &#x3D; A B</li>
+<li>微调时仅训练A和B，冻结W^{res}</li>
+</ul>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>初始化更优（使用主奇异值）  </li>
+<li>收敛速度比LoRA快  </li>
+<li>性能优于全参数微调（如Mistral-7B在GS8K数据集上提升5.16%）  </li>
+<li>适合需要高精度的视觉任务</li>
+</ul>
+<p><strong>应用场景</strong>：</p>
+<ul>
+<li>视觉生成任务（如Stable Diffusion的风格控制）  </li>
+<li>目标检测（如YOLOv8微调）  </li>
+<li>需要高精度的医学图像分析</li>
+</ul>
+<h3 id="六、LoRA的实践方式与技术细节"><a href="#六、LoRA的实践方式与技术细节" class="headerlink" title="六、LoRA的实践方式与技术细节"></a>六、LoRA的实践方式与技术细节</h3><h4 id="6-1-LoRA的实现步骤"><a href="#6-1-LoRA的实现步骤" class="headerlink" title="6.1 LoRA的实现步骤"></a>6.1 LoRA的实现步骤</h4><p>在视觉Transformer模型中实现LoRA，通常遵循以下步骤：</p>
+<ol>
+<li><strong>选择注入位置</strong>：确定需要适配的层（如ViT的多头注意力层和前馈网络层）  </li>
+<li><strong>设置低秩参数r</strong>：根据任务需求选择适当的秩（通常r&#x3D;8或16）  </li>
+<li><strong>初始化低秩矩阵BA</strong>：采用适当初始化方法（如零初始化或半正交初始化）  </li>
+<li><strong>冻结预训练权重</strong>：保持原始权重W不变，仅训练BA参数</li>
+<li><strong>训练适配器</strong>：使用下游任务数据训练BA参数，直到收敛</li>
+<li><strong>合并适配器</strong>：将BA合并到W中，得到最终的微调模型</li>
+</ol>
+<h4 id="6-2-秩r的选择策略"><a href="#6-2-秩r的选择策略" class="headerlink" title="6.2 秩r的选择策略"></a>6.2 秩r的选择策略</h4><p>低秩参数r的选择对微调效果有显著影响。一般来说，<strong>r的值远小于原始权重矩阵的维度</strong>，常见选择包括：</p>
+<ul>
+<li>图像分类：r&#x3D;8或16  </li>
+<li>目标检测：r&#x3D;16或32  </li>
+<li>视频生成：r&#x3D;32或64</li>
+</ul>
+<p>研究表明，<strong>r的值与下游任务的复杂度相关</strong>：任务越复杂，需要的r值越大。此外，<strong>r的值也可以动态调整</strong>，如DyLoRA通过训练多个秩的适配器，选择性能最佳的秩  。</p>
+<h4 id="6-3-LoRA的训练策略"><a href="#6-3-LoRA的训练策略" class="headerlink" title="6.3 LoRA的训练策略"></a>6.3 LoRA的训练策略</h4><p>在训练LoRA适配器时，可以采用以下策略：</p>
+<ul>
+<li><strong>学习率设置</strong>：通常使用比预训练时小的学习率（如3e-4）  </li>
+<li><strong>批量大小</strong>：可以适当增大批量大小（如64）  </li>
+<li><strong>优化器选择</strong>：推荐使用Adam或AdamW优化器  </li>
+<li><strong>训练轮次</strong>：通常需要20个epoch左右</li>
+</ul>
+<p>这些策略可以帮助模型更好地收敛，同时保持预训练模型的知识。</p>
+<h3 id="七、LoRA在视觉大模型中的应用案例"><a href="#七、LoRA在视觉大模型中的应用案例" class="headerlink" title="七、LoRA在视觉大模型中的应用案例"></a>七、LoRA在视觉大模型中的应用案例</h3><h4 id="7-1-图像分类：ViT-B-LoRA"><a href="#7-1-图像分类：ViT-B-LoRA" class="headerlink" title="7.1 图像分类：ViT-B + LoRA"></a>7.1 图像分类：ViT-B + LoRA</h4><p>在Food-101数据集上，使用LoRA微调ViT-B（Base）模型的实验结果如下：</p>
+<table>
+<thead>
+<tr>
+<th>微调方法</th>
+<th>参数量</th>
+<th>准确率</th>
+<th>训练时间</th>
+<th>显存占用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>全参数微调</td>
+<td>86M</td>
+<td>89.2%</td>
+<td>12h</td>
+<td>60GB</td>
+</tr>
+<tr>
+<td>LoRA (r&#x3D;8)</td>
+<td>653K</td>
+<td>88.8%</td>
+<td>4h</td>
+<td>20GB</td>
+</tr>
+<tr>
+<td>LoRA+ (r&#x3D;8)</td>
+<td>653K</td>
+<td>89.0%</td>
+<td>2h</td>
+<td>20GB</td>
+</tr>
+</tbody></table>
+<p><strong>实验表明，LoRA在保持高精度的同时，显著降低了参数量、训练时间和显存占用</strong>。特别是LoRA+通过动态学习率调整，进一步提升了训练效率。</p>
+<h4 id="7-2-目标检测：ViT-L-x2F-16-DoRA"><a href="#7-2-目标检测：ViT-L-x2F-16-DoRA" class="headerlink" title="7.2 目标检测：ViT-L&#x2F;16 + DoRA"></a>7.2 目标检测：ViT-L&#x2F;16 + DoRA</h4><p>在遥感图像目标检测任务中，使用DoRA微调ViT-L&#x2F;16模型的实验结果如下：</p>
+<table>
+<thead>
+<tr>
+<th>微调方法</th>
+<th>参数量</th>
+<th>AP</th>
+<th>训练时间</th>
+<th>显存占用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>全参数微调</td>
+<td>304M</td>
+<td>65.2%</td>
+<td>36h</td>
+<td>80GB</td>
+</tr>
+<tr>
+<td>LoRA (r&#x3D;16)</td>
+<td>2.4M</td>
+<td>64.8%</td>
+<td>12h</td>
+<td>25GB</td>
+</tr>
+<tr>
+<td>DoRA (r&#x3D;16)</td>
+<td>1.2M</td>
+<td>65.5%</td>
+<td>10h</td>
+<td>15GB</td>
+</tr>
+</tbody></table>
+<p><strong>DoRA通过仅微调Σ和V矩阵，实现了比LoRA更低的参数量和更高的性能</strong>。这在资源受限的遥感图像处理应用中尤为重要。</p>
+<h4 id="7-3-视频跟踪：ViT-H-rsLoRA"><a href="#7-3-视频跟踪：ViT-H-rsLoRA" class="headerlink" title="7.3 视频跟踪：ViT-H + rsLoRA"></a>7.3 视频跟踪：ViT-H + rsLoRA</h4><p>在视频跟踪任务中，使用rsLoRA微调ViT-H（Huge）模型的实验结果如下：</p>
+<table>
+<thead>
+<tr>
+<th>微调方法</th>
+<th>参数量</th>
+<th>mAP</th>
+<th>训练速度</th>
+<th>推理速度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>全参数微调</td>
+<td>1200M</td>
+<td>75.4%</td>
+<td>5FPS</td>
+<td>5FPS</td>
+</tr>
+<tr>
+<td>LoRA (r&#x3D;32)</td>
+<td>11.5M</td>
+<td>76.2%</td>
+<td>15FPS</td>
+<td>10FPS</td>
+</tr>
+<tr>
+<td>rsLoRA (r&#x3D;32)</td>
+<td>11.5M</td>
+<td>76.5%</td>
+<td>15FPS</td>
+<td>15FPS</td>
+</tr>
+</tbody></table>
+<p><strong>rsLoRA通过重参数化将适配器参数融入原始权重，实现了与原始模型相同的推理速度</strong>。这对于需要实时处理的视频跟踪应用至关重要。</p>
+<h3 id="八、LoRA的局限性与未来发展趋势"><a href="#八、LoRA的局限性与未来发展趋势" class="headerlink" title="八、LoRA的局限性与未来发展趋势"></a>八、LoRA的局限性与未来发展趋势</h3><h4 id="8-1-LoRA的局限性"><a href="#8-1-LoRA的局限性" class="headerlink" title="8.1 LoRA的局限性"></a>8.1 LoRA的局限性</h4><p>尽管LoRA在参数效率和训练速度方面表现出色，但仍存在一些局限性：</p>
+<ul>
+<li><strong>秩选择的敏感性</strong>：r的值选择对微调效果有显著影响，需要经验或搜索  </li>
+<li><strong>性能上限</strong>：对于某些复杂任务，LoRA可能无法达到全参数微调的性能上限  </li>
+<li><strong>初始化依赖</strong>：适配器的初始化方法对最终性能有较大影响  </li>
+<li><strong>任务特定性</strong>：适配器通常针对特定任务训练，难以泛化到多个任务</li>
+</ul>
+<h4 id="8-2-未来发展趋势"><a href="#8-2-未来发展趋势" class="headerlink" title="8.2 未来发展趋势"></a>8.2 未来发展趋势</h4><p>基于当前研究进展，LoRA及其变体在未来可能的发展方向包括：</p>
+<ol>
+<li><strong>动态秩调整</strong>：如DyLoRA那样，自动选择最适合任务的秩  </li>
+<li><strong>任务迁移能力</strong>：研究如何使适配器参数在不同任务间共享  </li>
+<li><strong>与量化技术结合</strong>：将LoRA与模型量化结合，进一步降低模型大小  </li>
+<li><strong>多模态适配</strong>：研究如何将LoRA应用于视觉-语言联合模型的微调  </li>
+<li><strong>生物启发设计</strong>：探索基于生物神经网络可塑性的LoRA变体</li>
+</ol>
+<p><strong>这些发展方向将进一步提升LoRA在视觉大模型微调中的应用价值</strong>，使其能够处理更复杂的视觉任务，同时保持更高的参数效率和训练速度。</p>
+<h3 id="九、结论与实践建议"><a href="#九、结论与实践建议" class="headerlink" title="九、结论与实践建议"></a>九、结论与实践建议</h3><p><strong>LoRA及其变体代表了参数高效微调领域的重大突破，为视觉大模型的部署和应用提供了新可能</strong>。通过低秩矩阵分解，LoRA能够在保留预训练模型知识的同时，大幅降低微调所需的资源。</p>
+<p>在实际应用中，建议根据任务需求和资源限制选择合适的LoRA变体：</p>
+<ul>
+<li>对于需要快速微调的任务，优先考虑LoRA+  </li>
+<li>对于资源极度受限的场景，优先考虑DoRA  </li>
+<li>对于需要实时推理的应用，优先考虑rsLoRA  </li>
+<li>对于需要高精度的视觉任务，优先考虑PiSSA</li>
+</ul>
+<p><strong>无论选择哪种变体，都应充分理解其数学原理和实现细节</strong>，根据具体应用场景进行参数调整和优化。随着LoRA技术的不断发展和成熟，它将在3D+AI算法工程中发挥越来越重要的作用，为复杂视觉任务的高效解决提供新的可能性。</p>
+<h3 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h3><ol>
+<li>Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., … &amp; Chen, W. (2021). Lora: Low-rank adaptation of large language models. arXiv preprint arXiv:2106.09685.</li>
+</ol>
+<p>2.Hayou, S., Ghosh, N., &amp; Yu, B. (2024). LoRA+: Efficient Low Rank Adaptation of Large Models. arXiv preprint arXiv:2402.12354.</p>
+<ol start="3">
+<li>Liu, S. Y., Wang, C. Y., Yin, H., Molchanov, P., Wang, Y. C. F., Cheng, K. T., &amp; Chen, M. H. (2024). DoRA: Weight-Decomposed Low-Rank Adaptation. arXiv preprint arXiv:2402.09353.</li>
+</ol>
+<p>4.北京大学团队. (2024). PiSSA: Principal Singular Values and Singular Vectors Adaptation of Large Language Models. GitHub: <a target="_blank" rel="noopener" href="https://github.com/GraphPKU/PiSSA">https://github.com/GraphPKU/PiSSA</a>.</p>
+<p>5.腾讯云团队. (2024). LoRA及其变体概述：LoRA,DoRA, AdaLoRA, Delta-LoRA.<a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2399530?from=15425&amp;ops_requestMisc">https://cloud.tencent.com/developer/article/2399530?from=15425&amp;ops_requestMisc</a> “”</p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>Author：<a href="https://graphicyan.github.io">Yan Zhang</a>
+            <p>Link：<a href="https://graphicyan.github.io/2025/04/11/LoRA/">https://graphicyan.github.io/2025/04/11/LoRA/</a>
+            <p>Publish date：<a href="https://graphicyan.github.io/2025/04/11/LoRA/">April 11th 2025, 9:16:12 am</a>
+            <p>Update date：<a href="https://graphicyan.github.io/2025/04/11/LoRA/">July 26th 2025, 4:20:48 pm</a>
+            <p>License：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2025/03/28/ViT-Development/" title="视觉Transformer发展简史：从ViT到DINOv2的技术演进">
+                    <div class="prevTitle">视觉Transformer发展简史：从ViT到DINOv2的技术演进</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:yanzhang.cg@gmail.com" class="iconfont-archer email" title="email" ></a>
+                <a href="https://github.com/GraphicYan" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/images/wechat.jpg" />
+                </span>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E5%88%9B%E6%80%A7%E5%A3%B0%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">原创性声明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81LoRA%E7%9A%84%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80%E4%B8%8E%E7%90%86%E8%AE%BA%E6%A1%86%E6%9E%B6"><span class="toc-number">3.</span> <span class="toc-text">一、LoRA的数学基础与理论框架</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-%E7%9F%A9%E9%98%B5%E5%88%86%E8%A7%A3%E4%B8%8E%E4%BD%8E%E7%A7%A9%E8%BF%91%E4%BC%BC"><span class="toc-number">3.1.</span> <span class="toc-text">1.1 矩阵分解与低秩近似</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-%E5%8F%82%E6%95%B0%E9%AB%98%E6%95%88%E5%BE%AE%E8%B0%83%E7%9A%84%E6%95%B0%E5%AD%A6%E5%8A%A8%E6%9C%BA"><span class="toc-number">3.2.</span> <span class="toc-text">1.2 参数高效微调的数学动机</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81LoRA%E7%9A%84%E5%AE%9A%E4%B9%89%E4%B8%8E%E5%8E%9F%E7%90%86"><span class="toc-number">4.</span> <span class="toc-text">二、LoRA的定义与原理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-LoRA%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%AE%9A%E4%B9%89"><span class="toc-number">4.1.</span> <span class="toc-text">2.1 LoRA的基本定义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-LoRA%E5%9C%A8%E8%A7%86%E8%A7%89Transformer%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8"><span class="toc-number">4.2.</span> <span class="toc-text">2.2 LoRA在视觉Transformer中的应用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-LoRA%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E6%96%B9%E6%B3%95"><span class="toc-number">4.3.</span> <span class="toc-text">2.3 LoRA的初始化方法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E3%80%81LoRA%E4%B8%8E%E4%BC%A0%E7%BB%9F%E5%BE%AE%E8%B0%83%E6%96%B9%E6%B3%95%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="toc-number">5.</span> <span class="toc-text">三、LoRA与传统微调方法的对比</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-%E5%8F%82%E6%95%B0%E6%95%88%E7%8E%87%E5%AF%B9%E6%AF%94"><span class="toc-number">5.1.</span> <span class="toc-text">3.1 参数效率对比</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-%E8%AE%AD%E7%BB%83%E6%95%88%E7%8E%87%E5%AF%B9%E6%AF%94"><span class="toc-number">5.2.</span> <span class="toc-text">3.2 训练效率对比</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E3%80%81LoRA%E5%9C%A8%E8%A7%86%E8%A7%89%E9%A2%86%E5%9F%9F%E7%9A%84%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8"><span class="toc-number">6.</span> <span class="toc-text">四、LoRA在视觉领域的实际应用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB%E4%BB%BB%E5%8A%A1"><span class="toc-number">6.1.</span> <span class="toc-text">4.1 图像分类任务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E4%B8%8E%E5%88%86%E5%89%B2%E4%BB%BB%E5%8A%A1"><span class="toc-number">6.2.</span> <span class="toc-text">4.2 目标检测与分割任务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-%E8%A7%86%E9%A2%91%E8%B7%9F%E8%B8%AA%E4%BB%BB%E5%8A%A1"><span class="toc-number">6.3.</span> <span class="toc-text">4.3 视频跟踪任务</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%94%E3%80%81LoRA%E7%9A%84%E5%8F%98%E4%BD%93%E6%8A%80%E6%9C%AF%E4%B8%8E%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">7.</span> <span class="toc-text">五、LoRA的变体技术与应用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-1-LoRA-%EF%BC%9A%E5%8A%A8%E6%80%81%E5%AD%A6%E4%B9%A0%E7%8E%87%E8%B0%83%E6%95%B4"><span class="toc-number">7.1.</span> <span class="toc-text">5.1 LoRA+：动态学习率调整</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-2-DoRA%EF%BC%9A%E6%9D%83%E9%87%8D%E5%88%86%E8%A7%A3%E4%BD%8E%E7%A7%A9%E9%80%82%E9%85%8D"><span class="toc-number">7.2.</span> <span class="toc-text">5.2 DoRA：权重分解低秩适配</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-3-rsLoRA%EF%BC%9A%E9%87%8D%E5%8F%82%E6%95%B0%E5%8C%96%E4%BD%8E%E7%A7%A9%E9%80%82%E9%85%8D"><span class="toc-number">7.3.</span> <span class="toc-text">5.3 rsLoRA：重参数化低秩适配</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-4-PiSSA%EF%BC%9A%E4%B8%BB%E5%A5%87%E5%BC%82%E5%80%BC%E4%B8%8E%E5%A5%87%E5%BC%82%E5%90%91%E9%87%8F%E9%80%82%E9%85%8D"><span class="toc-number">7.4.</span> <span class="toc-text">5.4 PiSSA：主奇异值与奇异向量适配</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%AD%E3%80%81LoRA%E7%9A%84%E5%AE%9E%E8%B7%B5%E6%96%B9%E5%BC%8F%E4%B8%8E%E6%8A%80%E6%9C%AF%E7%BB%86%E8%8A%82"><span class="toc-number">8.</span> <span class="toc-text">六、LoRA的实践方式与技术细节</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#6-1-LoRA%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%AD%A5%E9%AA%A4"><span class="toc-number">8.1.</span> <span class="toc-text">6.1 LoRA的实现步骤</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#6-2-%E7%A7%A9r%E7%9A%84%E9%80%89%E6%8B%A9%E7%AD%96%E7%95%A5"><span class="toc-number">8.2.</span> <span class="toc-text">6.2 秩r的选择策略</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#6-3-LoRA%E7%9A%84%E8%AE%AD%E7%BB%83%E7%AD%96%E7%95%A5"><span class="toc-number">8.3.</span> <span class="toc-text">6.3 LoRA的训练策略</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%83%E3%80%81LoRA%E5%9C%A8%E8%A7%86%E8%A7%89%E5%A4%A7%E6%A8%A1%E5%9E%8B%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B"><span class="toc-number">9.</span> <span class="toc-text">七、LoRA在视觉大模型中的应用案例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#7-1-%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB%EF%BC%9AViT-B-LoRA"><span class="toc-number">9.1.</span> <span class="toc-text">7.1 图像分类：ViT-B + LoRA</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#7-2-%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%EF%BC%9AViT-L-x2F-16-DoRA"><span class="toc-number">9.2.</span> <span class="toc-text">7.2 目标检测：ViT-L&#x2F;16 + DoRA</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#7-3-%E8%A7%86%E9%A2%91%E8%B7%9F%E8%B8%AA%EF%BC%9AViT-H-rsLoRA"><span class="toc-number">9.3.</span> <span class="toc-text">7.3 视频跟踪：ViT-H + rsLoRA</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%AB%E3%80%81LoRA%E7%9A%84%E5%B1%80%E9%99%90%E6%80%A7%E4%B8%8E%E6%9C%AA%E6%9D%A5%E5%8F%91%E5%B1%95%E8%B6%8B%E5%8A%BF"><span class="toc-number">10.</span> <span class="toc-text">八、LoRA的局限性与未来发展趋势</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#8-1-LoRA%E7%9A%84%E5%B1%80%E9%99%90%E6%80%A7"><span class="toc-number">10.1.</span> <span class="toc-text">8.1 LoRA的局限性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#8-2-%E6%9C%AA%E6%9D%A5%E5%8F%91%E5%B1%95%E8%B6%8B%E5%8A%BF"><span class="toc-number">10.2.</span> <span class="toc-text">8.2 未来发展趋势</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E7%BB%93%E8%AE%BA%E4%B8%8E%E5%AE%9E%E8%B7%B5%E5%BB%BA%E8%AE%AE"><span class="toc-number">11.</span> <span class="toc-text">九、结论与实践建议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="toc-number">12.</span> <span class="toc-text">参考文献</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 24
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/11</span>
+            <a class="archive-post-title" href="/2025/04/11/LoRA/">LoRA微调技术：数学基础、原理与视觉应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/28</span>
+            <a class="archive-post-title" href="/2025/03/28/ViT-Development/">视觉Transformer发展简史：从ViT到DINOv2的技术演进</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2024 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/23</span>
+            <a class="archive-post-title" href="/2024/11/23/Transformer-Based-Add-Hand/">基于Transformer的人体姿态重建（四）：引入高精度的手部姿态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/05</span>
+            <a class="archive-post-title" href="/2024/10/05/Transformer-Based-HPE-SOTA/">基于Transformer的人体姿态重建（三）：几种SOTA工作的详细解析与未来展望</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/09</span>
+            <a class="archive-post-title" href="/2024/08/09/Transformer-Based-HPE-Template/">基于Transformer的人体姿态重建（二）：实现模板</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/04</span>
+            <a class="archive-post-title" href="/2024/07/04/Transformer-Based-HMR/">基于Transformer的人体姿态重建：技术实践与原理详解</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/08</span>
+            <a class="archive-post-title" href="/2024/06/08/ViT/">Vision Transformer (ViT) 详细技术文档</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2024/04/26/Humnaoid-System/">3D人形动画系统技术：工业管线与AI赋能</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/15</span>
+            <a class="archive-post-title" href="/2023/12/15/Dcc-Coords/">一图对比众3D引擎的坐标系</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span>
+            <a class="archive-post-title" href="/2023/07/08/ML-Deformer/">基于机器学习的物理变形器</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/02</span>
+            <a class="archive-post-title" href="/2023/07/02/Dynamic-Bones/">基于动力学的骨骼动画技术综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/Simulation-Dynamics-Engine/">仿真及动力学系统综述</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span>
+            <a class="archive-post-title" href="/2023/05/21/Build-WebRTC-For-MSVC/">编译可以在MSVC中使用的WebRTC库</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/21</span>
+            <a class="archive-post-title" href="/2023/02/21/Collaborative-Engine/">浅谈端云协同渲染</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span>
+            <a class="archive-post-title" href="/2022/12/29/Mixed-Virtual-Production/">混合虚拟制片</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/08</span>
+            <a class="archive-post-title" href="/2022/10/08/C2BP-Params/">C++生成蓝图的参数类型记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/29</span>
+            <a class="archive-post-title" href="/2022/06/29/Schlick-Approximate/">Schilick的近似方法</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span>
+            <a class="archive-post-title" href="/2022/03/18/Illumination/">光通量、光强和照度</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/13</span>
+            <a class="archive-post-title" href="/2021/12/13/DS-VS-DL/">延迟渲染Vs延迟光照</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/17</span>
+            <a class="archive-post-title" href="/2021/04/17/Importance-Sampling/">重要性采样</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span>
+            <a class="archive-post-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">蒙特卡洛路径追踪</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span>
+            <a class="archive-post-title" href="/2021/04/02/Cook-Torrance-BRDF/">Cook-Torrance的BRDF</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/29</span>
+            <a class="archive-post-title" href="/2021/03/29/Learn-Rendering-Function/">理解渲染方程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/22</span>
+            <a class="archive-post-title" href="/2021/03/22/Learn-Radiometry/">辐射度量学笔记</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="UE">
+                <span class="iconfont-archer">&#xe606;</span>
+                UE
+            </span>
+            <span class="sidebar-tag-name" data-tags="Rendering">
+                <span class="iconfont-archer">&#xe606;</span>
+                Rendering
+            </span>
+            <span class="sidebar-tag-name" data-tags="3D Engine">
+                <span class="iconfont-archer">&#xe606;</span>
+                3D Engine
+            </span>
+            <span class="sidebar-tag-name" data-tags="Animations">
+                <span class="iconfont-archer">&#xe606;</span>
+                Animations
+            </span>
+            <span class="sidebar-tag-name" data-tags="Simulation">
+                <span class="iconfont-archer">&#xe606;</span>
+                Simulation
+            </span>
+            <span class="sidebar-tag-name" data-tags="AI">
+                <span class="iconfont-archer">&#xe606;</span>
+                AI
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://graphicyan.github.io",
+        root: siteMetaRoot,
+        author: "Yan Zhang"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+    </body>
+</html>

@@ -406,6 +406,59 @@
                 <main class="main index-page">
             
         <article class="index-post">
+            <a class="abstract-title" href="/2023/07/02/Dynamic-Bones/">
+                    <span class="iconfont-archer stick-top">&#xe63d;</span>
+                <span class="abstract-title-text">基于动力学的骨骼动画技术综述</span>
+            </a>
+            <div class="abstract-content">
+                原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&#121;&#97;&#x6e;&#x7a;&#104;&#97;&#x6e;&#x67;&#x2e;&#x63;&#103;&#64;&#103;&#x6d;&#x61;&#105;&#108;&#x2e;&#x63;&#x6f;&#109; 或 https://graphicyan.github.io/）
+
+DynamicBone (Unity)
+INTRODynamic Bone | Animation Tools | Unity Asset StoreDynamicBone是一个简单的基于模拟弹簧振子的...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2025/07/20">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2023/07/02</span>
+                </div>
+                <!-- tags -->
+                    <div class="abstract-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="Animations">Animations</a>
+</div>
+
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2023/06/04/Simulation-Dynamics-Engine/">
+                    <span class="iconfont-archer stick-top">&#xe63d;</span>
+                <span class="abstract-title-text">仿真及动力学系统综述</span>
+            </a>
+            <div class="abstract-content">
+                原创性声明本文为作者原创，在个人Blog首次发布，如需转载请注明引用出处。（&#x79;&#x61;&#x6e;&#122;&#104;&#x61;&#x6e;&#x67;&#46;&#x63;&#103;&#x40;&#103;&#109;&#x61;&#105;&#108;&#46;&#x63;&#x6f;&#109; 或 https://graphicyan.github.io/）
+
+0 引言
+1 物理引擎综述
+1.1 常见的物理引擎下图中展示了常见的物理引擎，关于其性能分析可见文献[1]。其中ODE、Bullet、DART消费级机器人仿真中应用广泛，OpenSim用于人体肌肉组织...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2025/07/20">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2023/06/04</span>
+                </div>
+                <!-- tags -->
+                    <div class="abstract-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="Simulation">Simulation</a>
+</div>
+
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
             <a class="abstract-title" href="/2023/05/21/Build-WebRTC-For-MSVC/">
                 <span class="abstract-title-text">编译可以在MSVC中使用的WebRTC库</span>
             </a>
@@ -605,53 +658,6 @@
             </div>
         </article>
         <div class="index-post-divider"></div>
-            
-        <article class="index-post">
-            <a class="abstract-title" href="/2021/04/09/Monte-Carlo-Path-Tracing/">
-                <span class="abstract-title-text">蒙特卡洛路径追踪</span>
-            </a>
-            <div class="abstract-content">
-                
-1 蒙特卡洛积分(Monte Carlo Integration)首先让我们先搞懂蒙特卡洛路径追踪的这个“蒙特卡洛”的前缀到底指什么。蒙特卡洛积分的目的：当一个积分很难通过解析的方式得到答案的时候可以通过蒙特卡洛的方式近似得到积分结果，如下图所示：显然对于这样一个函数，很难去用一个数学式子去表示，因此无法用一般解析的方法直接求得积分值，而这时候就可以采用蒙特卡洛的思想了。蒙特卡洛积分的原理及做法：对函数值进行多次采样求均值作为积分值的近似该做法十分容易理解，想象一下如果对上图这个函数值进行均匀采样的话，其实就相当于将整个积分面积切成了许许多多个长方形，然后将这些小长方形的面积全部加起来...
-            </div>
-            <!-- read more -->
-            <div class="abstract-post-meta">
-                <!-- date -->
-                <div class="abstract-date" title="Last updated: 2025/07/20">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/04/09</span>
-                </div>
-                <!-- tags -->
-                    <div class="abstract-tags" >
-        <a class="post-tag" href="javascript:void(0);" data-tags="Rendering">Rendering</a>
-</div>
-
-            </div>
-        </article>
-        <div class="index-post-divider"></div>
-            
-        <article class="index-post">
-            <a class="abstract-title" href="/2021/04/02/Cook-Torrance-BRDF/">
-                <span class="abstract-title-text">Cook-Torrance的BRDF</span>
-            </a>
-            <div class="abstract-content">
-                Cook-Torrance BRDF的定义:首先让我们先看看如何计算出。
-3.1 漫反射项推导在很久之前谈光栅化的时候就提及过，漫反射会均匀的向每个方向反射因此，漫反射的BRDF一定是一个常数。假设入射光是均匀且遍布整个半球方向，可以得到如下方程：（根据定义， 积分过程省略） 由于假设入射光是均匀且遍布整个半球方向，所以与方向无关，且等于，最终约去两边，得到结果：但有一点要注意的是，这里并没有考虑能量被吸收，将反射率考虑进来之后，得到最终的漫反射BRDF：这里的可以类比光栅化当中的漫反射系数去理解，本质就是一个3维向量，含有物体表面的颜色信息。
-3.2 镜面反射项推导漫反射项的形式简单且...
-            </div>
-            <!-- read more -->
-            <div class="abstract-post-meta">
-                <!-- date -->
-                <div class="abstract-date" title="Last updated: 2025/07/20">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2021/04/02</span>
-                </div>
-                <!-- tags -->
-                    <div class="abstract-tags" >
-        <a class="post-tag" href="javascript:void(0);" data-tags="Rendering">Rendering</a>
-</div>
-
-            </div>
-        </article>
-        <div class="index-post-divider"></div>
     <!-- paginator  -->
         <nav class="page-nav">
             <a class="extend prev" rel="prev" href="/">&lt; PREV</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/">NEXT &gt;</a>
@@ -736,15 +742,21 @@
         
         
         
+        
+        
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 22
+        Total : 24
         </div>
         <!-- search  -->
     </div>
     <div class="post-archive">
             <div class="archive-year"> 2025 </div>
             <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/11</span>
+            <a class="archive-post-title" href="/2025/04/11/LoRA/">LoRA微调技术：数学基础、原理与视觉应用</a>
+        </li>
         <li class="archive-post-item">
             <span class="archive-post-date">03/28</span>
             <a class="archive-post-title" href="/2025/03/28/ViT-Development/">视觉Transformer发展简史：从ViT到DINOv2的技术演进</a>
@@ -769,8 +781,12 @@
             <a class="archive-post-title" href="/2024/07/04/Transformer-Based-HMR/">基于Transformer的人体姿态重建：技术实践与原理详解</a>
         </li>
         <li class="archive-post-item">
-            <span class="archive-post-date">03/08</span>
-            <a class="archive-post-title" href="/2024/03/08/ViT/">Vision Transformer (ViT) 详细技术文档</a>
+            <span class="archive-post-date">06/08</span>
+            <a class="archive-post-title" href="/2024/06/08/ViT/">Vision Transformer (ViT) 详细技术文档</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2024/04/26/Humnaoid-System/">3D人形动画系统技术：工业管线与AI赋能</a>
         </li>
                 </ul>
             <div class="archive-year"> 2023 </div>
